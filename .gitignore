@@ -1,0 +1,75 @@
+.DS_Store
+node_modules/
+npm-debug.log
+**/_test.js
+**/_test*
+# Logs
+logs
+*.log
+*.lock
+!yarn.lock
+npm-debug.log*
+localLogs
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Test
+test-reports
+coverage
+
+app.*.json
+!app.base.json
+
+
+# Dependency directories
+node_modules
+jspm_packages
+
+
+# Cache directory
+.npm
+.DS_Store
+.pursuit-cache
+.fontcustom-manifest.json
+
+# Optional REPL history
+.node_repl_history
+
+# Temporary directories or files
+tmp/
+*.pyc
+
+# Build directories
+public/
+public2/
+download/
+upload/
+dist/
+app.*.json
+!app.base.json
+**/demo/*.html
+
+# Editor or IDE setting directories
+.vscode/
+!.vscode/launch.json
+.idea/
+.webstorm/
+
+# vscode custom config
+
+# private test
+_*
+
+# 环境变量配置
+.env_*
+.env
+# build.sh
+build.sh
+
+.yarnrc
+# .npmrc
+
+src-copy/

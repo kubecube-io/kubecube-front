@@ -1,0 +1,16 @@
+.root[topAlign] {
+    vertical-align: top;
+}
+.root > td {
+    padding-right: 10px;
+}
+
+.root.static td:nth-last-child(2) {
+    padding-right: 0;
+}
+.formTd {
+    position: relative;
+    width: 42px;
+    padding: 0;
+}
+

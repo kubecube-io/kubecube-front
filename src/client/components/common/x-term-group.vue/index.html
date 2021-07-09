@@ -1,0 +1,25 @@
+<div :class="$style.root" :maximized="currentMaximized" :minimized="minimized">
+    <div v-show="!minimized" :class="$style.main" :maximized="currentMaximized" :blank="blank">
+        <div :class="$style.head" @dblclick="maximize">
+            <u-tabs :class="$style.tabs" v-show="itemVMs.length > 1" :value="selectedVM" closable @select="select($event.value)" @close="close($event.value)">
+                <u-tab v-for="(itemVM, index) in itemVMs" :key="index" :value="itemVM" :title="itemVM.title"></u-tab>
+            </u-tabs>
+            <u-linear-layout gap="none" :class="$style.buttonWrap">
+                <!-- todo: pod的term暂不开启缩小 -->
+                <span v-if="blank" @click.stop="minimized = true"><u-icons name="minus-solid"></u-icons></span>
+                <span v-if="blank">
+                    <u-link target="_blank" :to="to" @click="$emit('blank')">
+                        <u-icons name="external-link-alt-solid"></u-icons>
+                    </u-link>
+                </span>
+                <span v-else @click.stop="maximize"><u-icons name="maximize"></u-icons></span>
+                <span @click.stop="closeAll"><u-icons name="close"></u-icons></span>
+            </u-linear-layout>
+        </div>
+        <div :class="$style.content">
+            <slot></slot>
+        </div>
+    </div>
+    <div v-show="minimized" :class="$style.min" @click="minimized = false"></div>
+</div>
+    

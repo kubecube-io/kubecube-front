@@ -1,0 +1,78 @@
+@import 'cloud-ui.vusion/src/u-sidebar-group.vue/module.css';
+
+.head{
+    display: inline-block;
+    padding-left: 0;
+    color: #fff;
+    background-color: #2b333f;
+}
+.head:hover{
+    padding-left: 0;
+    display: inline-block;
+    /* color: #fff; */
+    background-color: #2b333f;
+}
+.root[icon="overview"]:before{
+    padding-left: 20px;
+    color: #fff;
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/overview.svg);
+}
+.root[icon="virtual"]:before{
+    padding-left: 20px;
+    color: #fff;
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/virtual.svg);
+}
+.root[icon="monitor"]:before{
+    padding-left: 20px;
+    color: #fff;
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/usage.svg);
+}
+
+.root[icon="user"]:before{
+    padding-left: 20px;
+    color: #fff;
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 25px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/user.svg);
+}
+.root[icon="nlb"]:before{
+    padding-left: 20px;
+    color: #fff;
+    margin-right: 15px;
+    display: inline-block;
+    font-size: 20px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/nlb.svg);
+}
+.root[icon="pool"]:before{
+    padding-left: 20px;
+    color: #fff;
+    margin-right: 15px;
+    display: inline-block;
+    font-size: 20px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/pool.svg);
+}
+.expander{
+    right: unset;
+    margin-left: 75px;
+}
+.expander[expanded] > .root{
+    color: #fff;
+    background-color: #293846;
+    border-left: 3px solid #19aa8d;
+}

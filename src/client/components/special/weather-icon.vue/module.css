@@ -1,0 +1,27 @@
+.icon{
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+}
+.icon[type='sun']:before{
+    vertical-align: middle;
+    icon-font: url(./icons/sun.svg);
+    color: #fbcc3e;
+}
+.icon[type='cloud']:before{
+    vertical-align: middle;
+    icon-font: url(./icons/sunny.svg);
+    color: #fbcc3e;
+}
+.icon[type='cloudy']:before{
+    vertical-align: middle;
+    icon-font: url(./icons/cloudy.svg);
+}
+.icon[type='rain']:before{
+    vertical-align: middle;
+    icon-font: url(./icons/rain.svg);
+}
+.icon[type='storm']:before{
+    vertical-align: middle;
+    icon-font: url(./icons/storm.svg);
+}

@@ -1,0 +1,49 @@
+@import "cloud-ui.vusion/src/u-modal.vue/module.css";
+
+.root {
+    text-align: right;
+    z-index: 999;
+}
+.root[nomask="true"] {
+    background: none;
+    left: auto;
+    width: auto;
+    overflow: visible;
+}
+
+.head {
+    height: 54px;
+}
+
+.body {
+    height: calc(100% - 134px);
+    overflow: scroll;
+}
+
+.dialog {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    top: 0;
+}
+.dialog[header] {
+    top: 65px;
+}
+
+:global .fade-enter, :global .fade-leave-to {
+    opacity: 0;
+    top: 0;
+}
+
+:global .fade-enter-active, :global .fade-leave-active {
+    transition: all .2s;
+}
+
+:global .slide-right-enter-active, :global .slide-right-leave-active {
+    transition: all .3s;
+}
+
+:global .slide-right-enter, :global .slide-right-leave-to {
+    opacity: 0;
+    transform: translateX(100%);
+}

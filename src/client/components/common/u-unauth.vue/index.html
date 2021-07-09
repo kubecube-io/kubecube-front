@@ -1,0 +1,11 @@
+<div>
+    <u-head v-if="withHead" :hide="notFound" @load="headLoaded = true"></u-head>
+    <div v-if="!withHead || headLoaded" :class="$style.root">
+        <img v-if="notFound" :class="$style.img404" src="./assets/404-3.png" alt="404">
+        <img v-else :class="$style.unauthImg" src="./assets/block@2x.png" alt="无权限访问">
+        <slot>
+            <p>{{ unAuthText || (notFound ? '未找到该页面' : '无权限访问，可联系管理员开通权限') }} <u-link v-if="PlatformPermission['opsMgr'] && platformUrl" :href="platformUrl">快速配置</u-link></p>
+        </slot>
+    </div>
+    <u-foot></u-foot>
+</div>

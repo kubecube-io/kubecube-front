@@ -1,0 +1,30 @@
+.root {
+    color: #333;
+}
+
+.icon:before {
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.icon[name="success"]:before {
+    icon-font: url(./icons/success.svg);
+}
+.icon[name="waiting"]:before {
+    icon-font: url(./icons/waiting.svg);
+}
+.icon[name="pause"]:before {
+    icon-font: url(./icons/pause.svg);
+}
+.icon[name="warning"]:before {
+    icon-font: url(./icons/warning.svg);
+}
+.icon[name="error"]:before {
+    icon-font: url(./icons/error.svg);
+}
+.icon[name="building"]{
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+}

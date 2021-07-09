@@ -1,0 +1,17 @@
+<tr :class="[$style.root, dynamic ? '' : $style.static]">
+    <slot></slot>
+    <td v-if="dynamic" :class="$style.formTd">
+        <template>
+            <u-form-table-remove-button :disabled="disabled" @click="removeTr"></u-form-table-remove-button>
+            <!-- <u-form-table-remove-button v-else disabled></u-form-table-remove-button> -->
+        </template>
+        <span v-if="currentMessage" :class="$style.message" color="error">
+            {{ currentMessage }}
+        </span>
+    </td>
+    <td v-else :class="$style.formTd">
+        <span v-if="currentMessage" :class="$style.message" color="error">
+            {{ currentMessage }}
+        </span>
+    </td>
+</tr>

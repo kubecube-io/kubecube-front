@@ -1,0 +1,8 @@
+<div :class="$style.tableBlock" :size="size">
+    <table :class="$style.addTable" >
+        <slot></slot>
+    </table>
+    <p v-if="dynamic">
+        <u-form-table-add-button :disabled="disabled" @click="addNewTr()">{{$t('add')}}{{ description }}</u-form-table-add-button>
+    </p>
+</div>

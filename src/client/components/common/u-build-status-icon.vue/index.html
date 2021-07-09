@@ -1,0 +1,4 @@
+<span :class="$style.root">
+    <span :class="$style.icon" :name="name" :style="name == 'building' ? {background: color} : { fontSize: size + 'px', color :color}"></span>
+    <slot></slot>
+</span>

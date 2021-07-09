@@ -1,0 +1,64 @@
+.container {
+    display: block;
+    position: relative;
+}
+.container::after {
+    content: ' ';
+    display: table;
+    clear: both;
+}
+.container > .block-12,
+.container > .block-11,
+.container > .block-10,
+.container > .block-9,
+.container > .block-8,
+.container > .block-7,
+.container > .block-6,
+.container > .block-5,
+.container > .block-4, 
+.container > .block-3, 
+.container > .block-2, 
+.container > .block-1 {
+    float: left; 
+}
+
+.container > .block-1 {
+    width: 8.3333333333333%;
+}
+.container > .block-2 {
+    width: 16.666666666666%;
+}
+.container > .block-3 {
+    width: 25%;
+}
+.container > .block-4 {
+    width: 33.3333333333333%;
+}
+.container > .block-5 {
+    width: 41.666666666666%;
+}
+.container > .block-6 {
+    width: 50%;
+}
+.container > .block-7 {
+    width: 58.3333333333333%;
+}
+.container > .block-8 {
+    width: 66.666666666666%;
+}
+.container > .block-9 {
+    width: 75%;
+}
+.container > .block-10 {
+    width: 83.3333333333333%;
+}
+.container > .block-11 {
+    width: 91.666666666666%;
+}
+.container > .block-12 {
+    width: 100%;
+}
+
+.container > .chart {
+    height: ;
+}

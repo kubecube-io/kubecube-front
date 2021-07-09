@@ -1,0 +1,32 @@
+@import 'cloud-ui.vusion/src/u-resize-table.vue/module.css';
+
+.hthItem, .btd, .btd[role="center"] {
+    height: 42px;
+    padding: 0 0 0 10px;
+}
+
+.root[class] {
+    font-size: 12px;
+}
+
+.hthItem::after {
+    top: 11px;
+}
+
+.carve {
+    height: 42px;
+    line-height: 42px;
+}
+
+.filtertitle {
+    height: 42px;
+    line-height: 42px;
+}
+
+.btd {
+    color: #575962;
+}
+
+.titleText {
+    color: #999;
+}

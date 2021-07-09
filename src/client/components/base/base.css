@@ -1,0 +1,94 @@
+@import 'cloud-ui.vusion/src/base/base.css';
+
+body{
+    overflow: hidden;
+    color: $font-color;
+}
+
+.g-side {
+    position: absolute;
+    z-index: 1;
+    left: 60px;
+    top: 64px;
+    width: $sidebar-width;
+    height: calc(100% - 64px);
+    overflow: hidden;
+    background-color: #2b333f;
+}
+
+.g-sidebar {
+    /* sidebar的宽度 + 5px(滚动条的宽度) + 1px */
+    width: 186px;
+    height: 100%;
+}
+/* 一级菜单和二级菜单的sidebar的长度固定，兼容有无滚动条 */
+.g-sidebar > ul > li, .g-sidebar .m-sidebar-group > div > li {
+    width: 180px;
+}
+
+.g-body {
+    position: absolute;
+    top: 64px;
+    left: 240px;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    background-color: #fff;
+}
+
+.g-content {
+    width: 100%;
+    min-width: 1120px;
+    padding: 40px;
+}
+
+::-webkit-scrollbar {
+    /* width: 控制纵向滚动条的宽度，height: 控制横向滚动条的宽度 */
+    width: 5px;
+    height: 5px;
+}
+::-webkit-scrollbar-track {
+    background-clip: content-box;
+}
+::-webkit-scrollbar-thumb {
+    background: #9da8b4;
+    outline: 1px solid slategrey;
+    border-radius:5px;
+}
+
+/* u-chips单项的样式 */
+.u-chip {
+    position: relative;
+    box-sizing: border-box;
+    display: inline-block;
+    height: 24px;
+    line-height: 24px;
+    max-width: calc(100% - 30px);
+    margin: 5px 10px 5px 0;
+    padding: 0 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #666;
+    vertical-align: middle;
+    background-color: #eef2f7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.u-chip:hover {
+    background-color: #e6ecf4;
+}
+
+.pager {
+    margin: 20px 0;
+    text-align: right;
+}
+
+.g-withTable thead > tr {
+    background-color: transparent;
+}
+/* 设置二级菜单的头部的颜色 */
+.m-sidebar-group > div { color: #4c4e58; }
+/* 设置二级菜单的左侧的偏移量 */
+.m-sidebar-group > div > li { padding-left: 47px; }

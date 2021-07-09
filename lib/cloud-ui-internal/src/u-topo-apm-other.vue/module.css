@@ -1,0 +1,16 @@
+.node{
+    stroke: #afd2fa;
+    stroke-width: 8px;
+    fill: #fff;
+}
+.servicetype {
+    fill: #4ec9ab;
+}
+.type{
+    font-size: 12px;
+    fill: #fff;
+}
+.des{
+    fill: #999;
+    font-size: 12px;
+}

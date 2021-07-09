@@ -1,0 +1,72 @@
+@import 'cloud-ui.vusion/theme-cobalt/base/global.css';
+
+/* Brand Colors */
+$brand-primary: #508ae2;
+$brand-secondary: #dfe4ec; /* #575962; */
+$brand-info: #36a3f7;
+$brand-success: #34bfa3;
+$brand-warning: #ffb518;
+$brand-error: #f34f69;
+
+$brand-disabled-dark: #aeb4bd;
+$brand-disabled: #c4ccd8;
+$brand-disabled-light: #e7eaef;
+
+/* Gray Colors */
+$gray-darkest: #333;
+$gray-darker: #666;
+$gray-dark: #999;
+$gray-base: #aaa;
+$gray-light: #ccc;
+$gray-lighter: #ddd;
+$gray-lightest: #eee;
+
+/* Component Base Colors */
+$background-color-base: #f2f3f8;
+$background-color-light: #f2f4fb;
+$color-base: #4c4e58;
+$color-secondary: #777f8c;
+$border-color-base: #dfe4ec;
+$border-color-light: #e5e8ef;
+$font-color: #575962;
+
+/* Spacing Dimensions */
+$margin-small: 10px;
+$margin-base: 20px;
+$margin-large: 30px;
+$margin-right-base: 20px;
+
+/* Component Base Dimensions */
+$border-width-base: 1px;
+$width-base: 160px;
+$height-base: 36px;
+
+$border-radius-square: 0;
+$border-radius-base: 3px;
+$border-radius-round: 5px;
+
+/* Specific Dimensions */
+$navbar-height: 64px;
+$sidebar-width: 180px;
+
+/* Z-Index */
+$z-index-loading: 9000;
+$z-index-toast: 8000;
+$z-index-tooltip: 7010;
+$z-index-popper: 7000;
+$z-index-modal: 1000;
+$z-index-plugin: 100;
+$z-index-layout: 10;
+$z-index-base: 1;
+
+/* Component Action Hints */
+$cursor-pointer: pointer;
+$cursor-not-allowed: not-allowed;
+$focus-outline: none;
+
+/* Transition Speed */
+$transition-duration-fast: 0.1s;
+$transition-duration-base: 0.2s;
+$transition-duration-slow: 0.4s;
+
+

@@ -1,0 +1,92 @@
+$height:120px;
+$left-width:250px;
+$left-wid:100px;
+.root{
+    position: relative;
+    border-radius: 2px;
+    width: 260px;
+    height: $height;
+    background-image: linear-gradient(0deg,#6fad50,#7ebd5e);
+}
+.root[icon=service]{
+    background-image: linear-gradient( 0deg, rgb(81,130,237) 0%, rgb(107,148,237) 100%);
+    box-shadow: 0px 1px 15px 0px rgba(76, 132, 255, 0.25);
+}
+.root[icon=service] .left::before{
+    icon-font: url(./icons/physicalHost.svg);
+}
+.root[icon=service] .left::after{
+    background-image: linear-gradient( 0deg, rgb(62,115,229) 0%, rgb(84,132,237) 100%);
+}
+.root[icon=instance]{
+    background-image: linear-gradient( 0deg, rgb(96,125,139) 0%, rgb(108,129,140) 100%);
+    box-shadow: 0px 1px 15px 0px rgba(96, 125, 139, 0.3);
+}
+.root[icon=instance] .left::before{
+    icon-font: url(./icons/volume.svg);
+}
+.root[icon=instance]  .left::after{
+    background-image: linear-gradient( 0deg, rgb(87,111,122) 0%, rgb(96,125,139) 100%);
+}
+.root .left{
+    width: $left-width;
+    height: 100%;
+    float: left;
+    text-align: center;
+    position: relative;
+}
+.root[size=small] .left{
+    width: 100px;
+    height: 100%;
+    float: left;
+    text-align: center;
+    position: relative;
+}
+.left::before{
+    font-size:34px;
+    height:$height;
+    line-height:$height;
+    color: #fff;
+}
+.left::after{
+    content:" ";
+    border-radius: 50%;
+    position: absolute;
+    width: 76px;
+    height: 76px;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.root .right{
+    height: 100%;
+    margin-left:220px;
+    position: relative;
+}
+.root[size=small] .right{
+    height: 100%;
+    margin-left:60px;
+    position: relative;
+}
+.title{
+    display:block;
+}
+.number{
+    font-size: 28px;
+    /* font-weight: bold; */
+}
+.content{
+    position: absolute;
+    top: 50%;
+    left:10px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #fff;
+}
+.content span{
+    line-height:1.5em;
+        }
+.loading{
+    margin-top:10px;
+}

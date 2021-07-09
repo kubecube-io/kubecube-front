@@ -1,0 +1,66 @@
+.head:hover{
+    .node {
+        stroke: #5ca2f4;
+    }
+    .node[role="warn"] {
+        stroke: #ffd52e;
+    }
+    .node[role="stallWarn"] {
+        stroke: #ff867f;
+    }
+    .node[role="offLine"] {
+        stroke: #dadee6;
+    }
+}
+
+.node{
+    stroke: #afd2fa;
+    stroke-width: 8px;
+    fill: #fff;
+}
+
+.node[role="warn"] {
+    stroke: #ffd52e;
+}
+
+.node[role="stallWarn"] {
+    stroke: #ff867f;
+}
+
+.node[role="offLine"] {
+    stroke: #dadee6;
+}
+
+.servicetype {
+    fill: #4ec9ab;
+}
+.type{
+    font-size: 12px;
+    fill: #fff;
+}
+.des{
+    fill: #999;
+    font-size: 12px;
+}
+.none{
+    display: none;
+}
+.buttonBg{
+    stroke-width: 0.8;
+    stroke: rgb(225, 232, 237);
+    fill: rgb(255, 255, 255);
+    cursor: pointer;
+    y: -15;
+    x: -40;
+}
+.info{
+    font-size: 12px;
+    fill: #666;
+    cursor: pointer;
+}
+.title {
+    .titleContent {
+        font-size: 14px;
+        fill: #ffff;
+    }
+}

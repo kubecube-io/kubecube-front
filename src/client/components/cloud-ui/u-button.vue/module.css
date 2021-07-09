@@ -1,0 +1,5 @@
+@import 'cloud-ui.vusion/src/u-button.vue/module.css';
+
+.root[color="primary"] {
+    border: 1px solid transparent;
+}

@@ -1,0 +1,131 @@
+.time{
+    display: inline-block;
+    margin-left: 9px;
+    font-size: 16px;
+    color: #c9cfd8;
+    width: 16px;
+    vertical-align: middle;
+    height: 16px;
+    line-height: 13px;
+}
+.time::before{
+    icon-font: url('./assets/log-time.svg');
+}
+.content{
+    width: 406px;
+    padding:24px 20px 15px 20px;
+}
+.timecontent{
+    position: relative;
+    z-index: 10;
+}
+.changeblock{
+    position: absolute;
+    right: 0;
+    top: 0;
+    border-color: #f7f8f9 #f7f8f9 transparent transparent;
+    border-width: 20px;
+    border-style: solid;
+    color: #cdd3dc;
+    cursor: pointer;
+}
+.changeblock:hover{
+    border-color: #67aaf5 #67aaf5 transparent transparent;
+    color: #ffffff;
+}
+.change{
+    position: absolute;
+    font-size: 16px;
+    top: -20px;
+}
+.change::before{
+    icon-font: url('./assets/log-change.svg');
+}
+.timepick{
+    display: inline-block;
+    min-height: 34px;
+    margin-right: 20px;
+}
+.datepicker{
+    width: 106px;
+    margin-top: -1px;
+    margin-right: 10px;
+    vertical-align: bottom;
+}
+.datepicker input{
+    width: 106px !important;
+}
+.tip{
+    margin: 0px;
+    color: #999;
+    font-size: 12px;
+    padding: 30px 0 12px;
+}
+.history{
+    margin: 0px;
+    font-size: 12px;
+}
+.history label{
+    color: #999;
+}
+.tag {
+    padding: 3px 8px;
+    padding-right: 5px;
+    font-size: 12px;
+    border-radius: 2px;
+    background: #cad4e4;
+    color: #fff;
+    line-height: 11px;
+    height: 25px;
+    margin-top: 5px;
+    /* color: #b2bbc8; */
+    cursor: pointer;
+}
+/* .tag:hover{
+    color: #999;
+} */
+.close {
+    display: none;
+    position: absolute;
+    margin-left: 5px;
+    cursor: pointer;
+    right: 5px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+.close::before{
+    font-size: 11px !important;
+}
+.selectBtn{
+    position: relative;
+    width: 300px;
+    height: 32px;
+    line-height: 32px;
+    border:1px solid #e1e8ed;
+    border-radius: 2px;
+    color: #999;
+    background-color: #fff;
+    cursor: pointer;
+}
+.selectBtn:hover .close{
+    display: block;
+}
+.closeBox {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border-radius: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    background: #f5f7fa;
+    color: #b4b4b4;
+    font-size: 15px;
+    text-align: center;
+}

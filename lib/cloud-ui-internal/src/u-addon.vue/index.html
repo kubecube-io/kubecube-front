@@ -1,0 +1,7 @@
+<u-tooltip v-bind="$attrs" :size="$attrs.tooltipSize">
+    <span :name="name"  :class="[$style.base, $style[name]]" :style="{'font-size': size + 'px'}" :offset="8"></span>
+    <template slot="content">
+        <slot></slot>
+    </template>
+</u-tooltip>
+   

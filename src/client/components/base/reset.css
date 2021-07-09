@@ -1,0 +1,12 @@
+textarea {
+    resize: none;
+    outline: 0;
+    font-size: 100%;
+    margin: 0;
+    vertical-align: baseline;
+    vertical-align: middle;
+}
+
+textarea::placeholder {
+    color: #999;  
+}

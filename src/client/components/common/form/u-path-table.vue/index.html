@@ -1,0 +1,50 @@
+<div :class="$style.root">
+    <u-linear-layout type="flex" :class="$style.header">
+        <div :class="$style.item" style="width:120px;margin-right: 5px;">阶段</div>
+        <div :class="$style.item" style="width:150px;margin-right: 5px;">发起方</div>
+        <div :class="$style.item" style="width:150px;margin-right: 5px;">分布式事务服务</div>
+        <div :class="$style.item" style="text-align: left;padding-left: 15px;">参与方</div>
+    </u-linear-layout>
+    <!-- list最多两项 -->
+    <div :class="$style.content">
+        <u-linear-layout v-for="(item, index) in list" :key="item.type" :last="item.isLast" gap="none" :class="$style.row">
+            <div :class="$style.wrap" :last="item.isLast" style="width: 120px;text-align: left;padding-left: 20px;">
+                <!-- 根据是否有 stageText 判断是否有当前阶段 -->
+                <div :class="$style.axis" v-if="item.stageText">
+                    <div :class="$style.stageText">
+                        <div :class="$style.text">{{ item.stageText }}</div>
+                        <div v-if="!index" :class="$style.time">{{ info.StartTime }}</div>
+                    </div>
+                </div>
+                <div :class="$style.eventsWrap" :no-stage="!item.stageText"  :first="!index">
+                    <div :class="$style.eventWrap" v-for="(event, index) in item.events" :key="`${event.text}-${index}`" :style="{ left: event.start + 'px' }">
+                        <div style="position: absolute;" :style="{ left: (event.width > 0 ? 0 : event.width) + 'px', width: Math.abs(event.width) + 'px' }">
+                            <div :class="[$style.eventText, 'f-toe', 'f-toe-rtl']" :style="{ width: (event.width * 0.8) + 'px'}" :title="event.text" :isFail="event.isFail" v-tooltip.left="event.text" :arrow="event.width < 0 ? 'left' : 'right'">{{ event.text || ' ' }}</div>
+                            <div :class="$style.line" :isFail="event.isFail" :arrow="event.width < 0 ? 'left' : 'right'"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 针对是否有结束的两种情形 -->
+                <div v-if="item.isLast && (info.EndTime || fail)" :class="$style.axis" :last="true" :fail="fail" style="vertical-align: bottom;height: 50px;margin-top: 24px;">
+                    <div :class="$style.stageText">
+                        <div :class="$style.text">结束事务</div> <div :class="$style.time">{{ info.EndTime }}</div>
+                    </div>
+                </div>
+                <div v-if="item.isLast && !info.EndTime && !fail" :class="$style.emptyStageWrap"></div>
+            </div>
+            <div :class="$style.wrap" :last="item.isLast" style="width: 150px;">
+                <div :class="$style.axis" :last="item.isLast" style="height: 36px;" :dashed="true"><u-button :class="[$style.button, 'f-toe']" :title="info.AppName">{{ info.AppName }}</u-button></div>
+            </div>
+            <div :class="$style.wrap" :last="item.isLast" style="width: 150px;">
+                <div :class="$style.axis" :last="item.isLast" style="height: 36px;" :dashed="true"><u-button :class="$style.button">GTXS</u-button></div>
+            </div>
+            <div :class="$style.wrap" :last="item.isLast" :part="true" style="width: calc(100% - 420px);">
+                <u-linear-layout style="height: 36px;white-space: nowrap;" gap="small">
+                    <div v-for="(branch, index) in branchNames" :key="`${branch}-${index}`" style="display: inline-block;" :class="$style.axis" :dashed="true" :last="item.isLast">
+                        <u-button :class="[$style.button, 'f-toe']" :title="branch">{{ branch }}</u-button>
+                    </div>
+                </u-linear-layout>
+            </div>
+        </u-linear-layout>
+    </div>
+</div>

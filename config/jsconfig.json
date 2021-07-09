@@ -1,0 +1,7 @@
+{
+    "exclude": ["public", "node_modules", "dll"],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "esnext"
+    }
+}

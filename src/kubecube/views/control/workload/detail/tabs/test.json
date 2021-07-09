@@ -1,0 +1,58 @@
+{
+    "apiVersion": "monitoring.kubecube.io/v1",
+    "kind": "Dashboard",
+    "metadata": {
+        "creationTimestamp": "2021-05-30T07:57:51Z",
+        "generation": 1,
+        "name": "cube-workload-deployment",
+        "namespace": "kube-public",
+        "resourceVersion": "10007949",
+        "uid": "be7d19df-ff35-4306-91f9-def8235ed1fe"
+    },
+    "spec": {
+        "rows": [
+            {
+                "name": "resource",
+                "panels": [
+                    {
+                        "graph": {
+                            "datasource": "prometheus-default",
+                            "targets": [
+                                {
+                                    "prometheus": {
+                                        "legend": "{{pod}}",
+                                        "query": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{cluster=\"$cluster\",namespace=\"$namespace\", pod=\"$pod\"}) by (container)"
+                                    }
+                                }
+                            ],
+                            "title": "cpu usage"
+                        }
+                    },
+                    {
+                        "graph": {
+                            "datasource": "prometheus-default",
+                            "targets": [
+                                {
+                                    "prometheus": {
+                                        "legend": "{{pod}}",
+                                        "query": "sum(container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\", container!=\"\", image!=\"\"}) by (container)"
+                                    }
+                                }
+                            ],
+                            "title": "memory usage"
+                        }
+                    }
+                ]
+            }
+        ],
+        "title": "Awesome dashboard",
+        "variables": [
+            {
+                "query": {
+                    "name": "pod",
+                    "request": "label_values(kube_pod_info{namespace=$namespace},pod)"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,14 @@
+<div :class="$style.root">
+    <slot name="button"></slot>
+    <div :class="$style.title">{{ title }}</div>
+    <ul>
+        <li v-for="(item, index) in newList" :key="index" :class="item.status ? $style.u_item_on : $style.u_item" @click="selectItem(index)">
+            <span :class="$style.name" :title="type == 'service' ? item.Name : item.version">
+                <template v-if="type == 'service'">{{ item.Name }}</template>
+                <template v-else>{{ item.version }}</template>
+            </span>
+            <div :class="$style.close" @click.stop="deleteItem(index)">×</div>
+            <div v-if="item.status" :class="$style.left_line"></div>
+        </li>
+    </ul>
+</div>

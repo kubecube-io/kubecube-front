@@ -1,0 +1,42 @@
+<u-topo-node :node="node" @complete="nodeComplete" :radius="0" :can-drag="!showButton" @click="onClick" @drag="isDrag = true">
+    <g ref="head" :class="$style.head"  data-tag="effect">
+        <circle cx="0" cy="0" r="28" :class="$style.node" :role="type[node.status]"/>
+        <circle cx="-22" cy="26" r="15" :class="$style.servicetype"/>
+        <text :class="$style.type" text-anchor="middle" x="-22" y="29">
+            {{node.agentType}}
+        </text>
+        <text :class="$style.number" text-anchor="middle" y="-1">
+            {{node.nodeCount===undefined ? 1 : node.nodeCount}}
+        </text>
+        <text :class="$style.number" text-anchor="middle" dy="14">
+            {{$t('node')}}
+        </text>
+        <g fill="#f45353" v-if="node.errorData&&node.errorData.length>0">
+            <rect x="-21" y="-57" rx="3" ry="3" width="42" height="20"/>
+            <polygon points="-4 -37, 4 -37, 0 -33"/>
+            <text :class="$style.type" text-anchor="middle" y="-43">{{$t('error')}}</text>
+        </g>
+    </g>
+    <g ref="button" :class="!showButton ? $style.none : ''">
+        <rect :class="$style.buttonBg" width="80" height="30">
+        </rect>
+        <text :class="$style.info" text-anchor="middle" dy="5">
+            {{$t('detail')}}
+        </text>
+    </g>
+    <text :class="$style.name" fill="#666" x="2" y="54" text-anchor="middle">
+        {{node.name}}
+    </text>
+    <g :class="[$style.title, (isHover && node.status === 3) ? '' : $style.none]">
+        <polygon points="10,45 -10,45 0,33" fill="rgba(71,88,107,0.9)"/>
+        <rect width="150" height="40" y="38" x="-40" fill="rgba(71,88,107,0.95)"></rect>
+        <text :class="$style.titleContent" fill="rgba(255,255,255,1)" y="63" x="-30">
+            {{$t('offline')}}
+        </text>
+    </g>
+    <text :class="$style.des" x="45" y="-24" v-if="!isSnap">
+        <tspan x="45" dy="14">{{ node.stats.callsPerMinute | apmCount('b', 'x10') }} cpm</tspan>
+        <tspan x="45" dy="14">{{ node.stats.averageResponseTime | dayStr(' ms', ' s', 0, true, {'s': 2}) }}</tspan>
+        <tspan x="45" dy="14">{{ node.stats.errorRatio | integer }}% errors</tspan>
+    </text>
+</u-topo-node>

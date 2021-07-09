@@ -1,0 +1,14 @@
+.root {
+    display: inline-block;
+    position: relative;
+    height: 28px;
+    line-height: 28px;
+}
+/* 解决切换至已复制时行高抖动 */
+.icon > span {
+    vertical-align: middle;
+}
+
+.icon > span::before {
+    vertical-align: middle;
+}

@@ -1,0 +1,6 @@
+{
+    "error": "error",
+    "node": "node",
+    "detail": "detail",
+    "offline": "the service is offline"
+}

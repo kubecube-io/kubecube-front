@@ -1,0 +1,42 @@
+<u-linear-layout direction="vertical">
+    <u-linear-layout justify="end">
+        <u-capsules v-model="splitFlag">
+            <u-capsule :value="false" @click="splitFlag = false">Inline</u-capsule>
+            <u-capsule :value="true" @click="getSplitContent">Side-by-side</u-capsule>
+        </u-capsules>
+    </u-linear-layout>
+    <u-grid-layout gap="small">
+        <u-grid-layout-row :repeat="splitFlag ? 2 : 1">
+            <u-grid-layout-column v-for="(diffArray, columnIndex) in data" :span="1">
+                <div v-for="(line, rowIndex) in  diffArray">
+                    <div v-for="head in colorCode(line, true, columnIndex)" :class="$style[classMap(line.type)]">
+                        <pre :class="$style.pre" :type="line.type">{{ head.posMark }}</pre>
+                        <div :class="$style.outerPre" :type="line.type">
+                            <div :class="$style.slitCon">
+                                <div><span :class="$style.typeWidth" :type="line.type">{{ line.type }}</span>{{ head.text }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="line.content.hidden.length">
+                        <div :class="$style.hiddenLeft" :style="splitFlag ? 'width: 33px' : 'width: 66px'">
+                            <u-link @click="expand(rowIndex)">
+                                <i-line-awesome name="arrow-down" :class="$style.icon"></i-line-awesome><br>
+                                <i-line-awesome name="arrow-up" :class="$style.icon"></i-line-awesome>
+                            </u-link>
+                        </div>
+                        <div :class="$style.hiddenText">隐藏了{{ line.content.hidden.length }}行</div>
+                    </div>
+                    <div v-for="head in colorCode(line, false, columnIndex)" :class="$style[classMap(line.type)]">
+                        <pre :class="$style.pre" :type="line.type">{{ head.posMark }}</pre>
+                        <div :class="$style.outerPre" :type="line.type">
+                            <div :class="$style.slitCon">
+                                <div><span :class="$style.typeWidth" :type="line.type">{{ line.type }}</span>{{ head.text }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </u-grid-layout-column>
+        </u-grid-layout-column>
+        </u-grid-layout-row>
+    </u-grid-layout>
+</u-linear-layout>

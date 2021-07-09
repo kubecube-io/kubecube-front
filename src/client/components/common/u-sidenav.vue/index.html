@@ -1,0 +1,11 @@
+<div :class="show ? [$style.root, $style.large] : [$style.root, $style.small]">
+    <u-sidebar :value="currentRoute" :class="$style.sidebar" :router="false" @mouseover.native="show = true" @mouseleave.native="show = false" @select="toUrl($event)">
+        <u-sidebar-item>
+            <i-line-awesome :class="show ? [$style.icon, $style.icon_rotate] : $style.icon" name="navicon"></i-line-awesome>
+        </u-sidebar-item>
+        <u-sidebar-item v-for="nav in navList" :value="nav.value" :key="nav.value">
+            <u-icons :name="nav.value"></u-icons>
+            <u-text v-if="show">{{ nav.text }}<span :class="$style.text">{{ nav.remark }}</span></u-text>
+        </u-sidebar-item>
+    </u-sidebar>
+</div>

@@ -1,0 +1,17 @@
+<div :class="$style.root" :style="{ left: step.offset.x + 'px', top: step.offset.y + 'px' }" :placement="step.offset.placement">
+    <span :class="$style.arrow"></span>
+    <i-line-awesome :class="$style.close" name="close" @click.native="$emit('close')"></i-line-awesome>
+    <div :class="$style.content">
+        <div :class="$style.head">
+            <u-select :data="mainStepList" :value="step.subFlag ? currentSub[0].value : step.value" @select="$emit('selectStep', $event.value)" size="mini normal" :class="$style.select"></u-select>
+        </div>
+        <div :class="$style.tip" display="block">{{ step.desc }}</div>
+        <u-linear-layout v-if="currentSub.length" justify="center" gap="none">
+            <div v-for="sub in currentSub" :key="sub.value" @click="$emit('selectStep', sub.value)" :class="sub.value === step.value ? [$style.dot, $style.dot_active] : $style.dot"></div>
+        </u-linear-layout>
+        <u-linear-layout justify="space-between">
+            <u-link v-if="step.value > 1" @click="$emit('stepLess')">上一步</u-link>
+            <u-link @click="setNext()">{{ step.value > stepList.length - 1 ? '结束教程' : '下一步' }}</u-link>
+        </u-linear-layout>
+    </div>
+</div>

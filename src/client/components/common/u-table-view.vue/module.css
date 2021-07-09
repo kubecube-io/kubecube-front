@@ -1,0 +1,18 @@
+@import 'cloud-ui.vusion/src/u-table-view.vue/module.css';
+
+.hthSpan, .btdSpan, .btdSpan[role="center"] {
+    height: 42px;
+    padding: 0 0 0 10px;
+}
+
+.root[class] {
+    font-size: 12px;
+}
+
+.btdSpan {
+    color: #575962;
+}
+
+.hthSpan {
+    color: #999;
+}

@@ -1,0 +1,6 @@
+@import 'cloud-ui.vusion/src/u-status-icon.vue/module.css';
+
+.icon[name="graySuccess"]::before {
+    icon-font: url("./icons/success.svg");
+    color: #a2b0b7;
+}

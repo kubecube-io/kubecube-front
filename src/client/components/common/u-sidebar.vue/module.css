@@ -1,0 +1,11 @@
+@import 'cloud-ui.vusion/src/u-sidebar.vue/module.css';
+
+.root {
+    border-right: 1px solid #e1e8ed;
+}
+
+.root[submodule] {
+    height: auto;
+    overflow: hidden;
+    border-right: none;
+}

@@ -1,0 +1,9 @@
+<label :class="$style.root" :selected="selected" :disabled="currentDisabled" @click="select()"
+tabindex="0" @keydown.space.prevent @keyup.space.prevent="select()"
+@focus="onFocus" @blur="onBlur" v-on="listeners">
+    <slot></slot>
+    <span :class="$style.arrows">
+        <i :active="activeType === 1" :class="$style.up"></i>
+        <i :active="activeType === -1" :class="$style.down"></i>
+    </span>
+</label>

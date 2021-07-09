@@ -1,0 +1,22 @@
+<u-modal @close="close" ref="modalcomponent" :title="title" ok-button="" cancel-button="" :visible.sync="show" width="1020">
+    <slot name="headerTemplate">
+    </slot>
+    <u-monitor-chart ref="monitorModalChart" smooth fill height="445px" :yAxis="yAxis" :xAxis="xAxis" :type="type" :data-type="dataType" :chart-sum="chartSum"
+        :caption="caption" :contentStyle="contentStyle" @sumtotal="getSumtotal($event)" @loaded="onLoaded($event)"
+        :unit="unit" :options="options" :metrics="metrics" :series="series" :dimensions="dimensions" :filters="filters" :preprocessor="preprocessor" :processor="processor" :legend="legend">
+        <div slot="tooltip" slot-scope="scope">
+            {{ scope.item.datetime }}
+            <div v-if="scope.item.total !== undefined">{{$t('total')}}：{{  scope.item.total }}</div>
+            <div v-for="(sery, index) in series" :key="index" v-if=" scope.item[sery.key]!==undefined">
+                <span :class="$style.seryName" :title="sery.name || sery.key">{{ sery.name || sery.key }}</span>: {{ scope.item[sery.key] }} {{ unit }}
+            </div>
+        </div>
+        <template slot="titleTemplate">
+            <slot name="titleTemplate"></slot>
+        </template>
+        <template slot="captionTemplate">
+            <slot name="captionTemplate"></slot>
+        </template>
+    </u-monitor-chart>
+</u-modal>
+

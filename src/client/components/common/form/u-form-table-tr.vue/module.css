@@ -1,0 +1,57 @@
+.root[topAlign] {
+    vertical-align: top;
+}
+.root > td {
+    padding-right: 10px;
+}
+
+.root.static td:nth-last-child(2) {
+    padding-right: 0;
+}
+
+.formTd {
+    position: relative;
+}
+.message {
+    position: absolute;
+    display: inline-block;
+    margin-left: 10px;
+    padding: 0 10px;
+    line-height: 26px;
+    height: 26px;
+    font-size: 12px;
+    white-space: nowrap;
+    right: -10px;
+    top: 50%;
+    /* margin-top: -25px; */
+    transform: translate(100%, -18%);
+}
+.message[topAlign] {
+    top: 30px;
+}
+.message:after {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 8px;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-right: 4px solid #ff867f;
+    border-bottom: 4px solid transparent;
+}
+
+.message[color="error"] {
+    background-color: #ff867f;
+    color: #fff;
+}
+
+.message[color="error"]:after {
+    border-right-color: #ff867f;
+}
+
+.error {
+    height: 22px;
+    color: #ff867f;
+    margin-top: -24px;
+}

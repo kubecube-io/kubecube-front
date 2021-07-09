@@ -1,0 +1,18 @@
+<u-topo-line :link="link" ref="line" @update="update">
+    <template v-if="link.info">
+        <text :class="$style.text" v-if="!isSnap&&!noData" text-anchor="middle" :transform="translate">
+            <tspan x="0" dy="-6">
+                {{link.info.callsPerMinute | apmCount('b', 'x10') }} cpm, 
+                {{link.info.averageResponseTime | dayStr(' ms', ' s', 0, true, {'s': 2})}}
+            </tspan>
+            <tspan x="0" dy="20">
+                {{link.info.errorRatio | integer }}% errors
+            </tspan>
+        </text>
+        <!-- 调用链上的内容展示逻辑 -->
+        <!-- 优化：只展示responseTime和requestCount -->
+        <text :class="$style.text" v-if="isSnap&&!noData" text-anchor="middle" :transform="translate">
+            <tspan x="0" dy="-12">{{link.info.numberOfCalls}} calls, {{link.info.averageResponseTime | dayStr(' ms', ' s', 0, true, {'s': 2})}}</tspan>
+        </text>
+    </template>
+</u-topo-line>

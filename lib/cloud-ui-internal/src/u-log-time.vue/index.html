@@ -1,0 +1,55 @@
+<div>
+    <u-popup placement="bottom" :open.sync="open">
+        <div :class="$style.selectBtn">
+            <i :class="$style.time"></i>
+            <span :style="{position: 'relative', top: '-1px', color: selectTime?'#666': '#999'}">
+                <template v-if="selectTime">
+                    {{ selectTime | dateFormat('yyyy-MM-dd HH:mm:ss') }}
+                </template>
+                <template v-else>
+                    {{$t('specifiedTime')}}
+                </template>
+            </span>
+            <div @click.stop="removeSelect" :class="$style.close" v-if="selectTime">
+                <div :class="$style.closeBox">
+                    <u-icon name="close-small"></u-icon>
+                </div>
+            </div>
+        </div>
+        <div slot="content" :class="$style.content">
+            <div :class="$style.changeblock" @click="changeType">
+                <i :class="$style.change"></i>
+            </div>
+            <div :class="$style.timecontent">
+                <div :class="$style.timepick" v-if="type===0">
+                    <u-form @validate="formCanSubmit = $event.valid" :rules="rules" label-size="auto" layout="none">
+                        <u-form-item name="time" placement="bottom">
+                            <u-input @keypress.enter="addTime()" size="small medium" style="width:298px;height:34px;" v-model="timeText" :placeholder="`${$t('example')}“2016-05-31 12:23:12”`"></u-input>
+                        </u-form-item>
+                    </u-form>
+                </div>
+                <div :class="$style.timepick" v-else>
+                    <u-date-picker @change="updateYear" :min-date="min" :max-date="max" :class="$style.datepicker" :date="year" alignment="right"></u-date-picker>
+                    <u-time-picker @change="updateTime" :time="time"></u-time-picker>
+                </div>
+                <u-button @click="addTime()" :disabled="!canSubmit" color="primary" size="small">
+                    {{$t('positioning')}}
+                </u-button>
+            </div>
+            <p :class="$style.tip">
+                <span>
+                    {{$t('autoReplenishment')}} {{ getTimeResult(timeText) }}
+                </span>
+            </p>
+            <p :class="$style.history" v-if="historyTimes.length>0">
+                <label>
+                    {{$t('positioningHistory')}}
+                </label>
+                <u-label style="margin-right:5px;cursor: pointer;" :key="key" v-for="(time, key) in historyTimes" @click="addTime(time)">
+                    {{ time | dateFormat('yyyy-MM-dd HH:mm:ss') }}
+                </u-label>
+            </p>
+        </div>
+    </u-popup>
+</div>
+   

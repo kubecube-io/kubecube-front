@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.1 (78136) - https://sketchapp.com -->
+    <title>ic_syjc</title>
+    <desc>Created with Sketch.</desc>
+    <g id="CICD使用教程" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="v" transform="translate(-153.000000, -166.000000)" fill="#9DACC1" fill-rule="nonzero">
+            <g id="编组-3" transform="translate(153.000000, 166.000000)">
+                <path d="M2.8,13.4398604 C3.30334661,13.1596375 3.88303064,13 4.5,13 L16.2,13 L16.2,2.8 L14,2.8 L14,9 L11.0506592,7 L8,9 L8,2.8 L2.8,2.8 L2.8,13.4398604 Z M2,1 L17,1 C17.5522847,1 18,1.44771525 18,2 L18,19 C18,19.5522847 17.5522847,20 17,20 L2,20 C1.44771525,20 1,19.5522847 1,19 L1,2 C1,1.44771525 1.44771525,1 2,1 Z M9.8,5.66758615 L11.0675224,4.83660352 L12.2,5.60455655 L12.2,2.8 L9.8,2.8 L9.8,5.66758615 Z M4.5,14.8 C3.56111593,14.8 2.8,15.5611159 2.8,16.5 C2.8,17.4388841 3.56111593,18.2 4.5,18.2 L16.2,18.2 L16.2,14.8 L4.5,14.8 Z" id="形状结合"></path>
+            </g>
+        </g>
+    </g>
+</svg>

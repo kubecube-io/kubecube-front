@@ -1,0 +1,43 @@
+@import 'cloud-ui.vusion/src/u-suggest-item.vue/module.css';
+
+.root {
+    height: 42px;
+    line-height: 42px;
+    padding: 0 11px;
+    color: #666;
+}
+
+/* .root:before {
+    icon-font: url(./assets/region.svg);
+    font-size: 18px;
+    margin-right: 6px;
+    vertical-align: -4px;
+    color: $sidebar-region-select-icon-color;
+} */
+
+.root[selected] {
+    color: $brand-primary;
+    background: none;
+}
+
+.root:hover {
+    background: #f5f7fa;
+}
+
+/* .root[selected]:after {
+    icon-font: url(./assets/check.svg);
+    position: absolute;
+    right: 3px;
+    top: 13px;
+    line-height: 1;
+    color: $brand-primary;
+} */
+
+.root[disabled] {
+    color: #ccc;
+    background: none;
+}
+
+.root[disabled]:before {
+    color: #d9dde4;
+}

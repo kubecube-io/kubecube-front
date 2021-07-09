@@ -1,0 +1,69 @@
+{
+    "exclude": [
+        "public",
+        "node_modules",
+        "dll"
+    ],
+    "compilerOptions": {
+        "baseUrl": ".",
+        "target": "esnext",
+        "paths": {
+            "kubecube": [
+                "src/kubecube",
+                "src/kubecube/*"
+            ],
+            "@micro-app/common/library": [
+                "src/client/components",
+                "src/client/components/*"
+            ],
+            "@micro-app/common/components": [
+                "src/client/components",
+                "src/client/components/*"
+            ],
+            "@micro-app/common/base": [
+                "src/client/base",
+                "src/client/base/*"
+            ],
+            "@micro-app/common/mixins": [
+                "src/client/base/mixins",
+                "src/client/base/mixins/*"
+            ],
+            "@micro-app/common/filters": [
+                "src/client/filters",
+                "src/client/filters/*"
+            ],
+            "@micro-app/common/directives": [
+                "src/client/directives",
+                "src/client/directives/*"
+            ],
+            "@micro-app/common/utils": [
+                "src/client/utils",
+                "src/client/utils/*"
+            ],
+            "@micro-app/common/assets": [
+                "src/client/assets",
+                "src/client/assets/*"
+            ],
+            "@micro-app/common/icons": [
+                "src/client/assets/icons",
+                "src/client/assets/icons/*"
+            ],
+            "@micro-app/common/static": [
+                "src/client/static",
+                "src/client/static/*"
+            ],
+            "@micro-app/common/views": [
+                "src/client/views",
+                "src/client/views/*"
+            ],
+            "@micro-app/common/services": [
+                "src/client/services",
+                "src/client/services/*"
+            ],
+            "@micro-app/common/ccb": [
+                "src/client/ccb",
+                "src/client/ccb/*"
+            ]
+        }
+    }
+}

@@ -1,0 +1,4 @@
+<div :class="$style.root">
+    <u-link v-show="!copied" v-clipboard:copy="text" v-clipboard:success="onCopy" :disabled="disabled">复制</u-link>
+    <u-status-icon :class="$style.icon" v-show="copied" name="success">已复制</u-status-icon>
+</div>

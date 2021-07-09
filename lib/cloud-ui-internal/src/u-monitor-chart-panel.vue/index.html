@@ -1,0 +1,80 @@
+<div>
+    <u-monitor-chart ref="monitorChart" border smooth fill 
+        :height="height" 
+        :type="type" 
+        :data-type="dataType" 
+        :chart-sum="chartSum"
+        :title="title"
+        :title-align="titleAlign" 
+        :contentStyle="contentStyle"
+        :unit="unit" 
+        :options="options"
+        :metrics="metrics"
+        :series="series"
+        :preprocessor="preprocessor"
+        :processor="processor"
+        :dimensions="dimensions" 
+        :filters="filters"
+        :yAxis="yAxis"
+        :xAxis="xAxis"
+        :format="format"
+        :settings="settings"
+        :legend="legend"
+        @sumtotal="getSumtotal($event)"
+        @loaded="onLoaded($event)">
+            <div slot="tooltip" slot-scope="scope">
+                {{ scope.item.datetime }}
+                <div v-if="scope.item.total !== undefined">{{$t('total')}}：{{  scope.item.total }}</div>
+                <div v-for="(sery, index) in series" :key="index" v-if=" scope.item[sery.key]!==undefined">
+                    <span :class="$style.seryName" :title="sery.name || sery.key">{{ sery.name || sery.key }}</span>: {{ scope.item[sery.key] }} {{ unit }}
+                </div>
+            </div>
+            <template slot="titleTemplate">
+                <slot name="titleTemplate" v-bind="sumtotal" :data="templateData"></slot>
+            </template>
+            <template slot="captionTemplate">
+                <slot name="captionTemplate" v-bind="sumtotal" :data="templateData"></slot>
+            </template>
+            <template slot="legendTemplate">
+                <slot name="legendTemplate"></slot>
+            </template>
+            <template slot="legendSuffix">
+                <slot name="legendSuffix"></slot>
+            </template>
+            <div :class="$style.btn">
+                <i :class="$style.refreshIcon" v-if="!noRefresh" @click="refresh()"></i>
+                <i :class="$style.zoomIcon" v-if="!noModel" @click="showModal"></i>
+            </div>
+    </u-monitor-chart>
+    <!-- <u-modal ref="modalcomponent" :title="metricTitle" :visible="visible" :ok-button="okButton" :cancel-button="cancelButton" :width="modalWidth" @close="close"> -->
+    <u-monitor-chart-modal v-if="!noModel" :type="type" :title="title" ref="monitorModal" :data-type="dataType" :chart-sum="chartSum"
+        :contentStyle="contentStyle"
+        :unit="modal.unit" 
+        :options="modal.options"
+        :metrics="modal.metrics"
+        :series="modal.series"
+        :dimensions="modal.dimensions" 
+        :filters="modal.filters" 
+        :preprocessor="modal.preprocessor" 
+        :processor="modal.processor"
+        :yAxis="modal.yAxis"
+        :xAxis="modal.xAxis"
+        :format="modal.format" 
+        :settings="modal.settings"
+        :legend="modal.legend"
+        @sumtotal="getModalSumtotal($event)">
+        <template slot="headerTemplate">
+            <slot name="headerTemplate" :change="change" :modalData="modal" :modal="true" :data="modalTemplateData">
+                <div v-if="!noModalHeader">
+                    <u-monitor-optionbar v-bind="optionbarOptions"></u-monitor-optionbar>
+                </div>
+            </slot>
+        </template>
+        <template slot="titleTemplate">
+            <slot name="titleTemplate" v-bind="modalSumtotal" :modal="true"  :data="modalTemplateData"></slot>
+        </template>
+        <template slot="captionTemplate">
+            <slot name="captionTemplate" v-bind="modalSumtotal" :modal="true" :data="modalTemplateData"></slot>
+        </template>
+    </u-monitor-chart-modal>
+</div>

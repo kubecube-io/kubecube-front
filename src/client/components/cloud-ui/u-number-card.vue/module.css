@@ -1,0 +1,30 @@
+.root {
+    display: block;
+    background: #f7f8fd;
+    border-radius: $border-radius-base;
+    padding: 15px 18px;
+    transition: background $transition-duration-base;
+}
+
+.root:hover {
+    background: $background-color-base;
+}
+
+.title {
+    color: #8a8e9e;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.number {
+    font-size: 32px;
+    line-height: 1;
+    margin-top: 8px;
+}
+
+.root[color="primary"] .number * { color: $brand-primary !important; }
+.root[color="info"] .number * { color: $brand-info !important; }
+.root[color="success"] .number * { color: $brand-success !important; }
+.root[color="warning"] .number * { color: $brand-warning !important; }
+.root[color="error"] .number * { color: $brand-error !important; }

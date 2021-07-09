@@ -1,0 +1,94 @@
+.root{
+    position: absolute;
+    min-width: 140px;
+    background: #fff;
+    padding: 13px 16px;
+    border: 1px solid #dfe4ec;
+    z-index: 7000;
+}
+.close{
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-size: 18px;
+    color: #bbb;
+    cursor: pointer;
+}
+.close:hover{
+    color: #888;
+}
+.arrow{
+    display: block;
+    position: absolute;
+    border: 8px solid transparent;
+}
+
+.root[placement="bottom"] .arrow {
+    left: 50%;
+    top: -8px;
+    margin-left: -8px;
+    border-width: 0 8px 8px;
+    border-bottom-color: white;
+}
+
+.root[placement="top"] .arrow {
+    left: 50%;
+    bottom: -8px;
+    margin-left: -8px;
+    border-width: 8px 8px 0;
+    border-top-color: #fff;
+}
+
+.root[placement="left"] .arrow {
+    top: 50%;
+    right: -8px;
+    margin-top: -8px;
+    border-width: 8px 0 8px 8px;
+    border-left-color: #fff;
+}
+
+.root[placement="right"] .arrow {
+    top: 50%;
+    left: -8px;
+    margin-top: -8px;
+    border-width: 8px 8px 8px 0;
+    border-right-color: #fff;
+}
+
+.head{
+    font-size: 12px;
+    color: #575962;
+}
+.content {
+    width: 252px;
+}
+.tip{
+    min-height: 66px;
+    margin: 10px 0;
+}
+.dot{
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 0 6px;
+    border-radius: 6px;
+    text-align: center;
+    background: #E6EAEF;
+    cursor: pointer;
+}
+.dot_active{
+    background: #99A3AE;
+}
+.select[class]{
+    display: inline-block;
+    padding: 0;
+    width: 200px !important;
+    border: none;
+}
+.select[class] > ul {
+    width: 180px;
+    border: 1px solid #DFE5EC;
+}
+.select[class] > ul > li {
+    padding: 2px 12px;
+}

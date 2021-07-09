@@ -1,0 +1,22 @@
+<div :class="$style.root">
+    <svg xmlns="http://www.w3.org/2000/svg" :class="$style.svg" ref="svg">
+        <defs>
+            <marker id="arrow" markerUnits="strokeWidth"
+                markerWidth="12"
+                markerHeight="12"
+                viewBox="0 0 12 12"
+                refX="4"
+                refY="6"
+                orient="auto">
+                <polyline fill="#5ca2f4" points="0,2 12,6 0,10 2,6 0,2" />
+            </marker>
+        </defs>
+        <rect ref="background" fill="rgba(256,256,256,1)" width="100%" height="100%" />
+        <g ref="grap" :key="key" style="transform-origin: 50% 50%;" :transform="transform">
+            <slot :links="links" :nodes="nodes" :scale="scale" :config="config"></slot>
+        </g>
+    </svg>
+    <div :class="$style.slider" :place="config.sliderPlace">
+        <u-slider-scale @change="scaleChange" :value="sliderValue" :min="4" :max="24"></u-slider-scale>
+    </div>
+</div>

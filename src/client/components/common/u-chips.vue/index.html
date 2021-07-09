@@ -1,0 +1,26 @@
+<div :class="$style.root">
+    <div :class="$style.tipError" v-show="!!errMessage" color="error"><u-icon size="small" name="apm-alert" >{{errMessage}}</u-icon></div>
+    <div :class="$style.unitField" @click="onFieldClick" :style="{maxHeight: maxHeight + 'px'}" v-if="!disabled">
+        <!-- 展示生成好的项 -->
+        <template v-for="(item, index) in list">
+            <!-- 编辑的输入框 -->
+            <input v-if="modifying && current === index" type="text" v-model="modifyItem" ref="cpModifyInput" @keydown="onModifyKeydown" @blur="onModifyBlur"
+                :class="!!errMessage ? $style.inputError : ''" >
+            <div :class="[$style.unit, current === index ? $style.unitFocus : '']" @click="onFocus(index, $event)"
+                @dblclick="onDBLClick(index, $event)" :title="item">{{item}}
+                <span :class="$style.close" @click="deleteItem(index)">&#215;</span>
+            </div>
+        </template>
+        <!-- 因为修改最后一项生成项，list已经没有了对应的项了 -->
+        <input v-if="modifying && current === list.length" type="text" v-model="modifyItem" ref="cpModifyInput" @keydown="onModifyKeydown" @blur="onModifyBlur"
+            :class="!!errMessage ? $style.inputError : ''">
+
+        <!-- placeholder展示 -->
+        <div v-if="!focus && !list.length && !errMessage" :class="$style.placeholder">{{placeholder}}</div>
+        <!-- 添加新项的输入框 -->
+        <textarea :style="{ height: height + 'px', width: width + 'px' }" :class="[focus ? $style.textareaFocus : '', !!errMessage && !modifying ? $style.textareaError : '']"
+            ref="cpInput" type="text" @blur="onInputBlur" @focus="onInputFocus" @keydown="onKeydown" v-model="item"></textarea>
+    </div>
+    <div v-else :class="$style.unitFieldDisabled" > </div>
+</div>
+

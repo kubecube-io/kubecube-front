@@ -1,0 +1,21 @@
+{
+    "time": "Time",
+    "to": "to",
+    "default": "reset",
+    "customize": "custom",
+    "interval": "Interval",
+    "ok": "Confirm",
+    "cancel": "cancel",
+    "3hours": "last 3 hour(s)",
+    "24hours": "last 24 hour(s)",
+    "48hours": "last 48 hour(s)",
+    "7days": "last 7 day(s)",
+    "1minute": "1 minute(s)",
+    "5minute": "5 minute(s)",
+    "15minute": "15 minute(s)",
+    "1hour": "1 hour(s)",
+    "6hours": "6 hour(s)",
+    "1day": "1 day(s)",
+    "6days": "6 day(s)",
+    "15days": "15 day(s)"
+}

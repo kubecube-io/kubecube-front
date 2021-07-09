@@ -1,0 +1,64 @@
+@import 'cloud-ui.vusion/src/u-sidebar-item.vue/module.css';
+.root {
+    padding-left: 20px;
+    color: #fff;
+    background-color: #2b333f;
+    border-left: 3px solid #2b333f;
+}
+.root:hover{
+    /* color: #fff; */
+    background-color: #2d4254;
+    /* border-left: 3px solid #67aaf5; */
+}
+.root[selected] {
+    color: #fff;
+    background-color: #2d4254;
+    border-left: 3px solid #2d4254;
+}
+
+.root[icon="overview"]:before {
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/overview.svg);
+}
+
+.root[icon="facilities"]:before{
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/respoll.svg);
+}
+
+.root[icon="elk"]:before{
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/win.svg);
+}
+
+.root[icon="docker"]:before{
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/rds.svg);
+}
+
+.root[icon="nos"]:before{
+    margin-right: 10px;
+    display: inline-block;
+    font-size: 27px !important;
+    vertical-align: middle;
+    icon-font: url(@micro-app/common/icons/usage.svg);
+}
+.root[icon=""]{
+    color: #fff;
+    background-color: #2d4254;
+    border-left: 3px solid #2b333f;
+}
+
+

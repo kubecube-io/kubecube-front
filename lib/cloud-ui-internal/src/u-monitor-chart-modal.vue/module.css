@@ -1,0 +1,40 @@
+.btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 100;
+    width: 100px;
+    text-align: right;
+}
+.btn > .i-font {
+    font-size: 16px;
+    color: #9ba4ad;
+    margin-left: 4px;
+    &:hover { color: #68aaf5; }
+    &.z-dis { color: #ccc; }
+}
+.refreshIcon, .zoomIcon {
+    position: absolute;
+    top: -15px;
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: #9ba4ad;
+}
+.refreshIcon:hover, .zoomIcon:hover {
+    color: #68aaf5;
+    cursor: pointer;
+}
+.refreshIcon {
+    left: 75px;
+}
+.refreshIcon::after {
+    icon-font: url('../assets/svg/chart-refresh.svg');
+}
+.zoomIcon::after {
+    icon-font: url('../assets/svg/chart-zoom.svg');
+}
+/*------------------ 安全服务页面 ----------------------*/
+.btn-security {
+    top: 5px;
+    right: 0;
+}

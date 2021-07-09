@@ -1,0 +1,22 @@
+.root {
+
+}
+
+.root:not(:last-child) {
+    margin-bottom: $margin-base;
+}
+
+.head {
+    line-height: 45px;
+    font-size: 16px;
+    font-weight: bold;
+    /* border-top: 1px solid $border-color-light;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding-left: 15px; */
+    color: #80859c;
+}
+
+.body {
+    padding-bottom: 5px;
+}

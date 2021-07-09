@@ -1,0 +1,21 @@
+<div :class="$style.root">
+    <div :class="$style.item">{{$t('time')}}：
+        <ul :class="$style.timerange" ref="timerange" v-if="!menuValue.isCustomTime">
+            <li v-for="(trg, index) in timeRange" :class="$style.rangeitem" :role="menuValue.period === trg.value ? 'sel' : ''" @click="setPeriod(trg.value)">{{ trg.name }}</li>
+        </ul>
+        <div v-if="menuValue.isCustomTime" :class="$style.dateperiod" ref="dateperiod">
+            <u-date-picker-monitor :class="$style.datepicker" :date.sync="firstDate" :width="datewidth" :min-date="minDate" :max-date="secondDate"></u-date-picker-monitor>&nbsp;
+            <u-number-input :class="$style.numberitem" formatter="00" :min="0" :max="maxFirstHour" v-model="hourFirstTime"></u-number-input> :
+            <u-number-input :class="$style.numberitem" :min="0" :max="maxFirstMin" formatter="00" v-model="minuteFirstTime"></u-number-input> {{$t('to')}}
+
+            <u-date-picker-monitor :class="$style.datepicker" :date.sync="secondDate" :width="datewidth" :min-date="firstDate" :max-date="maxDate"></u-date-picker-monitor>&nbsp;
+            <u-number-input :class="$style.numberitem" :min="minSecoundHour" :max="23" formatter="00" v-model="hourSecondTime"></u-number-input> :
+            <u-number-input :class="$style.numberitem" :min="minSecoundMin" :max="59" formatter="00" v-model="minuteSecondTime"></u-number-input>
+            <u-button :class="$style.btn" style="margin-left:10px" color="primary" @click="update">{{$t('ok')}}</u-button>
+        </div>
+        <a :class="$style.selfdefinition" @click="changeToCustomTime">{{ menuValue.isCustomTime ? $t('default') : $t('customize') }}</a>
+    </div>
+    <div :class="$style.item" v-if="!noInterval">{{$t('interval')}}：
+        <u-select :class="$style.selectField" size="normal small" field="name" v-model="menuValue.interval" @select="update" :data="periodOptions"></u-select>
+    </div>
+</div>

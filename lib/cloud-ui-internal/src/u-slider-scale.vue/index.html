@@ -1,0 +1,20 @@
+<div :class="$style.root" :disabled="disabled">
+    <u-dragger :disabled="readonly || disabled" :transfer="handleEl" immediate
+        axis="vertical" :grid="grid"
+        range="offset-parent" range-mode="center"
+        @dragstart="onDragStart($event)"
+        @drag="onDrag($event)">
+        <div :class="$style.body">
+            <div :class="$style.track">
+                <div :class="$style.trail" :style="{ height: (100-percent) + '%' }"></div>
+                <div :class="$style.bound" role="start" v-if="rangeStartPercent" :style="{ height: rangeStartPercent + '%' }"></div>
+                <div :class="$style.bound" role="end" v-if="rangeEndPercent" :style="{ height: rangeEndPercent + '%' }"></div>
+            </div>
+            <div :class="$style.handle" ref="handle"></div>
+        </div>
+    </u-dragger>
+    <div :class="$style.plus" @click="plusValue">
+    </div>
+    <div :class="$style.minus" @click="minusValue">
+    </div>
+</div>

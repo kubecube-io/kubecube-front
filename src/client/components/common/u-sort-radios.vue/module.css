@@ -1,0 +1,9 @@
+@import 'proto-ui.vusion/src/u-radios.vue/module.css';
+
+.root {
+    display: inline-block;
+}
+
+.root > *:not(:last-child) {
+    margin-right: 20px;
+}

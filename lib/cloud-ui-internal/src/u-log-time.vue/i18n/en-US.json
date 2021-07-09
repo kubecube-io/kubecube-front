@@ -1,0 +1,10 @@
+{
+    "specifiedTime": "location to the specified time",
+    "positioning": "locate",
+    "autoReplenishment": "The system auto-replenishment time to",
+    "positioningHistory": "positioning history",
+    "PleaseEnterTheCorrectTime":"Please enter the correct time",
+    "DateCannotBeLessThan": "Date cannot be less than",
+    "DateCannotBeGreaterThan": "Date cannot be greater than",
+    "example": "example:"
+}

@@ -1,0 +1,8 @@
+<div :class="$style.root">
+    <div :class="$style.item" v-for="(item, index) in items" :type="item.type" :position="item.position" :style="{ top: item.top + 'px', bottom: item.bottom + 'px' }">
+        <i-line-awesome v-if="item.type === 'info'" name="info-circle" :class="$style.info"></i-line-awesome>
+        <u-status-icon v-else :name="item.type"></u-status-icon>
+        <slot :item="item"><u-text wrap="break">{{ item.text }}</u-text></slot>
+        <u-icon name="close" :class="$style.close" v-if="item.type === 'warning' || item.type === 'error'" @click.native="close(item)"></u-icon>
+    </div>
+</div>

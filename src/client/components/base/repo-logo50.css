@@ -1,0 +1,576 @@
+.i-repoLogo50 {
+    display: inline-block;
+    background-image: url(../../assets/images/sprite-repoLogo50.png);
+}
+
+
+.i-repoLogo50.i-repoLogo50-WASdev {
+    background-position: -500px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-_blank {
+    background-position: -50px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-_multi {
+    background-position: -50px -500px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-aerospike {
+    background-position: -50px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-alpine {
+    background-position: -50px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-arangodb {
+    background-position: 0px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-baseImage {
+    background-position: -550px 0px;
+    width: 36px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-bonita {
+    background-position: -100px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-buildpack-deps {
+    background-position: -100px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-busybox {
+    background-position: 0px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-cassandra {
+    background-position: -50px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-celery {
+    background-position: -100px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-centos {
+    background-position: -150px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-cirros {
+    background-position: -150px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-clearlinux {
+    background-position: -150px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-clojure {
+    background-position: 0px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-consul {
+    background-position: -50px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-couchbase {
+    background-position: -100px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-couchdb {
+    background-position: -150px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-crate {
+    background-position: -200px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-crux {
+    background-position: -200px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-debian {
+    background-position: -200px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50 {
+    background-position: -200px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-django {
+    background-position: 0px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-docker {
+    background-position: -50px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-drupal {
+    background-position: -100px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-elasticsearch {
+    background-position: -150px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-elixir {
+    background-position: -200px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-erlang {
+    background-position: -250px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-fedora {
+    background-position: -250px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-fsharp {
+    background-position: -250px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-gazebo {
+    background-position: -250px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-gcc {
+    background-position: -250px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-ghost {
+    background-position: 0px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-glassfish {
+    background-position: -50px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-golang {
+    background-position: -100px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-haproxy {
+    background-position: -150px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-haskell {
+    background-position: -200px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-hello-world {
+    background-position: -250px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-httpd {
+    background-position: -300px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-hylang {
+    background-position: -300px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-influxdb {
+    background-position: -300px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-iojs {
+    background-position: -300px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-irssi {
+    background-position: -300px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-java {
+    background-position: -300px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-javaclass {
+    background-position: -100px -500px;
+    width: 50px;
+    height: 43px;
+}
+.i-repoLogo50.i-repoLogo50-jenkins {
+    background-position: -50px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-jetty {
+    background-position: -100px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-joomla {
+    background-position: -150px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-jruby {
+    background-position: -200px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-julia {
+    background-position: -250px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-kaazing-gateway {
+    background-position: -300px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-kapacitor {
+    background-position: -350px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-kibana {
+    background-position: -350px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-kong {
+    background-position: -350px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-lamp {
+    background-position: -350px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-lightstreamer {
+    background-position: -350px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-logstash {
+    background-position: -350px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-mageia {
+    background-position: -350px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-mariadb {
+    background-position: 0px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-maven {
+    background-position: 0px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-memcached {
+    background-position: -100px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-mongo-express {
+    background-position: -150px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-mongodb {
+    background-position: -200px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-mono {
+    background-position: -250px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-mysql {
+    background-position: -300px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-nats {
+    background-position: -350px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-neo4j {
+    background-position: -400px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-neurodebian {
+    background-position: -400px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-nginx {
+    background-position: -400px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-node {
+    background-position: -400px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-notary {
+    background-position: -400px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-nuxeo {
+    background-position: -400px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-odoo {
+    background-position: -400px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-openjdk {
+    background-position: -400px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-opensuse {
+    background-position: 0px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-oraclelinux {
+    background-position: -50px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-owncloud {
+    background-position: -100px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-percona {
+    background-position: -150px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-perl {
+    background-position: -200px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-photon {
+    background-position: -250px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-php-zendserver {
+    background-position: -300px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-php {
+    background-position: -350px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-piwik {
+    background-position: -400px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-postgres {
+    background-position: -450px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-pypy {
+    background-position: -450px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-python {
+    background-position: -450px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-r-base {
+    background-position: -450px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-rabbitmq {
+    background-position: -450px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-rails {
+    background-position: -450px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-rakudo-star {
+    background-position: -450px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-redis {
+    background-position: -450px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-redmine {
+    background-position: -450px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-registry {
+    background-position: 0px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-rethinkdb {
+    background-position: -50px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-rhel {
+    background-position: -100px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-rocket {
+    background-position: -150px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-ros {
+    background-position: -200px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-ruby {
+    background-position: -250px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-sentry {
+    background-position: -300px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-solr {
+    background-position: -350px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-sonarqube {
+    background-position: -400px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-sourcemage {
+    background-position: -450px -450px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-swarm {
+    background-position: -500px 0px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-telegraf {
+    background-position: -500px -50px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-thrift {
+    background-position: -500px -100px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-tomcat {
+    background-position: -500px -150px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-tomee {
+    background-position: -500px -200px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-traefik {
+    background-position: -500px -250px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-ubuntu-upstart {
+    background-position: -500px -300px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-ubuntu {
+    background-position: -500px -350px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-vault {
+    background-position: -500px -400px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-websphere {
+    background-position: 0px -500px;
+    width: 50px;
+    height: 50px;
+}
+.i-repoLogo50.i-repoLogo50-wordpress {
+    background-position: 0px -300px;
+    width: 50px;
+    height: 50px;
+}

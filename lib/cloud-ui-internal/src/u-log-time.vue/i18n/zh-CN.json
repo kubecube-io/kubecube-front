@@ -1,0 +1,10 @@
+{
+    "specifiedTime": "定位到指定的时间",
+    "positioning": "定位",
+    "autoReplenishment": "系统自动补全时间为",
+    "positioningHistory": "定位历史",
+    "PleaseEnterTheCorrectTime":"请输入正确的时间",
+    "DateCannotBeLessThan": "日期不得小于",
+    "DateCannotBeGreaterThan": "日期不得大于",
+    "example": "比如："
+}

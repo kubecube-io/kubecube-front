@@ -1,0 +1,10 @@
+
+<div :class="$style.root">
+    <u-link v-if="link" :to="link">
+        <i :class="$style.back"></i>
+    </u-link>
+    <slot>
+        <span>{{name}}</span>
+    </slot>
+</div>
+   

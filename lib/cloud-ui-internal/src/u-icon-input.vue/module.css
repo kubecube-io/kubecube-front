@@ -1,0 +1,27 @@
+.input input{
+    padding-left: 40px !important;
+    text-align: left;
+}
+.input input:focus + i{
+    border-color: #8ebee9;
+}
+.icon{
+    position: absolute;
+    display: inline-block;
+    width: 29px;
+    left: 1px;
+    padding-left: 10px;
+    background: #ffffff;
+    height: 18px;
+    line-height: 18px;
+    top: 50%;
+    transform: translateY(-9px);
+}
+.icon::before {
+    cursor: auto;
+    font-size: 18px;
+    color: #d1d6de;
+}
+.icon[name='search']::before {
+    icon-font: url('./assets/log-search.svg');
+}

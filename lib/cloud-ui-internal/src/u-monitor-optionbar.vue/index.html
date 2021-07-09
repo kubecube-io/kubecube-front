@@ -1,0 +1,13 @@
+<div :class="$style.root">
+    <slot name="pre" :change="change" :menuValue="menuValue"></slot>
+    <slot name="content">
+        <div :class="$style.item" role="range" v-if="typeOptions&&optionbarModules.indexOf('type')!==-1">{{ typeName }}：
+            <u-select :class="$style.selectField" :size="size" field="name" :value="menuValue.type" :data="typeOptions" @select="onTypeSelect($event.value)"></u-select>
+        </div>
+        <u-date-custom-picker :class="$style.item" v-if="optionbarModules.indexOf('time')!==-1" :date="date" :timeRange="timeRange" :initPeriodOptionsMethod="initPeriodOptionsMethod"  :noInterval="noInterval" @update="updateTime"></u-date-custom-picker>
+        <div :class="$style.item" v-if="optionbarModules.indexOf('statistics')!==-1">{{$t('statisticalIndicators')}}：
+            <u-select :class="$style.selectField" size="normal small" field="name" :value="menuValue.statistics" :data="statisticsOptions" @select="onStatisticsSelect($event.value)"></u-select>
+        </div>
+    </slot>
+    <slot name="after" :change="change"></slot>
+</div>

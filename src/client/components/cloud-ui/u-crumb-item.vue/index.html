@@ -1,0 +1,8 @@
+<li :class="[$style.item, showSeperator ? $style.seperator : '']">
+    <span :class="$style.current" v-if="current || disabled">
+        <slot></slot>
+    </span>
+    <a v-else :class="$style.root" :href="currentHref" :target="target" :disabled="disabled" @click="onClick" v-on="listeners">
+        <slot></slot>
+    </a>
+</li>

@@ -1,0 +1,16 @@
+{
+    "name": "build-cloud-ui",
+    "version": "0.0.1",
+    "description": "A micro app fullstack project",
+    "author": "",
+    "private": true,
+    "scripts": {
+        "update:ui": "npx cloud-ui-custom -o \"../ui/cobalt\" --global-css \"../src/client/components/base/global.css\" -t cobalt -c \"library-path=../src/client/components\"",
+        "update:ui:force": "npm run update:ui -- -f"
+    },
+    "devDependencies": {
+        "cloud-ui.vusion": "0.3.103",
+        "proto-ui.vusion": "0.3.69",
+        "vusion-cli": "~0.7.17"
+    }
+}

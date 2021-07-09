@@ -1,0 +1,24 @@
+@import 'proto-ui.vusion/src/u-link.vue/module';
+
+.item {
+    display: inline-block;
+}
+
+.item.seperator::before {
+    content: '/';
+    margin: 0 5px;
+}
+
+.current {
+    color: #666;
+}
+
+.root {
+    color: #508de8;
+}
+
+.root:hover {
+    color: $brand-primary;
+    transition: ease $transition-duration;
+    text-decoration: none;
+}

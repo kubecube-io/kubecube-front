@@ -1,0 +1,90 @@
+.root {
+    padding: 0 30px 0 20px;
+    border-radius: 3px;
+    transition: all .2s;
+    position: relative;
+
+    -webkit-appearance: none;
+    margin: 0;
+    border: none;
+    overflow: visible;
+    outline: 0;
+    font: inherit;
+    text-transform: none;
+    cursor: pointer;
+    background: none;
+    display: inline-block;
+    text-align: center;
+    height: 36px;
+    line-height: 34px;
+    background: #fff;
+    color: $color-base;
+    border: 1px solid $border-color-base;
+    user-select: none;
+}
+
+.arrows {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 100%;
+    padding-left: 5px;
+    padding-top: 4px;
+}
+
+.up, .down {
+    height: 12px;
+    width: 12px;
+    display: block;
+    color: $border-color-base;
+}
+
+.up {
+    margin-bottom: 2px; 
+}
+
+.up::before, .down::before {
+    content: '';
+    display: block;
+    border: 6px solid transparent;
+    cursor: pointer;
+}
+
+.up::before {
+    border-bottom: 6px solid $border-color-base;
+}
+
+.down::before {
+    border-top: 6px solid $border-color-base;
+}
+
+.up[active]::before  {
+    border-bottom-color: $brand-disabled;
+}
+
+.down[active]::before {
+    border-top-color: $brand-disabled;
+}
+
+.root[selected] .up::before {
+    border-bottom-color: $border-color-base;
+}
+
+.root[selected] .down::before {
+    border-top-color: $border-color-base;
+}
+
+.root[selected] .up[active]::before {
+    border-bottom-color: #fff;
+}
+
+.root[selected] .down[active]::before {
+    border-top-color: #fff;
+}
+
+.root[selected] {
+    background-color: $brand-primary;
+    color: #fff;
+    border-color: $brand-primary;
+}

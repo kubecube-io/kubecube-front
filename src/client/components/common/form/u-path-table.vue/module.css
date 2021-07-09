@@ -1,0 +1,201 @@
+$axis-color: #d4d7dd;
+$success-color: #00ffa2;
+$error-color: #f62222;
+$line-color: #666;
+$button-height: 36px;
+$brand-height: 36px;
+$stage-text-height: 24px;
+$background-color: #f4f5f9;
+/* 分割线 */
+$dividing-line-color: white; 
+
+
+.root { overflow: hidden; }
+.table[class] th { text-align: center; }
+.header{
+    border: none;
+    position: relative;
+    width: 100%;
+    background: #fff;
+    word-break: keep-all;
+    white-space: nowrap;
+    table-layout: fixed;
+    border-bottom: 1px solid #ebf0f5;
+    background: #f4f5f9;
+}
+.item{
+    position: relative;
+    vertical-align: middle;
+    box-sizing: border-box;
+    line-height: 20px;
+    padding: 13px 0 13px 10px;
+    width: auto;
+}
+
+.wrap {
+    display: inline-block;
+    text-align: center;
+    vertical-align: top;
+}
+
+.content {
+    padding: 13px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: $background-color;
+}
+.row {
+    display: inline-block;
+    width: 100%;
+}
+.row + .row {
+    border-top: 2px solid $dividing-line-color;
+}
+/* 参与方 */
+.wrap[part] {
+    position: relative;
+    text-align: left;
+    padding: 0 30px;
+}
+
+
+.wrap[last] { vertical-align: bottom; }
+/* .wrap + .wrap { border-left: 2px solid $dividing-line-color; } */
+
+.axis { position: relative; }
+.axis:before {
+    position: absolute;
+    content: '';
+    left: 0;
+    top: 15px;
+    height: 9999px;
+    width: 1px;
+    border-left: 1px solid $axis-color;
+}
+.axis[last]:before, .axis[dashed][last]:before {
+    height: 65px;
+    background: $background-color;
+    border-left: none;
+}
+
+.axis:after {
+    position: absolute;
+    content: '';
+    left: -4px;
+    top: 8px;
+    border: 5px solid $success-color;
+    border-radius: 5px;
+}
+/* 结束事务需要标红的情形 */
+.axis[fail]:after {
+    border-color: $error-color;
+}
+/* 虚线图 */
+.axis[dashed]:before {
+    left: 50%;
+    border-left-style: dashed;
+}
+.axis[dashed]:after {
+    display: none;
+}
+
+/* stage 文案 */
+.stageText {
+    padding-left: 10px;
+    height: $stage-text-height;
+}
+.text {
+    height: $stage-text-height;
+    line-height: $stage-text-height;
+}
+.time {
+    line-height: 14px;
+    margin-top: -1px;
+}
+
+.emptyStageWrap {
+    position: relative;
+    height: 50px;
+    width: 1px;
+    background: $background-color;
+}
+.emptyStageWrap:before {
+    position: absolute;
+    content: '';
+    height: 50px;
+    width: 1px;
+    top: 14px;
+    background: $background-color;
+}
+
+/* 事件连线 */
+.eventsWrap {
+    position: relative;
+    z-index: 1;
+    margin-top: -$stage-text-height;
+}
+.eventsWrap[no-stage="true"] {
+    margin-top: 0px;
+}
+.eventsWrap[first] {
+    /* $brand-height - $stage-text-height */
+    margin-top: 12px; 
+}
+.eventWrap {
+    position: relative;
+    height: 40px;
+    padding: 5px 0;
+    text-align: left;
+}
+.eventText {
+    height: $stage-text-height;
+    line-height: $stage-text-height;
+    padding-left: 5px;
+}
+.eventText[arrow='left'] {
+    text-align: right;
+    padding: 0 5px 0 0;
+}
+.eventText[isFail] {
+    color: #f34f69;
+}
+
+.line {
+    position: relative;
+    height: 1px;
+    background: $line-color;
+}
+.line[isFail] {
+    background: #f34f69;
+}
+.line:after {
+    position: absolute;
+    content: '';
+    right: -1px;
+    top: -5px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-left: 10px solid $line-color;
+    border-bottom: 5px solid transparent;
+}
+.line[arrow='left']:after {
+    left: -1px;
+    right: auto;
+    border-right: 10px solid $line-color;
+    border-left-width: 0;
+}
+.line[isFail]:after {
+    content: 'x';
+    color: #f34f69;
+    border: none;
+    top: -17px;
+    right: 4px;
+    font-size: 19px;
+}
+
+.button[class] {
+    position: relative;
+    overflow: hidden;
+    width: 120px;
+}

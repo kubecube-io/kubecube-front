@@ -1,0 +1,50 @@
+.base {
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.0;
+}
+
+.base[name="help"]::before{
+    color: #bac2cf;
+    icon-font: url('./assets/help.svg');
+}
+
+.base[name='info'] {
+    color: #bac2cf;
+    padding: 0 5px;
+    vertical-align: text-bottom;
+}
+.base[name="info"]::before{
+    color: #bac2cf;
+    icon-font: url('./assets/info.svg');
+}
+
+.base[name="detail"] {
+    color: #bac2cf;
+    font-size: 24px!important;
+    margin-left: 6px;
+}
+.base[name="detail"]::before {
+    icon-font: url('./assets/detail.svg');
+}
+
+
+.base[name='readonly']{
+    color: #bac2cf;
+    padding: 0 5px;
+}
+.base[name='readonly']:before{
+   background-color: #afd2fa;
+   color: #fff;
+   icon-font: url('./assets/readonly.svg');
+}
+
+.base[name='readonly2']{
+    color: #bac2cf;
+    padding:0 5px;
+}
+.base[name='readonly2']:before{
+   background-color: #afd2fa;
+   color: #fff;
+   icon-font: url('./assets/readonly2.svg');
+}

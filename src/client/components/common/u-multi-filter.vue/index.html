@@ -1,0 +1,47 @@
+<u-popper ref="popper" :class="$style.root" :disabled="disabled" appendTo="reference" :placement="placement" @toggle="onToggle($event)" :options="options" :style="{width: size ? '':width+'px'}" :offset="all ? '' : ''">
+    <div :class="$style.head" :disabled="disabled" :role="filter" :size="size" @click.stop="focus"
+    :tabindex="readonly || disabled ? '' : 0" @keydown.prevent.up="$refs.popper.currentOpen ? shift(-1) : toggle(true)"
+    @keydown.prevent.down="$refs.popper.currentOpen ? shift(+1) : toggle(true)"
+    @keydown.stop.enter="$refs.popper.currentOpen && enterSelected()"
+    @keydown.stop.esc="toggle(false)">
+        <template v-if="filter">
+            <div :class="$style.tag" v-for="(selItem, index) in selItems" :key="selItem.value">
+                <span :class="$style.text" :size="size">{{selItem[field]}}</span>
+                <span :class="$style.close" @click.stop="close(index)"></span>
+            </div>
+            <input ref="input" :class="$style.input" :size="size" :placeholder="showPlaceholder" v-model="query" @click.stop="inputClick" @input="onInput" @keydown.delete="inputDelete"  @compositionstart="compositionInputing = true"
+            @compositionend="compositionInputing = false" :style="inputStyle" maxlength="58" maxlengthMessage="已达到输入上限" @blur="all = true;"></input>
+        </template>
+        <template v-else>
+            <span :class="$style.tiptext" v-if="!selFlag">{{ $t('selectText') }}</span>
+            <div v-else>
+                <div :class="$style.tag" v-for="(selItem, index) in selItems" :key="selItem.value">
+                    <span :class="$style.text" :size="size">{{selItem[field]}}</span>
+                    <span :class="$style.close" @click.stop="close(index)"></span>
+                </div>
+            </div>
+            <i :class="$style.icon" :role="open ? 'up':''"></i>
+        </template>
+    </div>
+    <template v-if="this.selItems.length < max">
+        <div v-if="all"  :class="$style.body" slot="popper" :size="size" :style="{width: size ? '':width+'px'}">
+            <ul :class="$style.listview" v-if="optionsData.length>0" ref="listView">
+                <li :class="$style.listitem" ref="listItem" v-for="(item,index) in optionsData" v-if="!item.hidden" :key="index" :disabled="item.disabled" :role="item.selected ? 'z-sel':''" :hovered="item.hovered" @click.stop="select($event,index)">
+                    {{item[field]}}
+                </li>
+            </ul>
+            <div :class="$style.none" v-else>无可选值</div>
+        </div>
+        <div v-if="!all" :class="$style.body" slot="popper" :size="size" :style="{width: size ? '':width+'px'}">
+            <ul :class="$style.listview" v-if="newData.length>0" ref="listView">
+                <li :class="$style.listitem" ref="listItem" v-for="(item,index) in newData" v-if="!item.hidden" :key="index" :disabled="item.disabled" :role="item.selected ? 'z-sel':''" :hovered="item.hovered" @click.stop="select1($event,index)">
+                    {{item[field]}}
+                </li>
+            </ul>
+            <div :class="$style.none" v-else>无可选值</div>
+        </div>
+    </template>
+    <div v-else slot="popper" :size="size">
+        <u-text color="disabled">只能选择一个</u-text>
+    </div>
+</u-popper>

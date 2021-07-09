@@ -1,0 +1,212 @@
+.root {
+    vertical-align: middle;
+    font-size: 18px;
+    margin-right: 10px;
+    position: relative;
+    top: 0px;
+    display: inline-block;
+}
+
+.root[name="DNS"]::before{icon-font: url(./icons/DNS.svg)}
+.root[name="angle-down"]::before{icon-font: url(./icons/angle-down.svg)}
+.root[name="angle-left"]::before{icon-font: url(./icons/angle-left.svg)}
+.root[name="angle-right"]::before{icon-font: url(./icons/angle-right.svg)}
+.root[name="angle-up"]::before{icon-font: url(./icons/angle-up.svg)}
+.root[name="apm-extend"]::before{icon-font: url(./icons/apm-extend.svg)}
+.root[name="apm-list"]::before{icon-font: url(./icons/apm-list.svg)}
+.root[name="apm-screenshot"]::before{icon-font: url(./icons/apm-screenshot.svg)}
+.root[name="apm-small"]::before{icon-font: url(./icons/apm-small.svg)}
+.root[name="apm-topo"]::before{icon-font: url(./icons/apm-topo.svg)}
+.root[name="chart-refresh"]::before{icon-font: url(./icons/chart-refresh.svg)}
+.root[name="chart-zoom"]::before{icon-font: url(./icons/chart-zoom.svg)}
+.root[name="check"]::before{icon-font: url(./icons/check.svg)}
+.root[name="close-circle"]::before{icon-font: url(./icons/close-circle.svg)}
+.root[name="close-small"]::before{icon-font: url(./icons/close-small.svg)}
+.root[name="close"]::before{icon-font: url(./icons/close.svg)}
+.root[name="collection"]::before{icon-font: url(./icons/collection.svg)}
+.root[name="combcloud"]::before{icon-font: url(./icons/combcloud.svg)}
+.root[name="detail"]::before{icon-font: url(./icons/detail.svg)}
+.root[name="doc"]::before{icon-font: url(./icons/doc.svg)}
+.root[name="docker"]::before{icon-font: url(./icons/docker.svg)}
+.root[name="earphone"]::before{icon-font: url(./icons/earphone.svg)}
+.root[name="eip"]::before{icon-font: url(./icons/eip.svg)}
+.root[name="expire"]::before{icon-font: url(./icons/expire.svg)}
+.root[name="export"]::before{icon-font: url(./icons/export.svg)}
+.root[name="file"]::before{icon-font: url(./icons/file.svg)}
+.root[name="help"]::before{icon-font: url(./icons/help.svg)}
+.root[name="home-cache-thin"]::before{icon-font: url(./icons/home-cache-thin.svg)}
+.root[name="home-deployment-thin"]::before{icon-font: url(./icons/home-deployment-thin.svg)}
+.root[name="home-kafka-thin"]::before{icon-font: url(./icons/home-kafka-thin.svg)}
+.root[name="home-micro"]::before{icon-font: url(./icons/home-micro.svg)}
+.root[name="home-mongodb-thin"]::before{icon-font: url(./icons/home-mongodb-thin.svg)}
+.root[name="home-monitoring-thin"]::before{icon-font: url(./icons/home-monitoring-thin.svg)}
+.root[name="home-nqs-thin"]::before{icon-font: url(./icons/home-nqs-thin.svg)}
+.root[name="home-statefulWorkload-thin"]::before{icon-font: url(./icons/home-statefulWorkload-thin.svg)}
+.root[name="home-storage-thin"]::before{icon-font: url(./icons/home-storage-thin.svg)}
+.root[name="home-volume-thin"]::before{icon-font: url(./icons/home-volume-thin.svg)}
+.root[name="home-vpc-thin"]::before{icon-font: url(./icons/home-vpc-thin.svg)}
+.root[name="home-win-thin"]::before{icon-font: url(./icons/home-win-thin.svg)}
+.root[name="info"]::before{icon-font: url(./icons/info.svg)}
+.root[name="list-drag"]::before{icon-font: url(./icons/list-drag.svg)}
+.root[name="list"]::before{icon-font: url(./icons/list.svg)}
+.root[name="list_close"]::before{icon-font: url(./icons/list_close.svg)}
+.root[name="list_move"]::before{icon-font: url(./icons/list_move.svg)}
+.root[name="list_no_response"]::before{icon-font: url(./icons/list_no_response.svg)}
+.root[name="list_open"]::before{icon-font: url(./icons/list_open.svg)}
+.root[name="list_warn"]::before{icon-font: url(./icons/list_warn.svg)}
+.root[name="lock"]::before{icon-font: url(./icons/lock.svg)}
+.root[name="log-big"]::before{icon-font: url(./icons/log-big.svg)}
+.root[name="log-black"]::before{icon-font: url(./icons/log-black.svg)}
+.root[name="log-change"]::before{icon-font: url(./icons/log-change.svg)}
+.root[name="log-end"]::before{icon-font: url(./icons/log-end.svg)}
+.root[name="log-more"]::before{icon-font: url(./icons/log-more.svg)}
+.root[name="log-play"]::before{icon-font: url(./icons/log-play.svg)}
+.root[name="log-search"]::before{icon-font: url(./icons/log-search.svg)}
+.root[name="log-small"]::before{icon-font: url(./icons/log-small.svg)}
+.root[name="log-time"]::before{icon-font: url(./icons/log-time.svg)}
+.root[name="log-white"]::before{icon-font: url(./icons/log-white.svg)}
+.root[name="log"]::before{icon-font: url(./icons/log.svg)}
+.root[name="logstash"]::before{icon-font: url(./icons/logstash.svg)}
+.root[name="minus"]::before{icon-font: url(./icons/minus.svg)}
+.root[name="more2"]::before{icon-font: url(./icons/more2.svg)}
+.root[name="ncs-schedule"]::before{icon-font: url(./icons/ncs-schedule.svg)}
+.root[name="nec-unused"]::before{icon-font: url(./icons/nec-unused.svg)}
+.root[name="nec"]::before{icon-font: url(./icons/nec.svg)}
+.root[name="nes"]::before{icon-font: url(./icons/nes.svg)}
+.root[name="nos-angle-right"]::before{icon-font: url(./icons/nos-angle-right.svg)}
+.root[name="nos-bucket"]::before{icon-font: url(./icons/nos-bucket.svg)}
+.root[name="nos-event"]::before{icon-font: url(./icons/nos-event.svg)}
+.root[name="nos-filemode"]::before{icon-font: url(./icons/nos-filemode.svg)}
+.root[name="nos-mode"]::before{icon-font: url(./icons/nos-mode.svg)}
+.root[name="nos-resource"]::before{icon-font: url(./icons/nos-resource.svg)}
+.root[name="nos-sskey"]::before{icon-font: url(./icons/nos-sskey.svg)}
+.root[name="nos-sub"]::before{icon-font: url(./icons/nos-sub.svg)}
+.root[name="nos-yidun"]::before{icon-font: url(./icons/nos-yidun.svg)}
+.root[name="nqs-plugin"]::before{icon-font: url(./icons/nqs-plugin.svg)}
+.root[name="plus"]::before{icon-font: url(./icons/plus.svg)}
+.root[name="readonly"]::before{icon-font: url(./icons/readonly.svg)}
+.root[name="readonly2"]::before{icon-font: url(./icons/readonly2.svg)}
+.root[name="refresh"]::before{icon-font: url(./icons/refresh.svg)}
+.root[name="secret-public"]::before{icon-font: url(./icons/secret-public.svg)}
+.root[name="speaker"]::before{icon-font: url(./icons/speaker.svg)}
+.root[name="tb-del"]::before{icon-font: url(./icons/tb-del.svg)}
+.root[name="text"]::before{icon-font: url(./icons/text.svg)}
+.root[name="video"]::before{icon-font: url(./icons/video.svg)}
+.root[name="warn"]::before{icon-font: url(./icons/warn.svg)}
+.root[name="write"]::before{icon-font: url(./icons/write.svg)}
+
+.root[name="tenant"]::before{icon-font: url(./icons/tenant.svg)}
+.root[name="tenantSetting"]::before{icon-font: url(./icons/tenantSetting.svg)}
+.root[name="audit"]::before{icon-font: url(./icons/audit.svg)}
+.root[name="outerAuth"]::before{icon-font: url(./icons/outerAuth.svg)}
+.root[name="alarmUser"]::before{icon-font: url(./icons/alarmUser.svg)}
+.root[name="alarmRule"]::before{icon-font: url(./icons/alarmRule.svg)}
+.root[name="member"]::before{icon-font: url(./icons/member.svg)}
+.root[name="project"]::before{icon-font: url(./icons/project.svg)}
+.root[name="dashboard"]::before{icon-font: url(./icons/dashboard.svg)}
+.root[name="volume"]::before{icon-font: url(./icons/volume.svg)}
+.root[name="alarm"]::before{icon-font: url(./icons/alarm.svg)}
+.root[name="workload"]::before{icon-font: url(./icons/workload.svg)}
+.root[name="service"]::before{icon-font: url(./icons/service.svg)}
+.root[name="loadbalance"]::before{icon-font: url(./icons/loadbalance.svg)}
+.root[name="config"]::before{icon-font: url(./icons/config.svg)}
+.root[name="configManage"]::before{icon-font: url(./icons/configManage.svg)}
+.root[name="repo"]::before{icon-font: url(./icons/repo.svg)}
+.root[name="cluster"]::before{icon-font: url(./icons/cluster.svg)}
+.root[name="chain"]::before{icon-font: url(./icons/chain.svg)}
+.root[name="agent"]::before{icon-font: url(./icons/agent.svg)}
+.root[name="database"]::before{icon-font: url(./icons/database.svg)}
+.root[name="cache"]::before{icon-font: url(./icons/cache.svg)}
+.root[name="setting"]::before{icon-font: url(./icons/setting.svg)}
+.root[name="overview"]::before{icon-font: url(./icons/overview.svg)}
+.root[name="dockerfileManage"]::before{icon-font: url(./icons/dockerfileManage.svg)}
+.root[name="line"]::before{icon-font: url(./icons/line.svg)}
+.root[name="archive"]::before{icon-font: url(./icons/archive.svg); font-size: 24px; margin-left: -3px; }
+.root[name="lineTemplate"]::before{icon-font: url(./icons/lineTemplate.svg)}
+.root[name="form"]::before{icon-font: url(./icons/form.svg)}
+.root[name="deploy"]::before{icon-font: url(./icons/deploy.svg)}
+.root[name="deployTemplate"]::before{icon-font: url(./icons/deployTemplate.svg)}
+.root[name="certificate"]::before{icon-font: url(./icons/certificate.svg)}
+.root[name="servicetopo"]::before{icon-font: url(./icons/servicetopo.svg)}
+.root[name="globalconfig"]::before{icon-font: url(./icons/globalconfig.svg)}
+.root[name="serviceinstance"]::before{icon-font: url(./icons/serviceinstance.svg)}
+.root[name="servicemanage"]::before{icon-font: url(./icons/servicemanage.svg)}
+.root[name="servicerepo"]::before{icon-font: url(./icons/servicerepo.svg)}
+.root[name="search"]::before{icon-font: url(./icons/search.svg)}
+.root[name="envManage"]::before{icon-font: url(./icons/envManage.svg)}
+.root[name="log"]::before{icon-font: url(./icons/log.svg)}
+.root[name="targetRepo"]::before{icon-font: url(./icons/targetRepo.svg)}
+.root[name="role"]::before{icon-font: url(./icons/role.svg)}
+.root[name="angleDown"]::before{icon-font: url(./icons/angle-down.svg)}
+.root[name="angleUp"]::before{icon-font: url(./icons/angle-up.svg)}
+.root[name="flowcolor"]::before{icon-font: url(./icons/flowColor.svg); font-size: 20px;}
+.root[name="tutorial"]::before{icon-font: url(./icons/tutorial.svg)}
+.root[name="chart-area-solid"]::before{icon-font: url('i-font-awesome.vue/assets/chart-area-solid.svg')}
+/* ncs */
+.root[name="ncs"]::before{icon-font: url(./icons/ncs/ncs.svg)}
+.root[name="ceph"]::before{icon-font: url(./icons/ncs/ceph.svg)}
+.root[name="global"]::before{icon-font: url(./icons/ncs/global.svg)}
+.root[name="guide"]::before{icon-font: url(./icons/ncs/guide.svg)}
+.root[name="helm"]::before{icon-font: url(./icons/ncs/helm.svg)}
+.root[name="pdb"]::before{icon-font: url(./icons/ncs/pdb.svg)}
+.root[name="repoManage"]::before{icon-font: url(./icons/ncs/repo-manage.svg)}
+.root[name="serverFinder"]::before{icon-font: url(./icons/ncs/server-finder.svg)}
+.root[name="sshkey"]::before{icon-font: url(./icons/ncs/sshkey.svg)}
+.root[name="yaml"]::before{icon-font: url(./icons/ncs/yaml.svg)}
+.root[name="container"]::before{icon-font: url(./icons/ncs/container.svg)}
+.root[name="initcontainer"]::before{icon-font: url(./icons/ncs/initcontainer.svg)}
+.root[name="external-link-alt-solid"]::before{icon-font: url(./icons/ncs/external-link-alt-solid.svg)}
+.root[name="minus-solid"]::before{icon-font: url(./icons/ncs/minus-solid.svg)}
+.root[name="cloud-shell"]::before{icon-font: url(./icons/ncs/cloud-shell.svg)}
+/* todo: 名称可能还会修改 */
+.root[name="nodePool"]::before{icon-font: url(./icons/ncs/nodePool.svg)}
+/*左侧固定导航栏*/
+.root[name="sideoverview"]::before{icon-font: url(./icons/sidenav/overview.svg)}
+.root[name="nsf"]{width:18px;}
+.root[name="nsf"]::before{icon-font: url(./icons/sidenav/nsf.svg)}
+.root[name="ncs"]::before{icon-font: url(./icons/sidenav/ncs.svg)}
+.root[name="cicd"]::before{icon-font: url(./icons/sidenav/cicd.svg)}
+.root[name="apm"]::before{icon-font: url(./icons/sidenav/apm.svg)}
+.root[name="goapi"]::before{icon-font: url(./icons/sidenav/goapi.svg)}
+.root[name="gportal"]::before{icon-font: url(./icons/sidenav/gportal.svg)}
+.root[name="gtxs"]::before{icon-font: url(./icons/sidenav/gtxs.svg)}
+.root[name="gaojing"]::before{icon-font: url(./icons/sidenav/gaojing.svg)}
+.root[name="outerauth"]::before{icon-font: url(./icons/sidenav/outerAuth.svg)}
+
+/* gateway */
+.root[name="envoy"]::before{icon-font: url(./icons/envoy.svg)}
+.root[name="switch"]::before{icon-font: url(./icons/switch.svg)}
+.root[name="plugin"]::before{icon-font: url(./icons/plugin.svg)}
+
+.root[name="paas"]::before{icon-font: url(./icons/servicemanage.svg)}
+.root[name="logseer"]::before{icon-font: url(./icons/logseer.svg)}
+.root[name="cicd-version"]::before{icon-font: url(./icons/cicd-version.svg)}
+
+.root[name="nos"]::before{icon-font: url(./icons/nos.svg)}
+.root[name="hdm"]::before{icon-font: url(./icons/hdm.svg)}
+
+
+/* nsf ccb */
+.root[name="ccb-overview"]::before{icon-font: url(./icons/nsf-overview.svg)}
+.root[name="ccb-instance"]::before{icon-font: url(./icons/nsf-instance.svg)}
+.root[name="ccb-config"]::before{icon-font: url(./icons/nsf-config.svg)}
+.root[name="ccb-govern"]::before{icon-font: url(./icons/nsf-govern.svg)}
+.root[name="ccb-menu"]::before{icon-font: url(./icons/nsf-menu.svg)}
+.root[name="probe"]::before{icon-font: url(./icons/probe.svg)}
+.root[name="monitor"]::before{icon-font: url(./icons/monitor.svg)}
+.root[name="k8s"]::before{icon-font: url(./icons/k8s.svg)}
+.root[name="guide"]::before{icon-font: url(./icons/guide.svg)}
+
+.root[name="logseermanage"]::before{icon-font: url(./icons/logmanage.svg)}
+.root[name="logseersearch"]::before{icon-font: url(./icons/logsearch5.svg)}
+.root[name="logseerjson"]::before{icon-font: url(./icons/json2.svg)}
+.root[name="logseerlognormal"]::before{icon-font: url(./icons/log2.svg)}
+.root[name="logseermonitor"]::before{icon-font: url(./icons/monitor2.svg)}
+.root[name="logseerlikes"]::before{icon-font: url(./icons/ic_likes.svg)}
+.root[name="quicksearch"]::before{icon-font: url(./icons/ic_quicksearch.svg)}
+.root[name="savesearch"]::before{icon-font: url(./icons/ic_savesearch.svg)}
+.root[name="exportlog"]::before{icon-font: url(./icons/ic_exportlog.svg)}
+.root[name="logseercontext"]::before{icon-font: url(./icons/context.svg)}
+.root[name="logmenu"]::before{icon-font: url(./icons/menu.svg)}
+
+

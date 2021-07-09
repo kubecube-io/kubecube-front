@@ -1,0 +1,106 @@
+.f-toe {
+    overflow: hidden;
+    word-wrap: normal;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.f-toe-rtl {
+    direction: rtl;
+    text-align: left;
+}
+
+.f-cb:after,.f-cbli li:after{display:block;clear:both;visibility:hidden;height:0;overflow:hidden;content:".";}
+
+.oh {
+    overflow: hidden;
+}
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+.f-mt10 {
+    margin-top: 10px;
+}
+.f-mt20 {
+    margin-top: 20px;
+}
+.f-mb10 {
+    margin-bottom: 10px;
+}
+.f-mb20 {
+    margin-bottom: 20px;
+}
+.f-mb30 {
+    margin-bottom: 30px;
+}
+.f-mb40 {
+    margin-bottom: 40px;
+}
+.f-mb50 {
+    margin-bottom: 50px;
+}
+.f-ml5 {
+    margin-left: 5px;
+}
+.f-ml10 {
+    margin-left: 10px;
+}
+.f-ml15 {
+    margin-left: 15px;
+}
+.f-ml20 {
+    margin-left: 20px;
+}
+.f-mr5 {
+    margin-right: 5px;
+}
+.f-mr10 {
+    margin-right: 10px;
+}
+.f-mr15 {
+    margin-right: 15px;
+}
+.f-mr20 {
+    margin-right: 20px;
+}
+.f-mr10 {
+    margin-right: 10px;
+}
+.f-pd10 {
+    padding: 10px;
+}
+.f-pd20 {
+    padding: 20px;
+}
+.f-pt0 {
+    padding-top: 0 !important;
+}
+.f-pl0 {
+    padding-left: 0 !important;
+}
+.f-tac {
+    text-align: center;
+}
+.f-tar {
+    text-align: right;
+}
+.f-tal {
+    text-align: left!important;
+}
+.f-vab {
+    vertical-align: text-bottom!important;
+}
+.f-vam {
+    vertical-align: middle!important;
+}
+.f-dib {
+    display: inline-block;
+}
+.f-du {
+    color: #508de8;
+    cursor: pointer;
+    text-decoration: underline;
+}

@@ -1,0 +1,66 @@
+.datepicker{
+    display: inline-block;
+}
+.item{
+    display: inline-block;
+    margin-right: 20px;
+    margin-top: 5px;
+}
+.item:last-child{
+    margin-right: 0px;
+}
+.item[role=range]{ font-size: 14px; }
+.selectField{
+    vertical-align: middle;
+    height: 30px !important;
+    line-height: 28px !important;
+}
+.timerange{
+    display: inline-block;
+    vertical-align: middle;
+}
+.rangeitem{
+    display: inline-block;
+    float: left;
+    height: 30px;
+    line-height: 28px;
+    background: #fff;
+    color: #666;
+    border: 1px solid #cbd5dd;
+    padding: 0 12px;
+    margin-right: 5px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    cursor: pointer;
+
+    &:hover {
+        border-color: $brand-primary;
+    }
+}
+.rangeitem[role=sel]{
+    color: #fff;
+    background-color: $brand-primary;
+    border-color: $brand-primary;
+}
+.numberitem[class] {
+    width: 50px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.numberitem[class] input {
+    padding: 6px;
+}
+
+.btn{
+    margin-left: 5px;
+    padding: 0 10px !important;
+    height: 30px !important;
+    line-height: 28px !important;
+    background: $brand-primary !important;
+    width: 48px;
+    border-radius: 2px;
+}
+.selfdefinition{
+    color: #4477d0;
+}

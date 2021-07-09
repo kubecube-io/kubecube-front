@@ -1,0 +1,36 @@
+.root{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.svg{
+    width: 100%;
+    height: 100%;
+}
+.slider{
+    position: absolute;
+    left: 12px;
+    bottom: 21px;
+    height: 74px;
+    width: 30px;
+}
+.slider[place="none"]{
+   display: none;
+}
+.slider[place="left top"]{
+    position: absolute;
+    bottom: inherit;
+    top: 21px;
+}
+.slider[place="rigth top"]{
+    position: absolute;
+    right: 12px;
+    left: inherit;
+    bottom: inherit;
+    top: 21px;
+}
+.slider[place="rigth bottom"]{
+    position: absolute;
+    right: 12px;
+    left: inherit;
+}

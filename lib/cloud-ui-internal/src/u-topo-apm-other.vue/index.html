@@ -1,0 +1,15 @@
+<u-topo-node :node="node" :radius="0">
+    <circle data-tag="effect" class="topoGraph_node_back" fill="rgba(256,256,256,1)" cx="0" cy="0" r="28" />
+    <image data-tag="effect" :href="imageUrl[node.backendType]" :xlink:href="imageUrl[node.backendType]" width="40" height="40" x="-20" y="-20" />
+    <text class="topoGraph_details" text-anchor="middle" x="2" y="38">
+        <tspan class="topoGraph_type" fill="#666">{{node.backendName}}</tspan>
+        <!-- node.id的数据是调用链需要 -->
+        <template v-if="node.name.length > 32">
+            <tspan x="0" dy="20" fill="#999">{{node.name.slice(0, 32)}}</tspan>
+            <tspan x="0" dy="20" fill="#999">{{node.name.slice(32)}}</tspan>
+        </template>
+        <template v-else>
+            <tspan x="0" dy="20" fill="#999">{{node.name}}</tspan>
+        </template>
+    </text>
+</u-topo-node>
