@@ -202,7 +202,7 @@
 .root[name="logseerjson"]::before{icon-font: url(./icons/json2.svg)}
 .root[name="logseerlognormal"]::before{icon-font: url(./icons/log2.svg)}
 .root[name="logseermonitor"]::before{icon-font: url(./icons/monitor2.svg)}
-.root[name="logseerlikes"]::before{icon-font: url(./icons/ic_likes.svg)}
+.root[name="logseerlikes"]::before{icon-font: url(./icons/star.svg)}
 .root[name="quicksearch"]::before{icon-font: url(./icons/ic_quicksearch.svg)}
 .root[name="savesearch"]::before{icon-font: url(./icons/ic_savesearch.svg)}
 .root[name="exportlog"]::before{icon-font: url(./icons/ic_exportlog.svg)}
