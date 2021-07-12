@@ -9,6 +9,7 @@
       :columns="columns"
       :items="items"
       :resizable="true"
+      max-height="500px"
     >
       <template #noData>
         暂无数据

@@ -1,128 +1,132 @@
 <template>
-  <table
-    :class="$style.root"
-    :scrollable="maxHeight"
+  <div
+    :class="{ [$style.scrollable]: !!maxHeight }"
+    :style="{ maxHeight: maxHeight }"
   >
-    <colgroup v-if="!maxHeight">
-      <col
-        v-for="(column, index) in columns"
-        :key="column.name"
-        :width="columnWidth[index]"
-      >
-    </colgroup>
-    <thead
-      @mousemove="onResizing($event)"
-      @mouseup="onEndResize()"
+    <table
+      :class="$style.root"
     >
-      <tr ref="theadtr">
-        <th-comp
+      <colgroup>
+        <col
           v-for="(column, index) in columns"
-          :key="index"
-          :topslots="$scopedSlots"
-          :item-key="itemKey"
-          :column="column"
-          :rows="items"
+          :key="column.name"
           :width="columnWidth[index]"
-          :column-meta="columnMeta[index]"
-          :resizable="index < columns.length - 1 ? resizable : false"
-          @beginResize="onbeginResize"
-          @sort="onColumnSort"
-        />
-      </tr>
-      <tr :class="$style.progress">
-        <th :colspan="columns.length">
-          <div :class="$style.progressbar">
-            <div :style="progressStyle" />
-          </div>
-        </th>
-      </tr>
-    </thead>
-    <template v-if="loading && items.length === 0">
-      <tbody>
-        <!-- <colgroup v-if="maxHeight">
+        >
+      </colgroup>
+      <thead
+        @mousemove="onResizing($event)"
+        @mouseup="onEndResize()"
+      >
+        <tr ref="theadtr">
+          <th-comp
+            v-for="(column, index) in columns"
+            :key="column.name"
+            :topslots="$scopedSlots"
+            :item-key="itemKey"
+            :column="column"
+            :rows="items"
+            :width="columnWidth[index]"
+            :max-height="maxHeight"
+            :column-meta="columnMeta[index]"
+            :resizable="index < columns.length - 1 ? resizable : false"
+            @beginResize="onbeginResize"
+            @sort="onColumnSort"
+          />
+        </tr>
+        <tr :class="$style.progress">
+          <th :colspan="columns.length">
+            <div :class="$style.progressbar">
+              <div :style="progressStyle" />
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <template v-if="loading && items.length === 0">
+        <tbody>
+          <!-- <colgroup v-if="maxHeight">
           <col :width="tableWidth">
         </colgroup> -->
-        <tr>
-          <td
-            :colspan="columns.length"
-            style="text-align:center"
-          >
-            加载中...
-          </td>
-        </tr>
-      </tbody>
-    </template>
-    <template v-else>
-      <tbody
-        v-if="items.length"
-        :style="{ maxHeight: maxHeight }"
-      >
-        <!-- 滚动条宽度问题 -->
-        <colgroup v-if="maxHeight">
+          <tr>
+            <td
+              :colspan="columns.length"
+              style="text-align:center"
+            >
+              加载中...
+            </td>
+          </tr>
+        </tbody>
+      </template>
+      <template v-else>
+        <tbody
+          v-if="items.length"
+        >
+          <!-- 滚动条宽度问题 -->
+          <!-- <colgroup v-if="maxHeight">
           <col
             v-for="column in columns"
             :key="column.name"
             :width="index === columns.length - 1 ? `${parseInt(column.width) - 5}px`: column.width"
           >
-        </colgroup>
-        <row-group-comp
-          v-for="(item, idx) in items"
-          :key="getItemKey(item)"
-          :expand="itemMeta[getItemKey(item) || idx].expand"
-        >
-          <template slot="content">
-            <row-comp
-              :appendant="appendant"
-              :data="item"
-              :topslots="$scopedSlots"
-              :data-meta="itemMeta[getItemKey(item) || idx]"
-              :item-key="itemKey"
-              :columns="columns"
-              :column-meta="columnMeta"
-            />
-          </template>
-          <template slot="expand">
-            <row-expand-comp
-              :columns="columns"
-            >
-              <slot
-                name="expand"
+        </colgroup> -->
+          <row-group-comp
+            v-for="(item, idx) in items"
+            :key="getItemKey(item)"
+            :expand="itemMeta[getItemKey(item) || idx].expand"
+          >
+            <template slot="content">
+              <row-comp
+                :appendant="appendant"
                 :data="item"
+                :topslots="$scopedSlots"
+                :data-meta="itemMeta[getItemKey(item) || idx]"
+                :item-key="itemKey"
+                :columns="columns"
+                :column-meta="columnMeta"
               />
-            </row-expand-comp>
-          </template>
-        </row-group-comp>
-      </tbody>
+            </template>
+            <template slot="expand">
+              <row-expand-comp
+                :columns="columns"
+              >
+                <slot
+                  name="expand"
+                  :data="item"
+                />
+              </row-expand-comp>
+            </template>
+          </row-group-comp>
+        </tbody>
 
-      <tbody v-else-if="error">
-        <!-- <colgroup v-if="maxHeight">
+        <tbody v-else-if="error">
+          <!-- <colgroup v-if="maxHeight">
           <col :width="tableWidth">
         </colgroup> -->
-        <tr>
-          <td
-            :colspan="columns.length"
-            style="text-align:center"
-          >
-            <slot name="error" />
-          </td>
-        </tr>
-      </tbody>
-      <tbody v-else>
-        <!-- <colgroup v-if="maxHeight">
+          <tr>
+            <td
+              :colspan="columns.length"
+              style="text-align:center"
+            >
+              <slot name="error" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <!-- <colgroup v-if="maxHeight">
           <col :width="tableWidth">
         </colgroup> -->
-        <tr>
-          <td
-            :colspan="columns.length"
-            style="text-align:center"
-          >
-            <slot name="noData" />
-          </td>
-        </tr>
-      </tbody>
-    </template>
+          <tr>
+            <td
+              :colspan="columns.length"
+              style="text-align:center"
+            >
+              <slot name="noData" />
+            </td>
+          </tr>
+        </tbody>
+      </template>
     <!-- </template> -->
-  </table>
+    </table>
+  </div>
 </template>
 
 <script>
@@ -371,24 +375,20 @@ export default {
 </script>
 
 <style module>
+.scrollable{
+    overflow-y: auto;
+}
+.scrollable .root > thead th {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
 .root{
     table-layout: fixed;
     width: 100%;
     font-size: 12px;
     border-collapse: collapse;
     user-select: none;
-}
-.root[scrollable] {
-    position: relative;
-}
-.root[scrollable] tbody{
-    display: block;
-    width: 100%;
-    overflow: auto;
-}
-.root[scrollable] thead tr {
-    display: block;
-    position: relative;
 }
 
 .root > thead th {
@@ -398,6 +398,8 @@ export default {
     line-height: 20px;
     text-align: left;
     font-weight: 400;
+     background-color: #f5f7fa;
+      border-bottom: 1px solid #ebf0f5;
 }
 .root > thead th:first-child {
     padding-left: 10px;
@@ -406,9 +408,9 @@ export default {
     padding-right: 10px;
 }
 .root > thead tr {
-    background-color: #f5f7fa;
+    /* background-color: #f5f7fa; */
     background-clip: padding-box;
-    border-bottom: 1px solid #ebf0f5;
+    /* border-bottom: 1px solid #ebf0f5; */
 }
 .root > thead tr.progress{
     background: none;

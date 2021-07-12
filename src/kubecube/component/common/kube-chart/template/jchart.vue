@@ -235,6 +235,11 @@ export default {
                     const {
                         min, max, unit,
                     } = this.meta.axes.left;
+                    if (unit === 'bytes') {
+                        dataoption.yAxis.format = function(value) {
+                            return niceBytes(value);
+                        };
+                    }
                     if (unit === 'percentunit') {
                         dataoption.yAxis.format = function(value) {
                             return `${NumberFormatter.format(value * 100)}%`;

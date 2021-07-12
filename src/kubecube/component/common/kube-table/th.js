@@ -21,6 +21,7 @@ export default {
         rows: Array,
         topslots: Object,
         resizable: Boolean,
+        maxHeight: String,
     },
     data() {
         return {
@@ -38,6 +39,7 @@ export default {
             rows,
             topslots,
             resizable,
+            maxHeight,
         } = context.props;
         const columnCopy = cloneDeep(column);
         const {
@@ -74,7 +76,7 @@ export default {
             },
             style: {
                 cursor: 'pointer',
-                position: 'relative',
+                position: maxHeight ? undefined : 'relative',
             },
         };
         if (sortable) {
