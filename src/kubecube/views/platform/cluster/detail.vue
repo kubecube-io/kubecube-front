@@ -61,7 +61,7 @@ export default {
                 { title: '存储类别', path: `/platform/cluster/${this.clusterName}/storageclass` },
                 { title: '持久存储', path: `/platform/cluster/${this.clusterName}/persistentvolumes` },
                 { title: '网络策略', path: `/platform/cluster/${this.clusterName}/network` },
-                { title: '集群日志', path: `/platform/cluster/${this.clusterName}/log` },
+                // { title: '集群日志', path: `/platform/cluster/${this.clusterName}/log` },
                 { title: '监控', path: `/platform/cluster/${this.clusterName}/monitor` },
             ];
         },
