@@ -44,7 +44,7 @@
     </div>
     <div style="margin-bottom: 20px">
       <u-notice icon="warning">
-        为保证通过 YAML 文件创建的资源能够通过轻舟平台进行管理，平台将自动设置轻舟内置标签。
+        为保证通过 YAML 文件创建的资源能够通过KubeCube进行管理，平台将自动设置KubeCube内置标签。
         <u-link
           @click="preview"
         >
@@ -180,6 +180,7 @@ export default {
             option: {},
             yamlErrorTip: '',
             yamlContent: '',
+            oldYamlContent: '',
             readOnly: false,
 
             uploadErrorTip: false,
@@ -326,9 +327,8 @@ export default {
         },
         async preview() {
             try {
-
-
                 if (!this.isPreview) {
+                    this.oldYamlContent = this.yamlContent;
                     let content = this.editor.getModel().getValue();
                     content = yamljs.parse(content);
                     const response = await workloadExtendService.deploy({
@@ -350,8 +350,10 @@ export default {
                     this.isPreview = true;
 
                 } else {
-                    this.editor.getModel().setValue(this.yamlContent);
-                    const editorOp = Object.assign({}, defaultOption);
+                    this.editor.getModel().setValue(this.oldYamlContent);
+                    const editorOp = Object.assign({}, defaultOption, {
+                        readOnly: false,
+                    });
                     this.readOnly = false;
                     this.editor.updateOptions(editorOp);
                     this.isPreview = false;
