@@ -71,12 +71,17 @@
                         >
                           <kube-form-item
 
-                            :label="meta.key"
+                            :label="meta.label"
                             :message="errors && errors[0]"
-                            layout="list"
+                            label-size="large"
+                            :layout="meta.ui === 'checkbox' ? 'normal' : 'list'"
                           >
+                            <u-checkbox
+                              v-if="meta.ui === 'checkbox'"
+                              v-model="row[meta.key]"
+                            />
                             <u-textarea
-                              v-if="meta.ui === 'textarea'"
+                              v-else-if="meta.ui === 'textarea'"
                               v-model="row[meta.key]"
                               :color="errors && errors[0] ? 'error' : ''"
                               size="huge"
@@ -176,6 +181,15 @@ export default {
         },
     },
     methods: {
+        getLabel(val) {
+            if (val === 'sendResolved') {
+                return '是否接受告警恢复通知';
+            }
+            if (val === 'to') {
+                return '收件人';
+            }
+            return val;
+        },
         getTextUI(config) {
             const ui = [];
             Object.keys(config).forEach(k => {
@@ -183,7 +197,8 @@ export default {
 
                     ui.push({
                         key: k,
-                        ui: textArea.includes(k) ? 'textarea' : 'input',
+                        label: this.getLabel(k),
+                        ui: k === 'sendResolved' ? 'checkbox' : (textArea.includes(k) ? 'textarea' : 'input'),
                     });
 
                 }

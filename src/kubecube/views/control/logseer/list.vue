@@ -132,6 +132,7 @@ export default {
                 { title: '日志源类型', name: 'type', width: '120px' },
                 { title: '标签选择器', name: 'metadata.labels', width: '180px', type: 'tag', cellprops: {
                     formatter(item) { return `${item.key}=${item.value}`; },
+                    isChip: true,
                 } },
                 { title: '日志路径', name: 'path', width: '200px', textwrap: true },
                 { title: '创建时间', name: 'metadata.creationTimestamp', width: '180px' },

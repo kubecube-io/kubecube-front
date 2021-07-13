@@ -2,6 +2,7 @@ import {
     validate,
 } from 'vee-validate';
 import { required } from 'vee-validate/dist/rules';
+import isValidGlob from 'is-valid-glob';
 import { ignoredKeys } from 'kubecube/utils/constance';
 import cronValidate from 'node-cron/src/pattern-validation';
 
@@ -70,6 +71,10 @@ export const rules = {
     ConsistofPath: {
         validate: v => /^[a-zA-Z0-9-_/.]*$/.test(v || ''),
         message: '仅包含字母，数字，中划线，下划线，"/"和"."',
+    },
+    ConsistofGlob: {
+        validate: v => isValidGlob(v),
+        message: '输入日志路径或glob表达式',
     },
     ConsistofSubPath: {
         validate: v => /^[a-zA-Z0-9-_.][a-zA-Z0-9-_/.]*$/.test(v || ''),

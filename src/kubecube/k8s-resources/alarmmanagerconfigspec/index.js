@@ -23,10 +23,12 @@ export const CONFIGS = {
         //     key: '',
         //     optional: false,
         // },
+        sendResolved: false,
         apiURL: '',
         corpID: '',
     },
     webhookConfigs: {
+        sendResolved: false,
         url: '',
         // urlSecret: {
         //     name: '',
@@ -37,17 +39,19 @@ export const CONFIGS = {
         //     proxyURL: ''.
         // },
         maxAlerts: '',
+
     },
     emailConfigs: {
+        sendResolved: false,
         to: '',
-        from: '',
-        hello: '',
-        smarthost: '',
-        authUsername: '',
+        // from: '',
+        // hello: '',
+        // smarthost: '',
+        // authUsername: '',
         // authPassword: '',
         // authSecret: '',
-        authIdentity: '',
-        text: '',
+        // authIdentity: '',
+        // text: '',
     },
 };
 

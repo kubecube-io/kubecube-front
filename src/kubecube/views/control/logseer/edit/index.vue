@@ -74,7 +74,7 @@
                       :rules="{
                         required: true,
                         startsWithSlash: true,
-                        ConsistofPath: true,
+                        ConsistofGlob: true,
                       }"
                       placeholder="输入日志路径或glob表达式"
                     />

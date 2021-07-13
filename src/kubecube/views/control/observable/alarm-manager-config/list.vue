@@ -56,9 +56,9 @@
                 <u-link-list-item @click="deleteItem(item)">
                   删除
                 </u-link-list-item>
-                <!-- <u-link-list-item @click="editYAML(item)">
+                <u-link-list-item @click="editYAML(item)">
                   YAML 设置
-                </u-link-list-item> -->
+                </u-link-list-item>
               </u-link-list>
             </u-linear-layout>
           </template>
@@ -161,9 +161,7 @@ export default {
     },
     methods: {
         resolver(response) {
-            console.log(response);
             const list = (response.items || []).map(this.toPlainObject);
-            console.log(list);
             return {
                 list,
                 total: response.total,
