@@ -144,6 +144,7 @@ import {
     toK8SObject as toAMCSK8SObject,
     patchK8SObject as patchAMCSK8SObject,
     CONFIGS as configTemplate,
+    LabelMapping,
 } from 'kubecube/k8s-resources/alarmmanagerconfigspec';
 import {
     specCRD,
@@ -182,13 +183,7 @@ export default {
     },
     methods: {
         getLabel(val) {
-            if (val === 'sendResolved') {
-                return '是否接受告警恢复通知';
-            }
-            if (val === 'to') {
-                return '收件人';
-            }
-            return val;
+            return LabelMapping[val] || val;
         },
         getTextUI(config) {
             const ui = [];

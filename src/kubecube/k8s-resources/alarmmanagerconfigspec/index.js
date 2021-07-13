@@ -16,6 +16,15 @@ const channels = [
     'emailConfigs',
 ];
 
+export const LabelMapping = {
+    sendResolved: '是否接受告警恢复通知',
+    to: '收件人',
+    corpID: 'CorpId: 企业微信账号唯一 ID， 可以在我的企业中查看',
+    toParty: 'toParty: 接收通知的联系人组Id',
+    agentID: 'agentId: 第三方企业应用的 ID，可以在自己创建的第三方企业应用详情页面查看',
+    apiSecret: 'apiSecret:第三方企业应用的密钥，可以在自己创建的第三方企业应用详情页面查看',
+};
+
 export const CONFIGS = {
     wechatConfigs: {
         // apiSecret: {
@@ -26,6 +35,9 @@ export const CONFIGS = {
         sendResolved: false,
         apiURL: '',
         corpID: '',
+        toParty: '',
+        agentID: '',
+        apiSecret: '',
     },
     webhookConfigs: {
         sendResolved: false,
