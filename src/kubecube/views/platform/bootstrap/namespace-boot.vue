@@ -122,7 +122,7 @@
 
 <script>
 import {
-    toPlainObject as toResourceQuotaPlainObject,
+    // toPlainObject as toResourceQuotaPlainObject,
     toK8SObject as toResourceQuotaPK8SObject,
 } from 'kubecube/k8s-resources/resourceQuota/index.js';
 
@@ -133,13 +133,13 @@ import {
     toK8SObject as toSubnamespaceK8SObject,
 } from 'kubecube/k8s-resources/subnamespace';
 
-import clusterSelect from '../../namespace/cluster-select.vue';
+import clusterSelect from '../namespace/cluster-select.vue';
 import kubeTenantSelect from 'kubecube/component/global/common/kube-tenant-select.vue';
 import kubeProjectSelect from 'kubecube/component/global/common/kube-project-select.vue';
 import scopeService from 'kubecube/services/scope';
 // import clusterService from 'kubecube/services/cluster';
 import workloadService from 'kubecube/services/k8s-resource';
-import hardQuota from '../../namespace/ns-quota-table.vue';
+import hardQuota from '../namespace/ns-quota-table.vue';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 
 export default {

@@ -119,7 +119,7 @@ import {
 import userService from 'kubecube/services/user';
 import clusterService from 'kubecube/services/cluster';
 import scopeService from 'kubecube/services/scope';
-import hardQuota from '../../quota/hard-quota-table.vue';
+import hardQuota from '../quota/hard-quota-table.vue';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 
 export default {

@@ -114,7 +114,7 @@ export default {
         },
         {
             path: 'bootstrap',
-            component: () => import(/* webpackChunkName: "platform-bootstrap" */ 'kubecube/views/platform/cluster/bootstrap/quick-boot.vue'),
+            component: () => import(/* webpackChunkName: "platform-bootstrap" */ 'kubecube/views/platform/bootstrap/quick-boot.vue'),
             meta: {
                 breadCrumb: '快速向导',
             },

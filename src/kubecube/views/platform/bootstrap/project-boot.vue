@@ -19,7 +19,7 @@
           :processor="tenantResolver"
         >
           <u-select
-            v-model="model.tenant"
+            v-model="model.model.tenant"
             size="normal huge"
             :data="tenants"
           />
@@ -149,8 +149,8 @@ export default {
                 value: getFunc(i, 'metadata.name'),
             }));
             this.tenants = items;
-            if (!this.model.tenant) {
-                this.model.tenant = items[0].value;
+            if (!this.model.model.tenant) {
+                this.model.model.tenant = items[0].value;
             }
             return items;
         },
@@ -173,7 +173,7 @@ export default {
                 },
                 data: toProjectK8SObject(this.model.model),
             });
-
+            this.$toast.success('创建成功');
         },
     },
 
