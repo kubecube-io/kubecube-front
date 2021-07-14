@@ -37,7 +37,7 @@ export const toK8SObject = model => {
             },
         },
         spec: {
-            displayName: g('metadata.name'),
+            displayName: g('spec.displayName'),
             description: g('spec.description'),
         },
     };
