@@ -40,6 +40,7 @@
         </kube-table>
         <u-page
           v-if="data && calculatePages(data.total) > 1"
+          :page="pagenation.pageNum"
           :count="data.total"
           :page-size="pagenation.pageSize"
           :total="calculatePages(data.total)"
@@ -99,13 +100,13 @@ export default {
             this.$refs.request.request();
         },
         level() {
-            this.pagenation = {
+            Object.assign(this.pagenation, {
                 pageNum: 1,
                 pageSize: 10,
                 sortOrder: 'asc',
                 sortName: undefined,
                 selector: '',
-            };
+            });
         },
     },
     methods: {
