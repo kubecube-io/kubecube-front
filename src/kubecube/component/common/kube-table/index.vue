@@ -455,6 +455,9 @@ export default {
     white-space: nowrap;
     color: #575962;
 }
+.root > tbody tr td span {
+    display: block;
+}
 .root > tbody tr td:first-child {
     padding-left: 10px;
 }
