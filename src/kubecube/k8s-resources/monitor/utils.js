@@ -6,6 +6,8 @@ const NumberFormatter = new Intl.NumberFormat('en-GB', {
     compactDisplay: 'short',
 });
 
+const NUMBER = /^\s*(-?(\d*\.?\d+|\d+\.?\d*)(e[-+]?\d+)?|NAN)\s*$/i;
+
 export const resolveTemplate = template => {
     const r = template.split(/\[\[([^\]]*)]\]|\$([a-zA-Z0-9_]+)/);
     // console.log(template, r);
@@ -80,7 +82,14 @@ export function resolveVariablesRequest(request) {
 }
 
 export function resolveFormatter(unit) {
-    let formatter = d => d;
+    let formatter = d => {
+        if (typeof d === 'string') {
+            if (NUMBER.test(d)) {
+                return NumberFormatter.format(d);
+            }
+        }
+        return d;
+    };
     if (unit === 'percentunit') {
         formatter = d => (d ? `${(+d * 100).toFixed(3)}%` : '-');
     }

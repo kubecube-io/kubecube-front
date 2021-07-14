@@ -137,6 +137,7 @@ export default {
     },
     computed: {
         namespace: get('scope/namespace@value'),
+        projectNamespace: get('scope/project@spec.namespace'),
         cluster: get('scope/cluster@value'),
         name() {
             return this.$route.params.instance;
@@ -223,7 +224,7 @@ export default {
                 return {
                     pathParams: {
                         cluster: this.cluster,
-                        namespace: this.namespace,
+                        namespace: this.projectNamespace,
                         name: this.name,
                         ...rulespecCRD,
                     },
