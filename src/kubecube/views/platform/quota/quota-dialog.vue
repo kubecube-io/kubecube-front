@@ -64,6 +64,7 @@
 
 <script>
 import { Modal } from '@micro-app/common/mixins';
+import BigNumber from 'bignumber.js';
 import {
     toPlainObject as toCubeResourceQoutaPlainObject,
     toK8SObject as toCubeResourceQoutaK8SObject,
@@ -121,14 +122,14 @@ export default {
             this.type = cubeQuotaResponse ? 'edit' : 'create';
             this.model = toCubeResourceQoutaPlainObject(cubeQuotaResponse);
             this.used = {
-                usedCpu: unitConvertCPU(clusterQuota.assignedCpu),
-                usedMemory: unitConvertMemory(clusterQuota.assignedMem),
-                usedGpu: unitConvertCPU(clusterQuota.assignedGpu),
+                usedCpu: this.model.status.used.cpu,
+                usedMemory: this.model.status.used.memory,
+                usedGpu: this.model.status.used.gpu,
             };
             this.availables = {
-                cpu: unitConvertCPU(clusterQuota.capacityCpu), // - unitConvertCPU(clusterQuota.assignedCpu),
-                memory: unitConvertMemory(clusterQuota.capacityMem), // - unitConvertMemory(clusterQuota.assignedMem),
-                gpu: unitConvertCPU(clusterQuota.capacityGpu), // - unitConvertCPU(clusterQuota.assignedGpu),
+                cpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityCpu)).minus(unitConvertCPU(clusterQuota.assignedCpu)),
+                memory: +new BigNumber(unitConvertMemory(clusterQuota.capacityMem)).minus(unitConvertMemory(clusterQuota.assignedMem)),
+                gpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityGpu)).minus(unitConvertCPU(clusterQuota.assignedGpu)),
                 // storage: item.totalStorage - item.usedStorage,
             };
         },

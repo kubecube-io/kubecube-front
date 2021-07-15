@@ -133,6 +133,7 @@
 
 <script>
 import { pick } from 'lodash';
+import BigNumber from 'bignumber.js';
 import { Modal } from '@micro-app/common/mixins';
 import {
     toPlainObject as toResourceQuotaPlainObject,
@@ -221,9 +222,9 @@ export default {
             // this.type = response ? 'edit' : 'create';
             const quota = toCubeResourceQoutaPlainObject(cubeQuotaResponse);
             Object.assign(this.availables, {
-                cpu: quota.status.hard.cpu - quota.status.used.cpu + this.resource.spec.hard.cpu, // - unitConvertCPU(clusterQuota.assignedCpu),
-                memory: quota.status.hard.memory - quota.status.used.memory + this.resource.spec.hard.memory, // - unitConvertMemory(clusterQuota.assignedMem),
-                gpu: quota.status.hard.gpu - quota.status.used.gpu + this.resource.spec.hard.gpu, // - unitConvertCPU(clusterQuota.assignedGpu),
+                cpu: +new BigNumber(quota.status.hard.cpu).minus(quota.status.used.cpu).plus(this.resource.spec.hard.cpu), // - unitConvertCPU(clusterQuota.assignedCpu),
+                memory: +new BigNumber(quota.status.hard.memory).minus(quota.status.used.memory).plus(this.resource.spec.hard.memory), // - unitConvertMemory(clusterQuota.assignedMem),
+                gpu: +new BigNumber(quota.status.hard.gpu).minus(quota.status.used.gpu).plus(this.resource.spec.hard.gpu), // - unitConvertCPU(clusterQuota.assignedGpu),
                 // storage: item.totalStorage - item.usedStorage,
             });
         },

@@ -17,7 +17,9 @@
           size="normal"
           disabled
         />
-        <u-link>查看详细日志</u-link>
+        <u-link @click="toPodLog">
+          查看详细日志
+        </u-link>
       </u-linear-layout>
     </template>
     <x-request
@@ -59,7 +61,9 @@
           size="normal"
           disabled
         />
-        <u-link>查看详细日志</u-link>
+        <u-link @click="toPodLog">
+          查看详细日志
+        </u-link>
       </template>
     </x-request>
     <template v-if="podName && containerName">
@@ -180,6 +184,23 @@ export default {
             this.pods = items;
             // this.containerName = getFunc(items, '[0].containers[0].containerName');
             return items;
+        },
+        toPodLog() {
+            this.$store.dispatch('lens/setToDefault');
+            this.$store.commit('like/RESET');
+            this.$store.dispatch('timer/setTimer');
+
+            this.$store.commit('lens/setFilters', [
+                {
+                    key: 'pod_name',
+                    operator: 'is',
+                    value: this.podName,
+                },
+            ]);
+
+            this.$router.push({
+                path: '/control/lens/normal',
+            });
         },
     },
 };

@@ -162,7 +162,7 @@
 <script>
 import { toNumber } from 'lodash';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
-
+import BigNumber from 'bignumber.js';
 import tableLayout from 'kubecube/component/common/kube-dynamic-table-layout/index.vue';
 export default {
     components: {
@@ -175,17 +175,17 @@ export default {
     },
     computed: {
         availableCPU() {
-            return Math.min(Math.max(0, this.availables.cpu - toNumber(this.model.spec.hard['requests.cpu'] || '0')), this.availables.cpu);
+            return Math.min(Math.max(0, +new BigNumber(this.availables.cpu).minus(toNumber(this.model.spec.hard['requests.cpu'] || '0'))), this.availables.cpu);
         },
         availableMemory() {
-            return Math.min(Math.max(0, this.availables.memory - toNumber(this.model.spec.hard['requests.memory'] || '0')), this.availables.memory);
+            return Math.min(Math.max(0, +new BigNumber(this.availables.memory).minus(toNumber(this.model.spec.hard['requests.memory'] || '0'))), this.availables.memory);
         },
         availableGPU() {
-            return Math.min(Math.max(0, this.availables.gpu - toNumber(this.model.spec.hard['requests.nvidia.com/gpu'] || '0')), this.availables.gpu);
+            return Math.min(Math.max(0, +new BigNumber(this.availables.gpu).minus(toNumber(this.model.spec.hard['requests.nvidia.com/gpu'] || '0'))), this.availables.gpu);
         },
-        availableStorage() {
-            return Math.min(Math.max(0, this.availables.storage - toNumber(this.model.spec.hard['requests.storage'] || '0')), this.availables.storage);
-        },
+        // availableStorage() {
+        //     return Math.min(Math.max(0, this.availables.storage - toNumber(this.model.spec.hard['requests.storage'] || '0')), this.availables.storage);
+        // },
     },
 };
 </script>

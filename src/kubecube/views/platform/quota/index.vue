@@ -94,7 +94,7 @@ export default {
             clusterService: clusterService.getClusters,
             columns: [
                 { name: 'clusterName', title: '集群' },
-                { name: 'resource', title: '共享资源（已分配/配额）' },
+                { name: 'resource', title: '共享资源' },
                 // { name: 'memory', title: '持久存储（已分配/配额）' },
                 { name: 'operation', title: '操作', width: '160px' },
             ],

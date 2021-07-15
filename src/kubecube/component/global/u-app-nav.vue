@@ -129,6 +129,7 @@
           </u-sidebar-item>
           <u-sidebar-item
             :to="{ path: '/control/lens/normal' }"
+            @click="toLog"
           >
             日志查询
           </u-sidebar-item>
@@ -194,6 +195,11 @@ export default {
         },
         openCloudShell() {
             this.$kubeterm();
+        },
+        toLog() {
+            this.$store.dispatch('lens/setToDefault');
+            this.$store.commit('like/RESET');
+            this.$store.dispatch('timer/setTimer');
         },
     },
 

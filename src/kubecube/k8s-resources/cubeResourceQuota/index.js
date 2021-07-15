@@ -23,7 +23,7 @@ export function toPlainObject(model) {
     const hard = {
         'requests.cpu': g('spec.hard["limits.cpu"]') ? unitConvertCPU(g('spec.hard["limits.cpu"]')) : 0,
         'requests.memory': g('spec.hard["limits.memory"]') ? unitConvertMemory(g('spec.hard["limits.memory"]')) : 0,
-        'requests.nvidia.com/gpu': g('spec.hard["limits.gpu"]') ? unitConvertCPU(g('spec.hard["limits.gpu"]')) : 0,
+        'requests.nvidia.com/gpu': g('spec.hard["requests.nvidia.com/gpu"]') ? unitConvertCPU(g('spec.hard["requests.nvidia.com/gpu"]')) : 0,
     };
     return {
         ...obj,
@@ -35,12 +35,12 @@ export function toPlainObject(model) {
             hard: {
                 cpu: g('status.hard["limits.cpu"]') ? unitConvertCPU(g('status.hard["limits.cpu"]')) : 0,
                 memory: g('status.hard["limits.memory"]') ? unitConvertMemory(g('status.hard["limits.memory"]')) : 0,
-                gpu: g('status.hard["limits.gpu"]') ? unitConvertCPU(g('status.hard["limits.gpu"]')) : 0,
+                gpu: g('status.hard["requests.nvidia.com/gpu"]') ? unitConvertCPU(g('status.hard["requests.nvidia.com/gpu"]')) : 0,
             },
             used: {
                 cpu: g('status.used["limits.cpu"]') ? unitConvertCPU(g('status.used["limits.cpu"]')) : 0,
                 memory: g('status.used["limits.memory"]') ? unitConvertMemory(g('status.used["limits.memory"]')) : 0,
-                gpu: g('status.used["limits.gpu"]') ? unitConvertCPU(g('status.used["limits.gpu"]')) : 0,
+                gpu: g('status.used["requests.nvidia.com/gpu"]') ? unitConvertCPU(g('status.used["requests.nvidia.com/gpu"]')) : 0,
             },
         },
     };
