@@ -7,7 +7,7 @@
           color="primary"
           @click="create"
         >
-          添加秘钥
+          添加密钥
         </u-button>
         <u-button
           icon="refresh"
@@ -41,7 +41,7 @@
                 </u-linear-layout>
                 <u-linear-layout gap="small">
                   <span>yaml 格式</span>
-                  <u-easy-copy :text="'accessKey: ' + item.metadata.namey + '\n' + 'secretKey: ' + item.spec.secretKey" />
+                  <u-easy-copy :text="'accessKey: ' + item.metadata.name + '\n' + 'secretKey: ' + item.spec.secretKey" />
                 </u-linear-layout>
                 <u-link @click="remove(item)">
                   删除

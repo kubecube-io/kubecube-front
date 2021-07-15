@@ -40,6 +40,16 @@
             </td>
           </tr>
         </template>
+        <template v-else>
+          <tr :class="$style.row">
+            <td
+              colspan="2"
+              style="text-align: center"
+            >
+              暂无日志
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
     <!-- <button

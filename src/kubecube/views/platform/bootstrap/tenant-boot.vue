@@ -91,11 +91,12 @@
 </template>
 
 <script>
-import { get } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 import scopeService from 'kubecube/services/scope';
 import userService from 'kubecube/services/user';
 import {
     toK8SObject,
+    toPlainObject,
 } from 'kubecube/k8s-resources/scope/tenant';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 
@@ -133,7 +134,7 @@ export default {
                 data: toK8SObject(this.model.model),
             });
 
-            const tenantCurr = toK8SObject(response.data);
+            const tenantCurr = toPlainObject(response.data);
             tenantCurr.spec.namespace = `kubecube-tenant-${tenantCurr.metadata.name}`;
 
             const data = toRoleBindingK8SObject(
@@ -146,6 +147,36 @@ export default {
             }), 3000, 3);
 
             this.$toast.success('创建成功');
+
+            this.$emit('next', tabs => {
+                const namespacemodel = tabs.find(t => t.tab === 'namespace');
+                if (namespacemodel) {
+                    namespacemodel.model.pipe.tenant = {
+                        ...cloneDeep(tenantCurr),
+                        value: tenantCurr.metadata.name,
+                        text: tenantCurr.spec.displayName,
+                    };
+                }
+
+                const membermodel = tabs.find(t => t.tab === 'member');
+                if (membermodel) {
+                    membermodel.model.tenant = {
+                        ...cloneDeep(tenantCurr),
+                        value: tenantCurr.metadata.name,
+                        text: tenantCurr.spec.displayName,
+                    };
+                }
+
+                const projectmodel = tabs.find(t => t.tab === 'project');
+                if (projectmodel) {
+                    projectmodel.model.model.tenant = tenantCurr.metadata.name;
+                }
+
+                const tenantquotamodel = tabs.find(t => t.tab === 'tenantquota');
+                if (tenantquotamodel) {
+                    tenantquotamodel.model.tenant = tenantCurr.metadata.name;
+                }
+            });
         },
     },
 };

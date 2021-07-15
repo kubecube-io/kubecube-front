@@ -81,15 +81,15 @@ export const rules = {
         message: '请填入相对路径',
     },
     ConsistofNumber: {
-        validate: v => /^[0-9]*$/.test(v || ''),
+        validate: v => /^[0-9]*$/.test(`${v}` || ''),
         message: '仅包含数字',
     },
     ConsistofFloatNumber: {
-        validate: v => /^[\+\-]?\d*\.?\d+(?:[Ee][\+\-]?\d+)?$/.test(v || ''),
+        validate: v => /^[\+\-]?\d*\.?\d+(?:[Ee][\+\-]?\d+)?$/.test(`${v}` || ''),
         message: '数字格式有误',
     },
     ConsistofNumberOrPercentage: {
-        validate: v => /^[-+]?[0-9.]+%?$/.test(v || ''),
+        validate: v => /^[-+]?[0-9.]+%?$/.test(`${v}` || ''),
         message: '仅包含百分比或整数',
     },
     ConsistofNormalSymbol: {
@@ -98,7 +98,7 @@ export const rules = {
     },
 
     numberOrPercentage: {
-        validate: v => /^\d+%?$/.test(v || ''),
+        validate: v => /^\d+%?$/.test(`${v}` || ''),
         message: '仅包含数字或百分比',
     },
 

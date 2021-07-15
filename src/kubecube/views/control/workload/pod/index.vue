@@ -76,7 +76,8 @@
 <script>
 import { pickBy } from 'lodash';
 import { get } from 'vuex-pathify';
-import workloadService from 'kubecube/services/k8s-extend-resource';
+import workloadService from 'kubecube/services/k8s-resource';
+import workloadExtendService from 'kubecube/services/k8s-extend-resource';
 import PageMixin from 'kubecube/mixins/pagenation';
 import { toPlainObject as toPodPlainObject } from 'kubecube/k8s-resources/pod';
 export default {
@@ -88,7 +89,7 @@ export default {
 
     data() {
         return {
-            service: workloadService.getWorkloads,
+            service: workloadExtendService.getWorkloads,
             columns: [
                 { title: '副本名称', name: 'metadata.name', sortable: true, textwrap: true },
                 { title: 'IP', name: 'status.podIP', width: '100px' },
@@ -123,9 +124,7 @@ export default {
 
     methods: {
         resolver(response) {
-            console.log(response);
             const list = (response.items || []).map(toPodPlainObject);
-            console.log(list);
             return {
                 list,
                 total: response.total,
@@ -142,11 +141,43 @@ export default {
         onSearch(content) {
             this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
         },
-        view() {
+        async view(item) {
+            const reqParam = {
+                pathParams: {
+                    cluster: this.cluster,
+                    namespace: this.namespace,
+                    resource: this.workload,
+                    name: item.metadata.name,
+                },
+            };
+            const response = await workloadService.getAPIV1Instance(reqParam);
+
+            this.$editResource({
+                title: `${item.metadata.name} —— YAML 设置`,
+                content: response,
+                editorOption: {
+                    readOnly: true,
+                },
+            });
 
         },
-        deleteItem() {
-
+        deleteItem(item) {
+            this.$confirm({
+                title: '删除',
+                content: `确认要删除 ${item.metadata.name} 吗？`,
+                ok: async () => {
+                    const reqParam = {
+                        pathParams: {
+                            cluster: this.cluster,
+                            namespace: this.namespace,
+                            resource: this.workload,
+                            name: item.metadata.name,
+                        },
+                    };
+                    await workloadService.deleteAPIV1Instance(reqParam);
+                    this.$refs.request.request();
+                },
+            });
         },
     },
 };

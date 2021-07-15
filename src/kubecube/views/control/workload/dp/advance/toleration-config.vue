@@ -1,13 +1,13 @@
 <template>
   <kube-form-item
-    layout="block"
+    layout="list"
     label="容忍"
   >
     <kube-dynamic-block
       v-model="model"
-      style="width: 670px"
+      style="width: 750px"
       :data-template="getDataTemplate"
-      :initRequired="false"
+      :init-required="false"
     >
       <template slot="column">
         <th>Key</th>

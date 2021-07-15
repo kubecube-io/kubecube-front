@@ -4,6 +4,7 @@
     v-slot="{ invalid }"
   >
     <kube-pipe
+      ref="pipe"
       graph="tenant > project > role"
       direction="horizontal"
     >
@@ -100,10 +101,20 @@ export default {
         kubeRoleSelect,
     },
     mixins: [ makeVModelMixin ],
+    props: {
+        state: Boolean,
+    },
     data() {
         return {
             userService: userService.getUserList,
         };
+    },
+    watch: {
+        state(val) {
+            if (val) {
+                this.$refs.pipe.pipeRequest();
+            }
+        },
     },
     methods: {
         userResolver(result) {
@@ -128,6 +139,7 @@ export default {
                 data,
             });
             this.$toast.success('创建成功');
+            this.$emit('next');
         },
     },
 };

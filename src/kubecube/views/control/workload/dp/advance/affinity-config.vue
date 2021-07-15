@@ -1,22 +1,21 @@
 <template>
   <kube-form-item
-    layout="block"
+    layout="list"
     :label="title"
   >
     <kube-dynamic-block
       v-model="model"
       :layout-comp="blockLayout"
       :row-comp="blockRowLayout"
-      :column-comp="null"
       :init-required="false"
+      :column-comp="null"
       :data-template="getDataTemplate"
-      style="width: 670px"
+      style="width: 750px"
       button-name="添加规则"
     >
       <template slot-scope="{ model: blockModel, index: blockIndex }">
         <kube-dynamic-block
           v-model="blockModel.rules"
-          style="width: 630px;"
           :data-template="getRuleTemplate"
         >
           <template slot="column">

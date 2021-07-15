@@ -56,11 +56,13 @@
           >
             <slot
               :model="t.value"
+              :state="curTab === t.key"
               :errorPrefix="getErrorKey(t.key)"
             />
             <slot
               :name="`${t.value[tabKey]}`"
               :model="t.value"
+              :state="curTab === t.key"
               :errorPrefix="getErrorKey(t.key)"
             />
           </div>
@@ -182,6 +184,11 @@ export default {
                     deep: true,
                 });
             return target;
+        },
+        chooseNext() {
+            const idx = this.listLocal.findIndex(q => q.key === this.curTab);
+            this.transitionName = 'kubecube-tab-x-transition';
+            this.curTab = this.listLocal[(idx + 1) % this.listLocal.length].key;
         },
         choose(item) {
 

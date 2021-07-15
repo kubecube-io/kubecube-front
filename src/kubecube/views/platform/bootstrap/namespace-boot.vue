@@ -1,5 +1,6 @@
 <template>
   <kube-pipe
+    ref="pipe"
     graph="tenant > project"
     @pipestatechange="pipeLoading = $event"
   >
@@ -150,6 +151,9 @@ export default {
         hardQuota,
     },
     mixins: [ makeVModelMixin ],
+    props: {
+        state: Boolean,
+    },
     data() {
         return {
             quotaService: scopeService.getCubeQuotaResourceInstance,
@@ -162,6 +166,13 @@ export default {
                     name: `${this.model.pipe.cluster.value}.${this.model.pipe.tenant.value}`,
                 },
             };
+        },
+    },
+    watch: {
+        state(val) {
+            if (val) {
+                this.$refs.pipe.pipeRequest();
+            }
         },
     },
     methods: {

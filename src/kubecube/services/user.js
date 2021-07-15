@@ -19,7 +19,7 @@ const userService = Service({
             withCredentials: true,
         },
         validateUser: {
-            template: '/user/{name}',
+            template: '/user/valid/{name}',
             method: 'get',
         },
         modifyUser: {

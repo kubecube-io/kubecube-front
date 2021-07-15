@@ -32,7 +32,7 @@
           />
         </kube-form-item>
         <kube-form-item
-          label="账号"
+          label="用户名"
           required
         >
           <x-request

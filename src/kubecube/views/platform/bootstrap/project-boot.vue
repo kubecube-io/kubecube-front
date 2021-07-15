@@ -9,7 +9,7 @@
         required
       >
         <x-request
-          ref="request"
+          ref="requestTenant"
           :service="tenantService"
           :params="{
             params: {
@@ -83,7 +83,7 @@
         required
       >
         <x-request
-          ref="request"
+          ref="userrequest"
           :service="userService"
           :params="{}"
           :processor="userResolver"
@@ -121,17 +121,20 @@
 </template>
 
 <script>
-import { get as getFunc } from 'lodash';
+import { get as getFunc, cloneDeep } from 'lodash';
 import { get } from 'vuex-pathify';
 import userService from 'kubecube/services/user';
 import scopeService from 'kubecube/services/scope';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 import {
-    // toPlainObject as toProjectPlainObject,
+    toPlainObject as toProjectPlainObject,
     toK8SObject as toProjectK8SObject,
 } from 'kubecube/k8s-resources/scope/project';
 export default {
     mixins: [ makeVModelMixin ],
+    props: {
+        state: Boolean,
+    },
     data() {
         return {
             tenantService: userService.getUserTenants,
@@ -142,11 +145,19 @@ export default {
     computed: {
         user: get('scope/user.AccountId'),
     },
+    watch: {
+        state(val) {
+            if (val) {
+                this.$refs.requestTenant.request();
+            }
+        },
+    },
     methods: {
         tenantResolver(data) {
             const items = data.items.map(i => ({
                 text: getFunc(i, 'spec.displayName'),
                 value: getFunc(i, 'metadata.name'),
+                tenant: i,
             }));
             this.tenants = items;
             if (!this.model.model.tenant) {
@@ -167,13 +178,46 @@ export default {
             return items;
         },
         async submit() {
-            await scopeService.createScope({
+            const response = await scopeService.createScope({
                 pathParams: {
                     scope: 'projects',
                 },
                 data: toProjectK8SObject(this.model.model),
             });
+            const projectCurr = toProjectPlainObject(response.data);
+            const tenantCurr = this.tenants.find(t => t.value === this.model.model.tenant).tenant;
             this.$toast.success('创建成功');
+            this.$emit('next', tabs => {
+                const namespacemodel = tabs.find(t => t.tab === 'namespace');
+                if (namespacemodel) {
+                    namespacemodel.model.pipe.tenant = {
+                        ...cloneDeep(tenantCurr),
+                        value: tenantCurr.metadata.name,
+                        text: tenantCurr.spec.displayName,
+                    };
+
+                    namespacemodel.model.pipe.project = {
+                        ...cloneDeep(projectCurr),
+                        value: projectCurr.metadata.name,
+                        text: projectCurr.spec.displayName,
+                    };
+                }
+
+                const membermodel = tabs.find(t => t.tab === 'member');
+
+                if (membermodel) {
+                    membermodel.model.tenant = {
+                        ...cloneDeep(tenantCurr),
+                        value: tenantCurr.metadata.name,
+                        text: tenantCurr.spec.displayName,
+                    };
+                    membermodel.model.project = {
+                        ...cloneDeep(projectCurr),
+                        value: projectCurr.metadata.name,
+                        text: projectCurr.spec.displayName,
+                    };
+                }
+            });
         },
     },
 

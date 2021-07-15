@@ -9,7 +9,7 @@
         required
       >
         <x-request
-          ref="request"
+          ref="requestTenant"
           :service="userService"
           :params="{
             params: {
@@ -62,7 +62,7 @@
                     </kube-form-item>
                     <template v-if="clusters.length > 0">
                       <x-request
-                        ref="request"
+                        ref="requestQuota"
                         :service="quotaService"
                         :params="quotaParams"
                         :processor="quotaResolver"
@@ -127,6 +127,9 @@ export default {
         hardQuota,
     },
     mixins: [ makeVModelMixin ],
+    props: {
+        state: Boolean,
+    },
     data() {
         return {
             userService: userService.getUserTenants,
@@ -153,6 +156,13 @@ export default {
                     name: `${this.model.cluster}.${this.model.tenant}`,
                 },
             };
+        },
+    },
+    watch: {
+        state(val) {
+            if (val) {
+                this.$refs.requestTenant.request();
+            }
         },
     },
     methods: {
@@ -233,6 +243,7 @@ export default {
                 });
             }
             this.$toast.success('创建成功');
+            this.$emit('next');
         },
     },
 };

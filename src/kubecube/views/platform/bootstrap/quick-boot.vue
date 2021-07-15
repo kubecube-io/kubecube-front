@@ -1,29 +1,44 @@
 <template>
   <kube-tab
+    ref="tab"
     v-model="tabs"
     title-key="title"
     tab-key="tab"
     disabled
   >
-    <template #tenant="{ model }">
-      <!-- {{ model.title }} -->
-      <tenantBoot v-model="model.model" />
+    <template #tenant="{ model, state }">
+      <tenantBoot
+        v-model="model.model"
+        :state="state"
+        @next="next($event)"
+      />
     </template>
-    <template #tenantquota="{ model }">
-      <!-- {{ model.title }} -->
-      <tenantQuotaBoot v-model="model.model" />
+    <template #tenantquota="{ model, state }">
+      <tenantQuotaBoot
+        v-model="model.model"
+        :state="state"
+        @next="next()"
+      />
     </template>
-    <template #project="{ model }">
-      <!-- {{ model.title }} -->
-      <project-boot v-model="model.model" />
+    <template #project="{ model, state }">
+      <project-boot
+        v-model="model.model"
+        :state="state"
+        @next="next($event)"
+      />
     </template>
-    <template #member="{ model }">
-      <!-- {{ model.title }} -->
-      <member-boot v-model="model.model" />
+    <template #member="{ model, state }">
+      <member-boot
+        v-model="model.model"
+        :state="state"
+        @next="next($event)"
+      />
     </template>
-    <template #namespace="{ model }">
-      <!-- {{ model.title }} -->
-      <namespace-boot v-model="model.model" />
+    <template #namespace="{ model, state }">
+      <namespace-boot
+        v-model="model.model"
+        :state="state"
+      />
     </template>
   </kube-tab>
 </template>
@@ -119,7 +134,6 @@ export default {
                 title: '创建项目',
                 tab: 'project',
                 model: {
-                    tenant: null,
                     model: toProjectPlainObject(),
                     projectadmin: null,
                 },
@@ -150,6 +164,15 @@ export default {
             });
         }
         return tabs;
+    },
+    methods: {
+        next(callback) {
+            this.$refs.tab.chooseNext();
+            if (callback) {
+                callback(this.tabs);
+            }
+
+        },
     },
 };
 </script>

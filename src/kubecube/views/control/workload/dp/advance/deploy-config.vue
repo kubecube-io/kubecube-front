@@ -11,7 +11,8 @@
 
     <kube-form
       v-if="model.enable"
-      label-size="small"
+      label-size="normal"
+      style="margin-top: 20px"
     >
       <affinity-config
         v-model="model.nodeAffinity"

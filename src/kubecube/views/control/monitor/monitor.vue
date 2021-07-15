@@ -182,9 +182,9 @@ export default {
                 Object.assign(scope, {
                     workload: this.instance.metadata.name,
                     pod: this.instance.metadata.name,
+                    volume: this.instance.metadata.name,
                     type: this.workload.substr(0, this.workload.length - 1),
                 });
-
             }
             return scope;
         },
@@ -213,6 +213,7 @@ export default {
                     resource: this.resource,
                 },
             });
+
             const resolved = toMonitorPlainObject(response);
             this.variables = resolved.spec.variables || [];
             this.rows = resolved.spec.rows || [];

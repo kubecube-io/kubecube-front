@@ -87,7 +87,7 @@ export default {
     },
     data() {
         return {
-            podService: workloadExtendService.getWorkloads,
+            podService: workloadExtendService.getPVCPods,
             podColumn: [
                 { title: '副本名称', name: 'metadata.name' },
                 { title: '副本状态', name: 'status.phase', width: '80px' },
@@ -109,7 +109,7 @@ export default {
                 pathParams: {
                     cluster: this.cluster,
                     namespace: this.namespace,
-                    resource: 'pods',
+                    pvcName: this.instance.metadata.name,
                 },
                 params: {
                     pageSize: 10000,
@@ -133,7 +133,7 @@ export default {
     },
     methods: {
         podResolver(response) {
-            const items = (response.items || []).map(toPodPlainObject);
+            const items = (response.pods || []).map(toPodPlainObject);
             console.log(items);
             return items;
         },

@@ -8,6 +8,10 @@ const service = Service({
             method: 'get',
             template: '/{cluster}/namespaces/{namespace}/{resource}',
         },
+        getPVCPods: {
+            method: 'get',
+            template: '/{cluster}/namespaces/{namespace}/pvcworkloads/{pvcName}',
+        },
         getInstance: {
             method: 'get',
             template: '/{cluster}/namespaces/{namespace}/{resource}/{name}',
