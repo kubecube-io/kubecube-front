@@ -88,6 +88,11 @@ const userService = Service({
             method: 'get',
             responseType: 'blob', // Important
         },
+
+        createNSQuota: {
+            method: 'post',
+            url: '/clusters/nsquota',
+        },
     },
 });
 

@@ -151,6 +151,7 @@ import kubeProjectSelect from 'kubecube/component/global/common/kube-project-sel
 import scopeService from 'kubecube/services/scope';
 // import clusterService from 'kubecube/services/cluster';
 import workloadService from 'kubecube/services/k8s-resource';
+import userService from 'kubecube/services/user';
 import hardQuota from './ns-quota-table.vue';
 // import storageQuota from '../quota/storage-quota-input.vue';
 import {
@@ -295,25 +296,33 @@ export default {
                     this.resource
                 );
 
-                await workloadService.createNamespaceCRResource({
-                    pathParams: {
+                await userService.createNSQuota({
+                    data: {
                         cluster: cluster.value,
-                        group: 'hnc.x-k8s.io',
-                        version: 'v1alpha2',
-                        plural: 'subnamespaceanchors',
-                        namespace: project.spec.namespace,
+                        subNamespaceAnchor: subnamespaceyaml,
+                        resourceQuota: quota,
                     },
-                    data: subnamespaceyaml,
                 });
 
-                await workloadService.createAPIV1Instance({
-                    pathParams: {
-                        cluster: cluster.value,
-                        namespace,
-                        resource: 'resourcequotas',
-                    },
-                    data: quota,
-                });
+                // await workloadService.createNamespaceCRResource({
+                //     pathParams: {
+                //         cluster: cluster.value,
+                //         group: 'hnc.x-k8s.io',
+                //         version: 'v1alpha2',
+                //         plural: 'subnamespaceanchors',
+                //         namespace: project.spec.namespace,
+                //     },
+                //     data: subnamespaceyaml,
+                // });
+
+                // await workloadService.createAPIV1Instance({
+                //     pathParams: {
+                //         cluster: cluster.value,
+                //         namespace,
+                //         resource: 'resourcequotas',
+                //     },
+                //     data: quota,
+                // });
 
                 this.show = false;
                 this.$emit('refresh', this.pipe.tenant.value);
