@@ -114,12 +114,12 @@
                   <u-link-list-item @click="resize(item)">
                     调整副本数
                   </u-link-list-item>
-                  <u-link-list-item
+                  <!-- <u-link-list-item
                     v-if="workload === 'deployments'"
                     to="deployment.updateImage"
                   >
                     滚动更新
-                  </u-link-list-item>
+                  </u-link-list-item> -->
                   <u-link-list-item @click="deleteItem(item)">
                     删除
                   </u-link-list-item>
