@@ -21,6 +21,7 @@
           />
         </template>
         <kube-pipe
+          ref="tenantpipe"
           key="project"
           style="float: right;"
           component="u-linear-layout"
@@ -165,8 +166,13 @@ export default {
             console.log(r);
             return r;
         },
-        refresh() {
+        refresh(tenant) {
             this.$refs.request.request();
+            if (tenant) {
+                this.tenant = {
+                    value: tenant,
+                };
+            }
         },
         addMember(item) {
             console.log(item);

@@ -185,8 +185,9 @@ export default {
                     data: toPatchObject(this.model),
                 });
             }
+            this.$emit('refresh', this.model.tenant);
             this.show = false;
-            this.$emit('refresh');
+
         },
         resolver(data) {
             const items = data.items.map(i => ({
