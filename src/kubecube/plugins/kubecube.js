@@ -11,6 +11,7 @@ import kubeValve from 'kubecube/mixins/pipe/kube-valve.vue';
 import kubePipe from 'kubecube/mixins/pipe/kube-pipe.vue';
 import kubeChart from 'kubecube/component/common/kube-chart/template/index.js';
 import kubeDataTable from 'kubecube/component/common/kube-data-table/kube-data-table.vue';
+import kubeCheckboxBoard from 'kubecube/component/common/kube-checkbox-board/kube-checkbox-board.vue';
 import kubeCheckboxTree from 'kubecube/component/common/kube-checkbox-tree/kube-checkbox-tree.vue';
 import kubeTree from 'kubecube/component/common/kube-checkbox-tree/kube-tree.vue';
 import kubeTimer from 'kubecube/component/common/kube-timer/index.vue';
@@ -37,7 +38,7 @@ function loadingElm(el) {
 }
 const ELLIPSIS_KEY = 'SKELETON_KEY';
 function addEllipsis(el, length) {
-    const content = el.innerText;
+    const content = el.innerHTML;
     const nodeElem = `<span>${content.substring(0, length)}...</span>`;
     // el.addEventListener('click', (e))
     const href = document.createElement('a');
@@ -68,6 +69,7 @@ Vue.use({
         _Vue.component('KubeLabelEditor', kubeLabelEditor);
         _Vue.component('KubeChart', kubeChart);
         _Vue.component('KubeDataTable', kubeDataTable);
+        _Vue.component('KubeCheckboxBoard', kubeCheckboxBoard);
         _Vue.component('KubeCheckboxTree', kubeCheckboxTree);
         _Vue.component('KubeTree', kubeTree);
         _Vue.component('KubeTimer', kubeTimer);

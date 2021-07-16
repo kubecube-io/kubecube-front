@@ -155,7 +155,7 @@
 // import { cloneDeep } from 'lodash';
 import { sync } from 'vuex-pathify';
 import userService from 'kubecube/services/user';
-import { setItem, getItem } from 'kubecube/utils/persistant';
+import { setItem, getItem, removeItem } from 'kubecube/utils/persistant';
 import passwordDialog from './password.vue';
 export default {
     metaInfo: {
@@ -207,6 +207,7 @@ export default {
                 } else {
                     this.$router.push('/');
                 }
+                removeItem('lastlocation');
 
             } catch (error) {
                 if (error.message) {

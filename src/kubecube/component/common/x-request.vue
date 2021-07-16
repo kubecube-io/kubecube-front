@@ -45,9 +45,6 @@ export default {
         };
     },
     watch: {
-        loading(val) {
-            console.log(val)
-        },
         poll(val) {
             if (!val && this.currtimeout) {
                 clearTimeout(this.currtimeout);

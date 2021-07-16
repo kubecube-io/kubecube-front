@@ -6,7 +6,7 @@ import App from '../index.vue';
 import Login from '../views/login/index.vue';
 import noAuth from '../views/login/noAuth.vue';
 // import Control from 'kubecube/views/control/index.vue';
-import { getItem, setItem } from 'kubecube/utils/persistant';
+import { getItem } from 'kubecube/utils/persistant';
 // import NoRight from 'kubecube/views/circle/no-right.vue';
 // import wrapper from './wrapper';
 
@@ -34,16 +34,6 @@ const router = new VueRouter({
                         noCredential: true,
                     },
                 },
-
-                // { path: '/dashboard', component: dashboard,
-                //     meta: {
-                //         credential: true,
-                //         breadCrumb: 'specialTerms.Dashboard' } },
-                // { path: '/user', component: () => import('../views/user/index.vue'),
-                //     meta: {
-                //         credential: true,
-                //         breadCrumb: 'specialTerms.User' } },
-                // ...deploymentsRoutes,
             ],
         },
     ],
@@ -86,10 +76,6 @@ router.beforeEach((to, from, next) => {
             next();
             // K8SScopeHook(to, from, next);
         } else {
-            setItem('lastlocation', JSON.stringify({
-                path: to.path,
-                query: to.query,
-            }));
             next('/login');
         }
     } else {

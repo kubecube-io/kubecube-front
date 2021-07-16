@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { removeItem } from 'kubecube/utils/persistant';
 import router from 'kubecube/router';
 import { get } from 'lodash';
+import { setItem } from 'kubecube/utils/persistant';
 
 export function userInterceptor(instance, errHandler) {
 
@@ -30,6 +31,10 @@ export function userInterceptor(instance, errHandler) {
         } else if (status === 401) {
             removeItem('user');
             if (!router.currentRoute.meta.noCredential) {
+                setItem('lastlocation', JSON.stringify({
+                    path: router.currentRoute.path,
+                    query: router.currentRoute.query,
+                }));
                 router.replace('/login');
             }
 
