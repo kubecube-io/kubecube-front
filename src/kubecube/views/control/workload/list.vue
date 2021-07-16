@@ -4,6 +4,7 @@
       <u-button
         icon="create"
         color="primary"
+        :disabled="isReview"
         @click="toCreate"
       >
         部署
@@ -92,26 +93,44 @@
             <u-linear-layout gap="small">
               <u-link-list :key="workload">
                 <template v-if="workload === 'jobs'">
-                  <u-link-list-item @click="deleteItem(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="deleteItem(item)"
+                  >
                     删除
                   </u-link-list-item>
                 </template>
                 <template v-if="['cronjobs', 'daemonsets'].includes(workload)">
-                  <u-link-list-item @click="toEditItem(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="toEditItem(item)"
+                  >
                     设置
                   </u-link-list-item>
-                  <u-link-list-item @click="deleteItem(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="deleteItem(item)"
+                  >
                     删除
                   </u-link-list-item>
-                  <u-link-list-item @click="editYAML(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="editYAML(item)"
+                  >
                     YAML 设置
                   </u-link-list-item>
                 </template>
                 <template v-if="['deployments','statefulsets'].includes(workload)">
-                  <u-link-list-item @click="toEditItem(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="toEditItem(item)"
+                  >
                     设置
                   </u-link-list-item>
-                  <u-link-list-item @click="resize(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="resize(item)"
+                  >
                     调整副本数
                   </u-link-list-item>
                   <!-- <u-link-list-item
@@ -120,13 +139,19 @@
                   >
                     滚动更新
                   </u-link-list-item> -->
-                  <u-link-list-item @click="deleteItem(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="deleteItem(item)"
+                  >
                     删除
                   </u-link-list-item>
                   <!-- <u-link-list-item>
                     设置
                   </u-link-list-item> -->
-                  <u-link-list-item @click="editYAML(item)">
+                  <u-link-list-item
+                    :disabled="isReview"
+                    @click="editYAML(item)"
+                  >
                     YAML 设置
                   </u-link-list-item>
                 </template>
@@ -138,7 +163,10 @@
               没有搜索到相关内容，可调整关键词重新搜索
             </template>
             <template v-else>
-              还没有任何 {{ workloadLiteral }} , 现在就 <u-link @click="toCreate">
+              还没有任何 {{ workloadLiteral }} , 现在就 <u-link
+                :disabled="isReview"
+                @click="toCreate"
+              >
                 立即创建
               </u-link> 一个吧。
             </template>
@@ -208,6 +236,10 @@ export default {
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        userRole: get('scope/userRole'),
+        isReview() {
+            return !(this.userRole.tenantAdmin || this.userRole.projectAdmin || this.userRole.platformAdmin);
+        },
         workload() {
             return this.$route.params.workload;
         },
