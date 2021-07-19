@@ -11,6 +11,10 @@ export const rules = {
         ...required,
         message: '必填项',
     },
+    noEmptyArray: {
+        validate: v => v.length > 0,
+        message: '必填项',
+    },
     arrayRequired: {
         params: [ 'filterkey' ],
         validate: (v, { filterkey }) => {
@@ -298,5 +302,13 @@ export const rules = {
             }
         },
         message: 'URL不合法',
+    },
+
+    acceptOne: {
+        params: [ 'values' ],
+        validate: (value, { values }) => {
+            return values.filter(v => v).length === 1;
+        },
+        message: '仅支持选填其中一个',
     },
 };

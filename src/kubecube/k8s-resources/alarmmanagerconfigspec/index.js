@@ -1,4 +1,4 @@
-import { pickBy } from 'lodash';
+import { assign, some, pick, values, pickBy, cloneDeep, isObject, toNumber } from 'lodash';
 import {
     toPlainObject as toConfigPlainObject,
     toK8SObject as toConfigK8SObject,
@@ -16,28 +16,22 @@ const channels = [
     'emailConfigs',
 ];
 
-export const LabelMapping = {
-    sendResolved: '是否接受告警恢复通知',
-    to: '收件人',
-    corpID: 'CorpId: 企业微信账号唯一 ID， 可以在我的企业中查看',
-    toParty: 'toParty: 接收通知的联系人组Id',
-    agentID: 'agentId: 第三方企业应用的 ID，可以在自己创建的第三方企业应用详情页面查看',
-    apiSecret: 'apiSecret:第三方企业应用的密钥，可以在自己创建的第三方企业应用详情页面查看',
-};
-
 export const CONFIGS = {
     wechatConfigs: {
-        // apiSecret: {
-        //     name: '',
-        //     key: '',
-        //     optional: false,
-        // },
-        sendResolved: false,
-        apiURL: '',
-        corpID: '',
+        toUser: '',
         toParty: '',
-        agentID: '',
-        apiSecret: '',
+        toTag: '',
+        sendResolved: false,
+        advanced: false,
+        advancedPart: {
+            apiURL: '',
+            corpID: '',
+            agentID: '',
+            apiSecret: {
+                key: '',
+                name: '',
+            },
+        },
     },
     webhookConfigs: {
         sendResolved: false,
@@ -50,18 +44,24 @@ export const CONFIGS = {
         // httpConfig: {
         //     proxyURL: ''.
         // },
-        maxAlerts: '',
+        maxAlerts: 0,
 
     },
     emailConfigs: {
         sendResolved: false,
         to: '',
-        // from: '',
-        // hello: '',
-        // smarthost: '',
-        // authUsername: '',
-        // authPassword: '',
-        // authSecret: '',
+        advanced: false,
+        advancedPart: {
+            from: '',
+            // hello: '',
+            smarthost: '',
+            authUsername: '',
+            authPassword: '',
+            authSecret: {
+                key: '',
+                name: '',
+            },
+        },
         // authIdentity: '',
         // text: '',
     },
@@ -89,7 +89,34 @@ function resolveReceiver(receiver) {
         if (receiver[channel] && receiver[channel].length > 0) {
             const cur = obj[i];
             cur.enable = true;
-            cur.config = receiver[channel].map(c => Object.assign({}, CONFIGS[channel], c));
+            cur.config = receiver[channel].map(c => {
+                // Object.assign({}, cloneDeep(CONFIGS[channel]), c);
+                const baseConfig = cloneDeep(CONFIGS[channel]);
+                if (channel === 'wechatConfigs') {
+                    Object.keys(baseConfig.advancedPart).forEach(k => {
+                        if (c[k]) {
+                            baseConfig.advancedPart[k] = c[k];
+                            baseConfig.advanced = true;
+                        }
+                    });
+                    Object.assign(baseConfig, pick(c, [ 'toUser', 'toParty', 'toTag', 'sendResolved' ]));
+                }
+
+                if (channel === 'webhookConfigs') {
+                    Object.assign(baseConfig, pick(c, [ 'sendResolved', 'url', 'maxAlerts' ]));
+                }
+
+                if (channel === 'emailConfigs') {
+                    Object.keys(baseConfig.advancedPart).forEach(k => {
+                        if (c[k]) {
+                            baseConfig.advancedPart[k] = c[k];
+                            baseConfig.advanced = true;
+                        }
+                    });
+                    Object.assign(baseConfig, pick(c, [ 'to', 'sendResolved' ]));
+                }
+                return baseConfig;
+            });
         }
     });
     return obj;
@@ -115,15 +142,39 @@ function refactReceiver(receivers, name) {
     };
     receivers.forEach(r => {
         if (r.enable) {
-            obj[r.receiver] = r.config
-                .filter(c => Object.values(c).some(p => p))
-                .map(c => {
-                    const obj = pickBy(c, i => i);
-                    if (obj.maxAlerts) {
-                        obj.maxAlerts = +obj.maxAlerts;
+            const channel = r.receiver;
+            obj[channel] = r.config.filter(c => {
+                if (channel === 'wechatConfigs') {
+                    return some(values(pick(c, [ 'toUser', 'toParty', 'toTag' ])));
+                }
+                if (channel === 'webhookConfigs') {
+                    return some(values(pick(c, [ 'url', 'maxAlerts' ])));
+                }
+                if (channel === 'emailConfigs') {
+                    return some(values(pick(c, [ 'to' ])));
+                }
+                return false;
+            }).map(c => {
+                const yaml = {};
+                if (channel === 'wechatConfigs') {
+                    assign(yaml, pick(c, [ 'toUser', 'toParty', 'toTag', 'sendResolved' ]));
+                    if (c.advanced) {
+                        assign(yaml, pickBy(c.advancedPart, v => (isObject(v) ? (v.key && v.name) : Boolean(v))));
                     }
-                    return obj;
-                });
+                }
+                if (channel === 'webhookConfigs') {
+                    assign(yaml, pick(c, [ 'sendResolved', 'url', 'maxAlerts' ]));
+                    yaml.maxAlerts = toNumber(yaml.maxAlerts);
+
+                }
+                if (channel === 'emailConfigs') {
+                    assign(yaml, pick(c, [ 'to', 'sendResolved' ]));
+                    if (c.advanced) {
+                        assign(yaml, pickBy(c.advancedPart, v => (isObject(v) ? (v.key && v.name) : Boolean(v))));
+                    }
+                }
+                return yaml;
+            });
         }
     });
     return obj;

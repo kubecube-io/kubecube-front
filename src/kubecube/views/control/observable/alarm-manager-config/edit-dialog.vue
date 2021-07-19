@@ -56,45 +56,228 @@
                     :layout-comp="blockLayout"
                     :row-comp="blockRowLayout"
                     :column-comp="null"
-                    :data-template="() => configTemplate[inputsModel.receiver]"
+                    :data-template="() => getDataTemplate(inputsModel.receiver)"
                     button-name="添加"
                   >
                     <template slot-scope="{ model: row, index }">
-                      <template v-for="meta in getTextUI(row)">
+                      <kube-form v-if="inputsModel.receiver === 'wechatConfigs'">
+                        <kube-form-item
+                          label="是否接受告警恢复通知"
+                          label-size="large"
+                        >
+                          <u-checkbox
+                            v-model="row.sendResolved"
+                          />
+                        </kube-form-item>
                         <validation-provider
-                          :key="`${index}-${meta.key}`"
                           v-slot="{ errors }"
-                          :name="`${index}-${meta.key}`"
+                          :name="`wechatConfigs-${index}-to`"
                           :rules="{
-                            urlpattern: ['apiURL', 'url'].includes(meta.key),
+                            acceptOne: {
+                              values: [row.toUser, row.toParty, row.toTag]
+                            }
                           }"
                         >
                           <kube-form-item
-
-                            :label="meta.label"
-                            :message="errors && errors[0]"
-                            label-size="large"
-                            :layout="meta.ui === 'checkbox' ? 'normal' : 'list'"
+                            label="企业微信用户名"
+                            layout="list"
+                            :message="row.toUser && errors && errors[0]"
                           >
-                            <u-checkbox
-                              v-if="meta.ui === 'checkbox'"
-                              v-model="row[meta.key]"
-                            />
-                            <u-textarea
-                              v-else-if="meta.ui === 'textarea'"
-                              v-model="row[meta.key]"
-                              :color="errors && errors[0] ? 'error' : ''"
+                            <u-input
+                              v-model="row.toUser"
+                              :color="row.toUser && errors && errors[0] ? 'error' : ''"
                               size="huge"
                             />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="企业微信用户组"
+                            layout="list"
+                            :message="row.toParty && errors && errors[0]"
+                          >
                             <u-input
-                              v-else
-                              v-model="row[meta.key]"
-                              :type="['to', 'from'].includes(meta.key) ? 'email' : 'text'"
+                              v-model="row.toParty"
+                              :color="row.toParty && errors && errors[0] ? 'error' : ''"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="企业微信用户标签"
+                            layout="list"
+                            :message="row.toTag && errors && errors[0]"
+                          >
+                            <u-input
+                              v-model="row.toTag"
+                              :color="row.toTag && errors && errors[0] ? 'error' : ''"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                        </validation-provider>
+                        <u-link @click="row.advanced = !row.advanced">
+                          {{ row.advanced ? '收起' : '展开' }}更多配置
+                        </u-link>
+                        <template v-if="row.advanced">
+                          <validation-provider
+                            v-slot="{ errors }"
+                            :name="`wechatConfigs-${index}-apiURL`"
+                            rules="urlpattern"
+                          >
+                            <kube-form-item
+                              label="apiURL"
+                              layout="list"
+                              :message="errors && errors[0]"
+                            >
+                              <u-input
+                                v-model="row.advancedPart.apiURL"
+                                :color="errors && errors[0] ? 'error' : ''"
+                                size="huge"
+                              />
+                            </kube-form-item>
+                          </validation-provider>
+                          <kube-form-item
+                            label="corpID"
+                            layout="list"
+                            :message="errors && errors[0]"
+                          >
+                            <u-input
+                              v-model="row.advancedPart.corpID"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="agentID"
+                            layout="list"
+                          >
+                            <u-input
+                              v-model="row.advancedPart.agentID"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="apiSecret"
+                            layout="list"
+                          >
+                            <secret-select v-model="row.advancedPart.apiSecret" />
+                          </kube-form-item>
+                        </template>
+                      </kube-form>
+                      <kube-form v-if="inputsModel.receiver === 'webhookConfigs'">
+                        <kube-form-item
+                          label="是否接受告警恢复通知"
+                          label-size="large"
+                        >
+                          <u-checkbox
+                            v-model="row.sendResolved"
+                          />
+                        </kube-form-item>
+                        <validation-provider
+                          v-slot="{ errors }"
+                          :name="`webhookConfigs-${index}-url`"
+                          rules="urlpattern"
+                        >
+                          <kube-form-item
+                            label="url"
+                            layout="list"
+                            :message="errors && errors[0]"
+                          >
+                            <u-input
+                              v-model="row.url"
                               :color="errors && errors[0] ? 'error' : ''"
                               size="huge"
                             />
                           </kube-form-item>
                         </validation-provider>
+                        <kube-form-item
+                          label="maxAlerts"
+                          layout="list"
+                        >
+                          <u-number-input
+                            v-model="row.maxAlerts"
+                            :min="0"
+                          />
+                        </kube-form-item>
+                      </kube-form>
+                      <template v-if="inputsModel.receiver === 'emailConfigs'">
+                        <kube-form-item
+                          label="是否接受告警恢复通知"
+                          label-size="large"
+                        >
+                          <u-checkbox
+                            v-model="row.sendResolved"
+                          />
+                        </kube-form-item>
+                        <validation-provider
+                          v-slot="{ errors }"
+                          :name="`emailConfigs-${index}-to`"
+                        >
+                          <kube-form-item
+                            label="收件人邮箱"
+                            layout="list"
+                            :message="errors && errors[0]"
+                          >
+                            <u-input
+                              v-model="row.to"
+                              type="email"
+                              :color="errors && errors[0] ? 'error' : ''"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                        </validation-provider>
+                        <u-link @click="row.advanced = !row.advanced">
+                          {{ row.advanced ? '收起' : '展开' }}更多配置
+                        </u-link>
+                        <template v-if="row.advanced">
+                          <validation-provider
+                            v-slot="{ errors }"
+                            :name="`emailConfigs-${index}-from`"
+                          >
+                            <kube-form-item
+                              label="from"
+                              layout="list"
+                              :message="errors && errors[0]"
+                            >
+                              <u-input
+                                v-model="row.advancedPart.from"
+                                type="email"
+                                :color="errors && errors[0] ? 'error' : ''"
+                                size="huge"
+                              />
+                            </kube-form-item>
+                          </validation-provider>
+                          <kube-form-item
+                            label="smarthost"
+                            layout="list"
+                          >
+                            <u-input
+                              v-model="row.advancedPart.smarthost"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="authUsername"
+                            layout="list"
+                          >
+                            <u-input
+                              v-model="row.advancedPart.authUsername"
+                              size="huge"
+                            />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="authPassword"
+                            layout="list"
+                          >
+                            <u-input
+                              v-model="row.advancedPart.authPassword"
+                              size="huge"
+                              type="password"
+                            />
+                          </kube-form-item>
+                          <kube-form-item
+                            label="authSecret"
+                            layout="list"
+                          >
+                            <secret-select v-model="row.advancedPart.authSecret" />
+                          </kube-form-item>
+                        </template>
                       </template>
                     </template>
                   </kube-dynamic-block>
@@ -133,7 +316,7 @@
 </template>
 
 <script>
-// import { get as getFunc, cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { get } from 'vuex-pathify';
 import { Modal } from '@micro-app/common/mixins';
 import workloadService from 'kubecube/services/k8s-resource';
@@ -144,21 +327,22 @@ import {
     toK8SObject as toAMCSK8SObject,
     patchK8SObject as patchAMCSK8SObject,
     CONFIGS as configTemplate,
-    LabelMapping,
+    // LabelMapping,
 } from 'kubecube/k8s-resources/alarmmanagerconfigspec';
+import secretSelect from './secret-select.vue';
 import {
     specCRD,
 } from '../utils';
-const textArea = [ 'apiSecret', 'apiSecret', 'url', 'urlSecret', 'text' ];
 export default {
+    components: {
+        secretSelect,
+    },
     mixins: [ Modal ],
     data() {
-        console.log(configTemplate);
         return {
             model: toAMCSPlainObject(),
             isEdit: false,
             initStorage: 0,
-            configTemplate,
             blockLayout,
             blockRowLayout,
         };
@@ -182,24 +366,6 @@ export default {
         },
     },
     methods: {
-        getLabel(val) {
-            return LabelMapping[val] || val;
-        },
-        getTextUI(config) {
-            const ui = [];
-            Object.keys(config).forEach(k => {
-                if (k !== 'enable') {
-
-                    ui.push({
-                        key: k,
-                        label: this.getLabel(k),
-                        ui: k === 'sendResolved' ? 'checkbox' : (textArea.includes(k) ? 'textarea' : 'input'),
-                    });
-
-                }
-            });
-            return ui;
-        },
         async open(item) {
             if (item) {
                 this.isEdit = true;
@@ -210,11 +376,13 @@ export default {
                     },
                 });
                 this.model = toAMCSPlainObject(response);
-
             } else {
                 this.model = toAMCSPlainObject();
             }
             this.show = true;
+        },
+        getDataTemplate(receiver) {
+            return cloneDeep(configTemplate[receiver]);
         },
         async submit() {
             if (this.isEdit) {
