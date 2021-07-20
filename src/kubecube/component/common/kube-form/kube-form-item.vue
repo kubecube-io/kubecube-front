@@ -88,7 +88,6 @@ export default {
     content: '*';
     color: red;
     position: absolute;
-    right: 2px;
     height: 12px;
     line-height: 12px;
     top: 7px;
@@ -172,7 +171,7 @@ export default {
 }
 
 .root[label-size$="small"] > .label { width: 80px; padding-right: 10px; }
-.root[label-size$="small"] > .label::after { right: 2px; }
+.root[label-size$="small"] > .label::after { right: 12px; }
 .root[label-size$="small"] > .field { max-width: calc(100% - 80px); }
 .root[label-size$="normal"] > .label { width: 120px; padding-right: 20px; }
 .root[label-size$="normal"] > .label::after { right: 12px; }
@@ -229,7 +228,7 @@ export default {
     display: none;
 }
 .root[layout="none"] > .field {
-    max-width: none;
+    max-width: none!important;
 }
 .root[layout="list"] > .label {
     display: block;
