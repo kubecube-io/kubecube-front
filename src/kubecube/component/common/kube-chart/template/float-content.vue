@@ -61,6 +61,7 @@ export default {
     color: #fff;
     font-size: .8em;
     z-index: 999;
+    user-select: none;
 }
 .legend{
     display:inline-block;

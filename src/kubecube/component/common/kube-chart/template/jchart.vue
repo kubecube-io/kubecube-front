@@ -195,7 +195,6 @@ export default {
                         } else {
                             vs = values;
                         }
-
                         return {
                             name: this.legendTemplate[idx](r.metric),
                             values: vs,
@@ -245,7 +244,7 @@ export default {
                             return `${NumberFormatter.format(value * 100)}%`;
                         };
                     }
-                    if (unit === 'pps') {
+                    if (unit === 'pps' || unit === 'ops') {
                         dataoption.yAxis.format = function(value) {
                             return `${NumberFormatter.format(value)} pps`;
                         };
@@ -351,6 +350,6 @@ export default {
     bottom: 0;
     right: 0;
     background: url('cloud-ui.vusion/src/u-chart.vue/assets/empty.png') no-repeat center center #fff;
-    z-index: 9999;
+    z-index: 9;
 }
 </style>
