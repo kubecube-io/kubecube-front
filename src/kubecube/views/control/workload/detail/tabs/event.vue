@@ -71,7 +71,7 @@
 
 <script>
 
-import { get as getFunc, groupBy, uniq, omit, upperFirst } from 'lodash';
+import { get as getFunc, groupBy, uniq, omit, upperFirst, flatten } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
 import {
@@ -198,8 +198,10 @@ export default {
                     resource: 'pods',
                 },
                 params: {
+                    pageSize: 10000,
                     // labelSelector: this.instance.spec.matchLabels.map(l => `${l.key}=${l.value}`).join(','),
-                    selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
+                    // selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
+                    selector: `metadata.ownerReferences.uid=${this.instance.metadata.uid}`,
                 },
             };
         },
@@ -268,39 +270,84 @@ export default {
                 const response = await workloadService.getAPIV1(this.eventParams);
                 this.events = (response.items || []).map(toEventPlainObject);
             } else if (this.workload === 'deployments') {
-                const dpname = this.instance.metadata.name;
-                const [ rptRes, evtRes ] = await Promise.all([
-                    workloadService.getWorkloads(this.replicasParams),
-                    workloadService.getAPIV1(this.podEventParams),
-                ]);
-                const replicasets = rptRes.items.filter(i => {
-                    return getFunc(i, 'metadata.ownerReferences[0].kind') === 'Deployment' &&
-                        getFunc(i, 'metadata.ownerReferences[0].name') === dpname;
+                // const dpname = this.instance.metadata.name;
+                // const [ rptRes, evtRes ] = await Promise.all([
+                //     workloadService.getWorkloads(this.replicasParams),
+                //     workloadService.getAPIV1(this.podEventParams),
+                // ]);
+                // const replicasets = rptRes.items.filter(i => {
+                //     return getFunc(i, 'metadata.ownerReferences[0].kind') === 'Deployment' &&
+                //         getFunc(i, 'metadata.ownerReferences[0].name') === dpname;
+                // });
+                const replicasRes = await workloadService.getWorkloads({
+                    pathParams: {
+                        cluster: this.cluster,
+                        namespace: this.namespace,
+                        resource: 'replicasets',
+                    },
+                    params: {
+                        pageSize: 10000,
+                        selector: `metadata.ownerReferences.uid=${this.instance.metadata.uid}`,
+                        sortName: 'metadata.creationTimestamp',
+                        sortOrder: 'desc',
+                    },
                 });
+                const replicasets = replicasRes.items || [];
+                const evtRes = await workloadService.getAPIV1(this.podEventParams);
+                const rpIds = replicasets.map(i => getFunc(i, 'metadata.uid'));
+                const rpOld = rpIds.slice(1);
+                const rpCurr = getFunc(rpIds, '[0]');
 
-                const rpnames = replicasets.map(i => getFunc(i, 'metadata.name'));
-                const rpnamesOld = rpnames.slice(1);
-                const rpnamesCurr = getFunc(rpnames, '[0]');
-                let currentVersionPods = [];
-                let historyVersionPods = [];
+
+                // const rpnames = replicasets.map(i => getFunc(i, 'metadata.name'));
+                // const rpnamesOld = rpnames.slice(1);
+                // const rpnamesCurr = getFunc(rpnames, '[0]');
+                let [ currentVersionPods, ...historyVersionPods ] = await Promise.all([
+                    (async () => {
+                        const res = await workloadService.getAPIV1({
+                            pathParams: {
+                                cluster: this.cluster,
+                                namespace: this.namespace,
+                                resource: 'pods',
+                            },
+                            params: {
+                                pageSize: 10000,
+                                selector: `metadata.ownerReferences.uid=${rpCurr}`,
+                            },
+                        });
+                        return (res.items || []).map(i => i.metadata.name);
+                    })(),
+                    ...rpOld.map(async id => {
+                        const res = await workloadService.getAPIV1({
+                            pathParams: {
+                                cluster: this.cluster,
+                                namespace: this.namespace,
+                                resource: 'pods',
+                            },
+                            params: {
+                                pageSize: 10000,
+                                selector: `metadata.ownerReferences.uid=${id}`,
+                            },
+                        });
+                        return (res.items || []).map(i => i.metadata.name);
+                    }),
+                ]);
+                historyVersionPods = flatten(historyVersionPods);
                 const events = [];
                 evtRes.items.forEach(i => {
                     const podName = getFunc(i, 'involvedObject.name');
                     const arr = podName.split('-');
                     const podPrefix = arr.slice(0, arr.length - 1).join('-');
-                    if (podName.includes(rpnamesCurr)) {
+                    if (currentVersionPods.includes(podName)) {
                         events.push(i);
-                        currentVersionPods.push(podName);
-                    } else if (rpnamesOld.includes(podPrefix)) {
+                    } else if (historyVersionPods.includes(podPrefix)) {
                         events.push(i);
-                        historyVersionPods.push(podName);
                     }
                 });
 
                 this.eventGrouped = groupBy(events, i => getFunc(i, 'involvedObject.name'));
 
                 const makeTV = n => ({ text: n, value: n });
-                console.log(currentVersionPods, historyVersionPods);
                 currentVersionPods = uniq(currentVersionPods).map(makeTV);
                 historyVersionPods = uniq(historyVersionPods).map(makeTV);
                 if (this.pod) {
