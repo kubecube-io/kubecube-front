@@ -53,6 +53,7 @@
       <template v-if="mode === 'hard'">
         <label-editor
           v-model="model"
+          :no-system-key-rule="true"
           style="width: 580px;margin-bottom: 20px;"
         />
       </template>
@@ -61,6 +62,7 @@
 </template>
 
 <script>
+import { get as getFunc } from 'lodash';
 import { get } from 'vuex-pathify';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 import workloadService from 'kubecube/services/k8s-resource';
@@ -147,7 +149,7 @@ export default {
                 path: 'value',
                 current: this.workloadName,
             }, val => {
-                this.workloadName = val.value;
+                this.workloadName = getFunc(val, 'value');
             });
             return list;
         },

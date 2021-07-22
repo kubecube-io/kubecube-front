@@ -23,7 +23,7 @@
           :name="`${prefixKey}Key-${index}`"
           :rules="{
             KeyPattern: true,
-            noSystemKey: !model.disabled,
+            noSystemKey: !noSystemKeyRule && !model.disabled,
             noRedundance: { list: exsitKeys }
           }"
         >
@@ -91,6 +91,10 @@ export default {
         prefixKey: {
             type: String,
             default: '',
+        },
+        noSystemKeyRule: {
+            type: Boolean,
+            default: false,
         },
         disabled: Boolean,
     },
