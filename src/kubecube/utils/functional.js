@@ -33,6 +33,7 @@ export const unitConvert = (value = '', type = 'memory') => {
 // to plain
 const cpuUnits = [ 'k', 'M', 'G', 'T', 'P', 'E' ];
 export const unitConvertCPU = value => {
+    value = `${value}`;
     const valueNum = +(value.replace(/(m|k|M|G|T|P|E)/g, ''));
     if (`${valueNum}` === value) return valueNum;
     if (value.endsWith('m')) return +new BigNumber(valueNum).dividedBy(1000);
