@@ -230,6 +230,17 @@ const service = Service({
             method: 'post',
             template: '/{cluster}/apis/{group}/{version}/{plural}',
         },
+        getClusterCRResourceInstance: {
+            method: 'get',
+            template: '/{cluster}/apis/{group}/{version}/{plural}/{name}',
+        },
+        patchClusterCRResourceInstance: {
+            method: 'patch',
+            template: '/{cluster}/apis/{group}/{version}/{plural}/{name}',
+            headers: {
+                'Content-Type': 'application/merge-patch+json',
+            },
+        },
         modifyClusterCRResource: {
             method: 'put',
             template: '/{cluster}/apis/{group}/{version}/{plural}/{name}',

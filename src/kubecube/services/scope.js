@@ -38,6 +38,7 @@ const service = Service({
         getCubeQuotaResourceInstance: {
             method: 'get',
             template: '/apis/quota.kubecube.io/v1/cuberesourcequota/{name}',
+            silent: true,
         },
         patchKubeDefineResource: {
             method: 'patch',
@@ -49,9 +50,5 @@ const service = Service({
     },
 });
 
-userInterceptor(service.axiosInstance, data => {
-    if (data.code === 404 && data.details.kind === 'cuberesourcequota') {
-        return true;
-    }
-});
+userInterceptor(service.axiosInstance);
 export default service;
