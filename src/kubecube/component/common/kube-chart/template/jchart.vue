@@ -29,14 +29,21 @@
 </template>
 
 <script>
-import {
+// import {
+//     Data2D,
+//     Coord2D,
+//     LineChart,
+//     CrossIndicator,
+//     LegendPlugin,
+// } from 'jchart/plugins';
+
+import jChart, {
     Data2D,
     Coord2D,
     LineChart,
-    CrossIndicator,
-    LegendPlugin,
-} from 'jchart/plugins';
-import jChart from 'jchart';
+    LineIndicator,
+    Legend,
+} from 'jchart';
 import { get, flatten } from 'lodash';
 import monitorService from 'kubecube/services/monitor';
 import { getStep, getStepTime } from 'kubecube/utils/functional';
@@ -258,16 +265,13 @@ export default {
                     dataoption.yAxis.max = max;
                 }
 
-                if (!this.chartContext || this.legendMeta.legends.length !== series.length) {
-                    this.legendMeta.legends = series.map(s => ({
-                        legend: {
-                            name: s.name,
-                        },
-                        color: { enable: 'rgba(0,0,0,0)', disable: 'rgba(0,0,0,0)' } }));
+                if (!this.chartContext) {
+                    // this.legendMeta.legends = series.map(s => ({
+                    //     legend: {
+                    //         name: s.name,
+                    //     },
+                    //     color: { enable: 'rgba(0,0,0,0)', disable: 'rgba(0,0,0,0)' } }));
                     this.$nextTick(() => {
-                        if (this.chartContext) {
-                            this.chartContext.destroy();
-                        }
                         this.chartContext = jChart([
                             new Data2D(),
                             new Coord2D({
@@ -281,9 +285,7 @@ export default {
                                 smooth: true,
                                 fill: true,
                             }),
-                            new CrossIndicator({
-                                vertical: true,
-                                horizontal: true,
+                            new LineIndicator({
                                 callback: meta => {
                                     if (!meta.display) {
                                         this.floatMeta.display = meta.display;
@@ -292,7 +294,7 @@ export default {
                                     }
                                 },
                             }),
-                            new LegendPlugin({
+                            new Legend({
                                 initCallback: legends => {
                                     this.legendMeta.legends = legends;
                                 },

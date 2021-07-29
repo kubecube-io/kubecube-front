@@ -10,13 +10,15 @@ module.exports = function(api, opts) {
     //     add(webpackChainConfig, 'dll', Object.assign({}, opts, { root }));
         add(webpackChainConfig, 'ui', Object.assign({}, opts, { root }));
         // 锁死路径
+        console.log(require.resolve('vue'))
+        console.log(require.resolve('@joskii/jchart'))
         webpackChainConfig.resolve.alias
             .set('@necfe/cloud-ui-internal', path.resolve(__dirname, '../lib/cloud-ui-internal'))
             .set('vue$', require.resolve('vue/dist/vue.esm.js'))
             .set('vue-router$', require.resolve('vue-router/dist/vue-router.esm.js'))
             .set('vuex$', require.resolve('vuex/dist/vuex.esm.js'))
             .set('kubecube', path.resolve(__dirname, '../src/kubecube'))
-            .set('jchart', path.resolve(__dirname, '../src/JChart'));
+            .set('jchart', require.resolve('@joskii/jchart'));
 
         webpackChainConfig
             .context(root)

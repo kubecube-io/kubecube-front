@@ -36,7 +36,7 @@ module.exports = {
         services: path.resolve(__dirname, 'src/client/services/'),
 
         kubecube: path.resolve(__dirname, 'src/kubecube/'),
-        jchart: path.resolve(__dirname, 'src/JChart/'),
+        // jchart: path.resolve(__dirname, 'src/JChart/'),
     },
 
     plugins: require('./plugins'),

@@ -77,6 +77,7 @@ export default {
 }
 .table td {
     padding: 2px 4px;
+    line-height: 1em;
 }
 .table span,
 .table td{
