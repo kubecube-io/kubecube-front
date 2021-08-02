@@ -83,7 +83,7 @@
           <u-text>共享</u-text>
         </kube-form-item>
 
-        <template v-if="model.pipe.cluster && model.pipe.tenant">
+        <template v-if="!pipeLoading && model.pipe.cluster && model.pipe.tenant">
           <x-request
             ref="request"
             :service="quotaService"
@@ -157,6 +157,7 @@ export default {
     data() {
         return {
             quotaService: scopeService.getCubeQuotaResourceInstance,
+            pipeLoading: false,
         };
     },
     computed: {
@@ -169,6 +170,7 @@ export default {
         },
     },
     watch: {
+
         state(val) {
             if (val) {
                 this.$refs.pipe.pipeRequest();
