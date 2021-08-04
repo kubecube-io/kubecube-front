@@ -103,10 +103,10 @@
 </template>
 
 <script>
-import { get as getFunc, flatten } from 'lodash';
+import { get as getFunc } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
-import workloadExtendService from 'kubecube/services/k8s-extend-resource';
+import { podService } from 'kubecube/service-combined/pod-service.js';
 import {
     toPlainObject as toPodPlainObject,
 } from 'kubecube/k8s-resources/pod/index.js';
@@ -151,51 +151,12 @@ export default {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
         podService() {
-            if (this.workload === 'deployments') {
-                return async () => {
-                    const response = await workloadService.getWorkloads({
-                        pathParams: {
-                            cluster: this.cluster,
-                            namespace: this.namespace,
-                            resource: 'replicasets',
-                        },
-                        params: {
-                            pageSize: 10000,
-                            selector: `metadata.ownerReferences.uid=${this.instance.metadata.uid}`,
-                        },
-                    });
-                    const r2 = await Promise.all((response.items || []).map(i =>
-                        workloadExtendService.getWorkloads({
-                            pathParams: {
-                                cluster: this.cluster,
-                                namespace: this.namespace,
-                                resource: 'pods',
-                            },
-                            params: {
-                                pageSize: 10000,
-                                selector: `metadata.ownerReferences.uid=${i.metadata.uid}`,
-                            },
-                        })
-                    ));
-                    return {
-                        items: flatten(r2.map(p => (p.items || []))),
-                    };
-
-                };
-            }
-            return async () => {
-                return await workloadExtendService.getWorkloads({
-                    pathParams: {
-                        cluster: this.cluster,
-                        namespace: this.namespace,
-                        resource: 'pods',
-                    },
-                    params: {
-                        pageSize: 10000,
-                        selector: `metadata.ownerReferences.uid=${this.instance.metadata.uid}`,
-                    },
-                });
-            };
+            return podService({
+                workload: this.workload,
+                cluster: this.cluster,
+                namespace: this.namespace,
+                uid: this.instance.metadata.uid,
+            });
         },
         workload() {
             return this.$route.params.workload;
