@@ -7,7 +7,7 @@ export const toObjectArray = (obj, labelStr, valueStr) => {
     return keys(obj).map(k => ({ [labelStr]: k, [valueStr]: obj[k] }));
 };
 export const KVtoObject = (target = [], key, value) => {
-    const existLabels = target.filter(i => i.key);
+    const existLabels = target.filter(i => i[key]);
     return zipObject(
         existLabels.map(l => l[key]),
         existLabels.map(l => l[value])
