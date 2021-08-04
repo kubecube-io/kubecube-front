@@ -238,7 +238,7 @@ export default {
 }
 .root[layout="list"] > .field {
     display: block;
-    max-width: 100%;
+    max-width: 100%!important;
 }
 .root[layout="list"] > .label[required]::after {
     content: '*';
