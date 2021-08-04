@@ -22,7 +22,7 @@ import kubeMonacoEditor from 'kubecube/component/common/kube-monaco-editor.vue';
 import kubeNameInput from 'kubecube/component/global/form-common/kube-name-input.vue';
 import kubeDeploymentSelectorInput from 'kubecube/component/global/form-common/kube-deployment-input.vue';
 import kubeLabelEditor from 'kubecube/component/global/k8s/label-editor';
-
+import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue';
 
 const SKELETON_KEY = 'SKELETON_KEY';
 const SKELETON_RAW_DATA = 'SKELETON_RAW_DATA';
@@ -76,6 +76,7 @@ Vue.use({
         _Vue.component('KubeTab', kubeTab);
         _Vue.component('KubeListBlock', kubeListBlock);
         _Vue.component('KubeMonacoEditor', kubeMonacoEditor);
+        _Vue.component('KubeDynamicLabels', kubeDynamicLabels);
 
         _Vue.filter('formatLocaleTime', function(value) {
             if (!value) return '-';
