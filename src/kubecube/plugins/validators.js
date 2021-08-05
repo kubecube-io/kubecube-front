@@ -311,4 +311,8 @@ export const rules = {
         },
         message: '仅支持选填其中一个',
     },
+    duration: {
+        validate: value => /^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$/.test(value),
+        message: 'duration不合法',
+    },
 };

@@ -71,6 +71,9 @@
               操作审计
             </u-sidebar-item>
           </u-sidebar-group>
+          <u-sidebar-item :to="{ path: '/platform/monitor' }">
+            <u-icons name="monitor" />组件监控
+          </u-sidebar-item>
           <u-sidebar-group
             v-if="isPlatform"
             class="m-sidebar-group"

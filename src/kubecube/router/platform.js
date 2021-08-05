@@ -266,6 +266,33 @@ export default {
             ],
         },
         {
+            path: 'monitor',
+            name: 'platform.monitor',
+            redirect: { name: 'platform.monitor.list' },
+            component: wrapper,
+            meta: {
+                breadCrumb: '组件监控',
+            },
+            children: [
+                {
+                    path: 'list',
+                    name: 'platform.monitor.list',
+                    component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/monitor.vue'),
+                    meta: {
+                        subroot: true,
+                    },
+                },
+                {
+                    path: ':dashboard',
+                    name: 'platform.monitor.dashboard',
+                    component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/monitor.js'),
+                    meta: {
+                        breadCrumb(name) { return name; },
+                    },
+                },
+            ],
+        },
+        {
             path: 'PrometheusRule',
             name: 'platform.PrometheusRule',
             component: wrapper,

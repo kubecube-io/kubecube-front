@@ -13,10 +13,11 @@
         <kube-pipe
           v-if="variables.length > 0"
           component="u-linear-layout"
+          direction="vertical"
           :graph="pipeSeq"
           @pipestatechange="pipeLoading = $event"
         >
-          <span
+          <div
             v-for="v in variables"
             :key="v.name"
             :class="$style.variable"
@@ -42,9 +43,8 @@
                   :data="[{ text: `暂无${v.name}`}]"
                 />
               </template>
-
             </kube-valve>
-          </span>
+          </div>
         </kube-pipe>
         <u-linear-layout>
           <!-- <u-text>时间</u-text> -->

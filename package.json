@@ -22,7 +22,7 @@
     "dependencies": {
         "@cloud-ui/x-ace-editor.vue": "~0.3.3",
         "@cloud-ui/x-echarts.vue": "^0.9.2",
-        "@joskii/jchart": "^1.0.1",
+        "@joskii/jchart": "^1.0.4",
         "@micro-app/plugin-compatible": "^0.0.6",
         "@micro-app/vue-cli-plugin-microapp": "^0.0.19",
         "@vue/babel-preset-app": "4.2.3",

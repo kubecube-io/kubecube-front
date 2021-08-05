@@ -23,6 +23,10 @@ const service = Service({
             method: 'get',
             template: '/cube/proxy/clusters/pivot-cluster/apis/monitoring.kubecube.io/v1/namespaces/kube-public/dashboards/{resource}',
         },
+        getInnerDashboardByQuery: {
+            method: 'get',
+            url: '/cube/proxy/clusters/pivot-cluster/apis/monitoring.kubecube.io/v1/namespaces/kubecube-monitoring/dashboards',
+        },
         // getPodDashboards: {
         //     method: 'get',
         //     url: '/cube/proxy/clusters/pivot-cluster/apis/monitoring.kubecube.io/v1/namespaces/kube-public/dashboards/cube-pod-resource',
