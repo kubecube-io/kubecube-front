@@ -13,9 +13,9 @@
       >
         <span
           :class="$style.rootName"
-          :title="value.miniText"
+          :title="titleKey && value[titleKey]"
         >
-          {{ value.miniText || `配置 - ${index}` }}
+          {{ (titleKey && value[titleKey]) || `配置 - ${index}` }}
         </span>
         <div :class="$style.textWrap">
           <!-- 错误提示 -->
@@ -25,7 +25,7 @@
           >
             {{ getTip(errors) }}</span>
           <!-- 展开操作 -->
-          <u-link @click="open">
+          <u-link @click.stop="open">
             展开
           </u-link>
         </div>
@@ -52,15 +52,35 @@
 
 <script>
 export default {
+    inject: [ 'rowmeta', 'changeCurrentBlock' ],
     props: {
         value: Object,
         index: Number,
+        titleKey: String,
         disabled: Boolean,
     },
     data() {
         return {
-            mini: false,
+            mini: this.index !== this.rowmeta.currentBlock,
         };
+    },
+    watch: {
+        rowmeta: {
+            handler(val) {
+                this.mini = this.index !== val.currentBlock;
+            },
+            deep: true,
+        },
+        mini(val) {
+            if (val) {
+                this.$refs.observer.validate();
+            }
+        },
+    },
+    mounted() {
+        if (this.mini) {
+            this.$refs.observer.validate();
+        }
     },
     methods: {
         remove() {
@@ -70,7 +90,12 @@ export default {
             this.mini = true;
         },
         open() {
-            this.mini = false;
+            if (this.rowmeta.currentBlock === this.index) {
+                this.mini = false;
+            } else {
+                this.changeCurrentBlock(this.index);
+            }
+
         },
         getTip(errors) {
             const k = Object.keys(errors).find(key => {
@@ -124,7 +149,7 @@ export default {
     margin-left: 10px;
     display: inline-block;
     line-height: 30px;
-    max-width: calc(100% - 80px);
+    max-width: calc(100% - 180px);
     overflow: hidden;
     word-wrap: normal;
     white-space: nowrap;

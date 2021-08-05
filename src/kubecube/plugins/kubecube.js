@@ -22,6 +22,7 @@ import kubeMonacoEditor from 'kubecube/component/common/kube-monaco-editor.vue';
 import kubeNameInput from 'kubecube/component/global/form-common/kube-name-input.vue';
 import kubeDeploymentSelectorInput from 'kubecube/component/global/form-common/kube-deployment-input.vue';
 import kubeLabelEditor from 'kubecube/component/global/k8s/label-editor';
+import kubePlainLabelEditor from 'kubecube/component/global/k8s/plain-label-editor.vue';
 import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue';
 
 const SKELETON_KEY = 'SKELETON_KEY';
@@ -67,6 +68,7 @@ Vue.use({
         _Vue.component('KubeNameInput', kubeNameInput);
         _Vue.component('KubeDeploymentSelectorInput', kubeDeploymentSelectorInput);
         _Vue.component('KubeLabelEditor', kubeLabelEditor);
+        _Vue.component('KubePlainLabelEditor', kubePlainLabelEditor);
         _Vue.component('KubeChart', kubeChart);
         _Vue.component('KubeDataTable', kubeDataTable);
         _Vue.component('KubeCheckboxBoard', kubeCheckboxBoard);

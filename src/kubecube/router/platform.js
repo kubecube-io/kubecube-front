@@ -208,14 +208,6 @@ export default {
                             ],
                         },
                         {
-                            path: 'log',
-                            name: 'platform.cluster.detail.log',
-                            component: () => import(/* webpackChunkName: "platform-cluster" */'kubecube/views/platform/cluster/details/log.vue'),
-                            meta: {
-                                breadCrumb: '集群日志',
-                            },
-                        },
-                        {
                             path: 'monitor',
                             name: 'platform.cluster.detail.monitor',
                             component: () => /* webpackChunkName: "platform-cluster" */ import('kubecube/views/control/monitor/monitor.vue'),
@@ -272,6 +264,69 @@ export default {
                     ],
                 },
             ],
+        },
+        {
+            path: 'PrometheusRule',
+            name: 'platform.PrometheusRule',
+            component: wrapper,
+            redirect: { name: 'platform.PrometheusRule.list' },
+            meta: {
+                breadCrumb: '告警规则',
+            },
+            children: [
+                {
+                    path: 'list',
+                    name: 'platform.PrometheusRule.list',
+                    component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/prometheus-rule.vue'),
+                    meta: {
+                        subroot: true,
+                    },
+                },
+                {
+                    path: ':cluster',
+                    component: wrapper,
+                    meta: {
+                        skip: true,
+                    },
+                    children: [
+                        {
+                            path: 'create',
+                            name: 'platform.PrometheusRule.create',
+                            component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/prometheus-rule-edit.vue'),
+                            meta: {
+                                breadCrumb: '创建',
+                                type: 'create',
+                            },
+                        },
+                        {
+                            path: ':instance',
+                            component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/prometheus-rule-instance.vue'),
+                            meta: {
+                                breadCrumb(name) { return name; },
+                                breadDisabled: true,
+                            },
+                            children: [
+                                {
+                                    path: 'edit',
+                                    component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/prometheus-rule-edit.vue'),
+                                    meta: {
+                                        breadCrumb: '编辑',
+                                        type: 'edit',
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            path: 'AlertmanagerConfig',
+            name: 'platform.AlertmanagerConfig',
+            component: () => /* webpackChunkName: "platform-observable" */ import('kubecube/views/platform/observable/alertmanager-config.vue'),
+            meta: {
+                breadCrumb: '全局告警配置',
+            },
         },
     ],
 };

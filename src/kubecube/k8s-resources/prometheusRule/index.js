@@ -5,6 +5,16 @@ import {
 } from '../base/config';
 
 import { getFromModel } from '../base/utils';
+export const RESOURCE = {
+    group: 'monitoring.coreos.com',
+    version: 'v1',
+    plural: 'prometheusrules',
+};
+export const CRITICALS = [
+    { text: '轻微', value: 'info' },
+    { text: '一般', value: 'warning' },
+    { text: '紧急', value: 'critical' },
+];
 
 
 export function toPlainObject(model) {

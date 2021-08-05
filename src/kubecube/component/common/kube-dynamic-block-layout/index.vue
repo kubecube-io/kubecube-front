@@ -16,6 +16,12 @@
 
 <script>
 export default {
+    provide() {
+        return {
+            rowmeta: this.meta,
+            changeCurrentBlock: this.changeCurrentBlock,
+        };
+    },
     props: {
         size: {
             type: String,
@@ -27,11 +33,18 @@ export default {
     data() {
         return {
             showDetail: true,
+            meta: {
+                currentBlock: 0,
+            },
         };
     },
     methods: {
         add() {
             this.$emit('add');
+        },
+        changeCurrentBlock(index) {
+            console.log(index);
+            this.meta.currentBlock = index;
         },
     },
 };

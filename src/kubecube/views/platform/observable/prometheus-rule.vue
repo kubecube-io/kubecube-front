@@ -1,29 +1,21 @@
 <template>
   <u-linear-layout direction="vertical">
-    <u-linear-layout direction="horizontal">
+    <u-linear-layout>
+      <u-text>集群</u-text>
+      <cluster-selector v-model="cluster" />
       <u-button
         icon="create"
         color="primary"
         @click="toCreate"
       >
-        创建告警策略
+        创建告警规则
       </u-button>
-      <u-button
-        icon="refresh"
-        square
-        @click="refresh"
-      />
-      <kube-input-search
-        :align-right="true"
-        placeholder="请输入名称搜索"
-        @search="onSearch"
-      />
     </u-linear-layout>
-
     <x-request
+      v-if="cluster"
       ref="request"
       :service="service"
-      :params="{}"
+      :params="params"
       :processor="resolver"
     >
       <template slot-scope="{ data, loading, error }">
@@ -34,7 +26,6 @@
           :items="data ? data.list : []"
           :error="error"
           resizable
-          @sort="onSort"
         >
           <template #[`item.metadata.name`]="{ item, itemMeta }">
             <u-label
@@ -62,7 +53,7 @@
           </template>
           <template #[`item.operation`]="{ item }">
             <u-linear-layout gap="small">
-              <u-link-list :key="workload">
+              <u-link-list>
                 <u-link-list-item @click="editItem(item)">
                   设置
                 </u-link-list-item>
@@ -124,50 +115,61 @@
 </template>
 
 <script>
-import { pickBy, get as getFunc } from 'lodash';
+import { omit, get as getFunc } from 'lodash';
 import { get } from 'vuex-pathify';
-import workloadService from 'kubecube/services/k8s-resource';
 import PageMixin from 'kubecube/mixins/pagenation';
-import {
-    toPlainObject as toPrometheusRulePlainObject,
-} from 'kubecube/k8s-resources/prometheusRule';
+import workloadService from 'kubecube/services/k8s-resource';
+import clusterSelector from '../namespace/cluster-select.vue';
 import monitorService from 'kubecube/services/monitor';
 import {
     resolveTemplate,
 } from 'kubecube/k8s-resources/monitor/utils.js';
 import {
-    rulespecCRD,
-    critical,
-} from '../utils';
-import {
-    toObjectArray,
-} from 'kubecube/k8s-resources/base/utils.js';
+    toPlainObject as toPrometheusRulePlainObject,
+    RESOURCE,
+    CRITICALS,
+} from 'kubecube/k8s-resources/prometheusRule/global';
+const MONITOR_NAMESPACE = 'kubecube-monitoring';
 const template = 'sum (ALERTS{cluster="$cluster",kubecube_io_owner=~"$tenant-$project.*"}) without(receive,tenant_id)';
 const queryFunc = resolveTemplate(template);
-export default {
 
-    metaInfo() {
-        return {
-            title: '告警规则 - kubecube',
-        };
-    },
+export default {
     filters: {
         criticalFilter(val) {
-            const t = critical.find(c => c.value === val);
+            const t = CRITICALS.find(c => c.value === val);
             if (t) return t.text;
             return '-';
         },
     },
+    components: {
+        clusterSelector,
+    },
     mixins: [ PageMixin ],
+    beforeRouteLeave(to, from, next) {
+        if (to.query.cluster) {
+            next({
+                path: to.path,
+                query: omit(to.query, [ 'cluster' ]),
+            });
+        } else {
+            next();
+        }
+    },
+    metaInfo() {
+        return {
+            title: '全局告警规则 - kubecube',
+        };
+    },
     data() {
         return {
+            cluster: this.$route.query.cluster ? { value: this.$route.query.cluster, clusterName: this.$route.query.cluster } : null,
             columns: [
                 { title: '告警名称', name: 'metadata.name' },
-                { title: '告警规则', name: 'spec.rule.expr' },
-                { title: '告警策略组', name: 'spec.rule.ams' },
-                { title: '告警程度', name: 'spec.rule.severity' },
+                // { title: '告警规则', name: 'spec.rule.expr' },
+                // { title: '告警策略组', name: 'spec.rule.ams' },
+                // { title: '告警程度', name: 'spec.rule.severity' },
                 { title: '创建时间', name: 'metadata.creationTimestamp', width: '180px' },
-                { title: '操作', name: 'operation', width: '180px' },
+                { title: '操作', name: 'operation', width: '100px' },
             ],
             alertcolumns: [
                 { title: 'state', width: '180px', name: 'metric.alertstate' },
@@ -178,15 +180,13 @@ export default {
     computed: {
         tenant: get('scope/tenant@value'),
         project: get('scope/project@value'),
-        namespace: get('scope/project@spec.namespace'),
-        cluster: get('scope/cluster@value'),
         service() {
             return () => Promise.all([
-                workloadService.getNamespaceCRResource(this.requestParam),
+                workloadService.getNamespaceCRResource(this.params),
                 monitorService.queryInstant({
                     params: {
                         query: queryFunc({
-                            cluster: this.cluster,
+                            cluster: getFunc(this.cluster, 'clusterName'),
                             tenant: this.tenant,
                             project: this.project,
                         }),
@@ -196,58 +196,20 @@ export default {
             ]);
             // return workloadService.getNamespaceCRResource;
         },
-        deleteService() {
-            return workloadService.deleteNamespaceCRResource;
-        },
-        instanceService() {
-            return workloadService.getNamespaceCRResourceInstance;
-        },
-        modifyService() {
-            return workloadService.modifyNamespaceCRResource;
-        },
-        requestParam() {
+        params() {
             return {
                 pathParams: {
-                    cluster: this.cluster,
-                    namespace: this.namespace,
-                    ...rulespecCRD,
+                    cluster: getFunc(this.cluster, 'clusterName'),
+                    namespace: MONITOR_NAMESPACE,
+                    ...RESOURCE,
                 },
                 params: {
-                    ...pickBy(this.pagenation, i => !!i), // has to be this
+                    ...this.pagenation, // has to be this
                 },
             };
         },
-        workload() {
-            return this.$route.params.workload;
-        },
-    },
-    watch: {
-        columns() {
-            this.$refs.request.resetData();
-        },
     },
     methods: {
-        toObjectArray,
-        getAlertColor(val) {
-            switch (val) {
-                case 'normal':
-                    return 'success';
-                case 'pending':
-                    return 'warning';
-                case 'firing':
-                    return 'error';
-                default:
-                    return '-';
-            }
-        },
-        getAlert(alerts) {
-            const arr = [ 'normal', 'pending', 'firing' ];
-            let idx = 0;
-            alerts.forEach(alert => {
-                idx = Math.max(arr.findIndex(p => p === alert.metric.alertstate), idx);
-            });
-            return arr[idx];
-        },
         resolver(response) {
             const [ prometheusRuleResponse, statusResponse ] = response;
             const list = (prometheusRuleResponse.items || []).map(toPrometheusRulePlainObject).map(p => {
@@ -265,49 +227,14 @@ export default {
         refresh() {
             this.$refs.request.request();
         },
-        onSort({ order, name }) {
-            this.pagenation.sortOrder = order;
-            this.pagenation.sortName = `${name}`;
-            this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
+        view() {
+
         },
-        onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+        editItem(item) {
+            this.$router.push({ path: `/platform/PrometheusRule/${getFunc(this.cluster, 'clusterName')}/${item.metadata.name}/edit` });
         },
         toCreate() {
-            // this.$refs.editDialog.open();
-            this.$router.push({ name: 'control.workload.create', params: this.$route.params });
-        },
-        // view() {
-
-        // },
-        // closeItem(item) {
-
-        // },
-        // async editYAML(item) {
-        //     const reqParam = {
-        //         pathParams: {
-        //             ...this.requestParam.pathParams,
-        //             name: item.metadata.name,
-        //         },
-        //     };
-        //     const response = await this.instanceService(reqParam);
-
-        //     this.$editResource({
-        //         title: `${item.metadata.name} —— YAML 设置`,
-        //         content: response,
-        //         onSubmit: async content => {
-        //             await this.modifyService({
-        //                 ...reqParam,
-        //                 data: content,
-        //             });
-        //             this.refresh();
-        //         },
-        //     });
-        // },
-        editItem(item) {
-            this.$router.push({
-                path: `/control/${this.workload}/${item.metadata.name}/edit`,
-            });
+            this.$router.push({ path: `/platform/PrometheusRule/${getFunc(this.cluster, 'clusterName')}/create` });
         },
         deleteItem(item) {
             this.$confirm({
@@ -316,11 +243,12 @@ export default {
                 ok: async () => {
                     const reqParam = {
                         pathParams: {
-                            ...this.requestParam.pathParams,
+                            cluster: this.cluster.clusterName,
                             name: item.metadata.name,
+                            ...RESOURCE,
                         },
                     };
-                    await this.deleteService(reqParam);
+                    await workloadService.deleteNamespaceCRResource(reqParam);
                     this.$refs.request.request();
                 },
             });

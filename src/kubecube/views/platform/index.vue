@@ -71,6 +71,22 @@
               操作审计
             </u-sidebar-item>
           </u-sidebar-group>
+          <u-sidebar-group
+            v-if="isPlatform"
+            class="m-sidebar-group"
+          >
+            <span slot="title"><u-icons name="config" />告警</span>
+            <u-sidebar-item
+              :to="{ path: '/platform/PrometheusRule' }"
+            >
+              告警规则
+            </u-sidebar-item>
+            <u-sidebar-item
+              :to="{ path: '/platform/AlertmanagerConfig' }"
+            >
+              全局告警配置
+            </u-sidebar-item>
+          </u-sidebar-group>
         </u-sidebar>
       </div>
     </aside>

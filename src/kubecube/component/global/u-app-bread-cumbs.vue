@@ -49,6 +49,7 @@ export default {
                 const last = breadcrumbs[idx - 1] || { to: { path: `/${remainPath}` } };
                 if (!c) break;
                 if (c.meta.subroot) break;
+                if (c.meta.skip) continue;
                 const ctext = isFunction(c.meta.breadCrumb) ? c.meta.breadCrumb(p, relative) : c.meta.breadCrumb;
                 const breadDisabled = c.meta.breadDisabled;
                 console.log(last.to.path);
