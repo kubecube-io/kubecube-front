@@ -27,22 +27,7 @@
           :error="error"
           resizable
         >
-          <template #[`item.metadata.name`]="{ item, itemMeta }">
-            <u-label
-              v-if="item.alerts.length"
-              :class="$style.label"
-              :color="getAlertColor(getAlert(item.alerts))"
-              @click="itemMeta.expand = !itemMeta.expand"
-            >
-              {{ getAlert(item.alerts) }}
-            </u-label>
-            <u-label
-              v-else
-              :class="$style.label"
-              color="success"
-            >
-              normal
-            </u-label>
+          <template #[`item.metadata.name`]="{ item }">
             {{ item.metadata.name }}
           </template>
           <template #[`item.spec.rule.severity`]="{ item }">
@@ -50,6 +35,9 @@
           </template>
           <template #[`item.metadata.creationTimestamp`]="{ item }">
             {{ item.metadata.creationTimestamp | formatLocaleTime }}
+          </template>
+          <template #[`item.regularnum`]="{ item }">
+            {{ getRuleSum(item) }}
           </template>
           <template #[`item.operation`]="{ item }">
             <u-linear-layout gap="small">
@@ -168,6 +156,7 @@ export default {
                 // { title: '告警规则', name: 'spec.rule.expr' },
                 // { title: '告警策略组', name: 'spec.rule.ams' },
                 // { title: '告警程度', name: 'spec.rule.severity' },
+                { title: '规则数量', name: 'regularnum', width: '100px' },
                 { title: '创建时间', name: 'metadata.creationTimestamp', width: '180px' },
                 { title: '操作', name: 'operation', width: '100px' },
             ],
@@ -235,6 +224,13 @@ export default {
         },
         toCreate() {
             this.$router.push({ path: `/platform/PrometheusRule/${getFunc(this.cluster, 'clusterName')}/create` });
+        },
+        getRuleSum(item) {
+            let num = 0;
+            item.spec.groups.forEach(g => {
+                num += g.rules.length;
+            });
+            return num;
         },
         deleteItem(item) {
             this.$confirm({

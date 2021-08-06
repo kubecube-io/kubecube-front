@@ -64,7 +64,7 @@ export default {
         return {
             columns: [
                 { title: '集群', name: 'cluster.clusterName' },
-                { title: '告警策略组', name: 'config.metadata.name' },
+                { title: '告警配置', name: 'config.metadata.name' },
                 { title: '操作', name: 'operation', width: '180px' },
             ],
         };
