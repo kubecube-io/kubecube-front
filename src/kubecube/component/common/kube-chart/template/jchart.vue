@@ -295,7 +295,7 @@ export default {
                                 },
                             }),
                             new Legend({
-                                initCallback: legends => {
+                                callback: legends => {
                                     this.legendMeta.legends = legends;
                                 },
                             }),

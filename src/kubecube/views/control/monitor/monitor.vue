@@ -12,9 +12,8 @@
       <template v-else>
         <kube-pipe
           v-if="variables.length > 0"
-          component="u-linear-layout"
-          direction="vertical"
           :graph="pipeSeq"
+          :class="$style.variableWrapper"
           @pipestatechange="pipeLoading = $event"
         >
           <div
@@ -30,16 +29,23 @@
               :request="() => resolveRequest(v)"
             >
               <template v-if="sources[v.name]">
-                <u-select
-                  v-if="sources[v.name].length > 0"
-                  v-model="variableSelected[v.name]"
-                  size="large"
-                  :data="sources[v.name]"
-                />
+                <template v-if="sources[v.name].length > 0">
+                  <div>
+                    <span :class="$style.occupation">{{ findLongest(sources[v.name]) }}</span>
+                    <u-select
+                      v-model="variableSelected[v.name]"
+                      size="large"
+                      style="width: 100%"
+                      :class="$style.selector"
+                      :data="sources[v.name]"
+                    />
+                  </div>
+                </template>
                 <u-select
                   v-else
                   size="large"
                   disabled
+                  style="width: auto"
                   :data="[{ text: `暂无${v.name}`}]"
                 />
               </template>
@@ -243,14 +249,44 @@ export default {
             this.startTime = startTime;
             this.endTime = endTime;
         },
+        findLongest(sources) {
+            let l = 0;
+            let longest = '';
+            sources.forEach(s => {
+                const p = s.text.length;
+                if (p > l) {
+                    l = p;
+                    longest = s.text;
+                }
+            });
+            return `xxxx${longest}xxxx`;
+        },
     },
 };
 </script>
 
 <style module>
+.variableWrapper {
+    display: flex;
+    flex-wrap: wrap;
+}
+.variable {
+    margin: 10px;
+}
+.variable > span .occupation {
+    display: block;
+    visibility: hidden;
+    height: 38px;
+}
+.variable > span .selector {
+    position: absolute;
+    top: 0;
+}
 .variable > span{
+    position: relative;
     display: inline-block;
     margin-right: 10px;
+    vertical-align: middle;
 }
 
 .container::after{
