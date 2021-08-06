@@ -22,6 +22,7 @@
 import { get } from 'lodash';
 import monitorService from 'kubecube/services/monitor';
 import { getStep, getStepTime } from 'kubecube/utils/functional';
+const METRIC_KEY = Symbol('METRIC_KEY');
 export default {
     props: {
         type: String,
@@ -123,7 +124,6 @@ export default {
                     return;
                 }
                 const columns = this.meta.styles.map(s => s.column(this.scope));
-
                 const items = {};
                 response.forEach((r, idx) => {
                     const data = r.data.result;
@@ -131,9 +131,27 @@ export default {
 
                     data.forEach(d => {
                         if (d.metric) {
-                            const key = Object.values(d.metric).sort().join('-');
-                            if (!items[key]) {
-                                items[key] = {};
+                            // 表格键值为子集关系
+                            const curMetric = Object.values(d.metric);
+                            let key = curMetric.sort().join('-');
+                            let finded;
+                            for (const k in items) {
+                                const keyMetric = items[k][METRIC_KEY];
+                                if (keyMetric.length > curMetric.length
+                                    && curMetric.every(m => keyMetric.includes(m))) {
+                                    finded = k;
+                                    break;
+                                }
+                                if (keyMetric.length < curMetric.length
+                                 && keyMetric.every(m => curMetric.includes(m))) {
+                                    finded = k;
+                                    break;
+                                }
+                            }
+                            if (!finded) {
+                                items[key] = {
+                                    [METRIC_KEY]: curMetric,
+                                };
                                 Object.keys(d.metric).forEach(k => {
                                     // 避免遗漏 column
                                     if (!columns.find(c => c.name === k)) {
@@ -146,7 +164,10 @@ export default {
                                         [k]: d.metric[k],
                                     });
                                 });
-
+                            } else if (finded && key !== finded) {
+                                const newKey = key.length > finded.length ? key : finded;
+                                items[newKey] = items[finded];
+                                key = newKey;
                             }
                             Object.assign(items[key], {
                                 [qmeta.ref]: get(d, 'value[1]', '-'),
