@@ -25,7 +25,7 @@ const resolveRow = row => {
 const resolveVariable = varible => {
     const g = getFromModel(varible);
     return {
-        displayName: g('query.displayName'),
+        displayName: g('query.label'),
         name: g('query.name'),
         request: resolveVariablesRequest(g('query.request')),
     };

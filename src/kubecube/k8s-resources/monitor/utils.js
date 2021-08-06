@@ -22,7 +22,7 @@ export const resolveTemplate = template => {
     };
 };
 
-export function resolveLegend(template) {
+export function resolveLegend(template = '') {
     const r = template.split(/\{\{([^}]*)\}\}/);
     return obj => {
         console.log(obj, template);
