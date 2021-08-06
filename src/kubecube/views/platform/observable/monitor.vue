@@ -38,7 +38,7 @@ export default {
         return {
             service: monitorService.getInnerDashboardByQuery,
             columns: [
-                { name: 'metadata.name', title: '监控名称' },
+                { name: 'metadata.name', title: '组件名称' },
                 // { name: 'displayName', title: '用户名' },
             ],
         };

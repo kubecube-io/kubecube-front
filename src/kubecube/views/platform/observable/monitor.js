@@ -23,6 +23,7 @@ export default {
                 },
             });
             const resolved = toMonitorPlainObject(get(response, 'items[0]'));
+            this.title = resolved.spec.title;
             this.variables = resolved.spec.variables || [];
             this.rows = resolved.spec.rows || [];
             this.pipeSeq = this.variables.map(v => v.name).join(' > ');

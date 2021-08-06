@@ -105,8 +105,33 @@
                       <kube-tab
                         v-model="rcModel.receivers"
                         title-key="receiver"
+                        tab-key="receiver"
                         disabled
                       >
+                        <template #[`wechatConfigs.tab`]>
+                          <span
+                            v-if="rcModel.receivers.find(c => c.receiver === 'wechatConfigs').config.length"
+                            :class="$style.indicator"
+                          >
+                            {{ rcModel.receivers.find(c => c.receiver === 'wechatConfigs').config.length }}
+                          </span>
+                        </template>
+                        <template #[`webhookConfigs.tab`]>
+                          <span
+                            v-if="rcModel.receivers.find(c => c.receiver === 'webhookConfigs').config.length"
+                            :class="$style.indicator"
+                          >
+                            {{ rcModel.receivers.find(c => c.receiver === 'webhookConfigs').config.length }}
+                          </span>
+                        </template>
+                        <template #[`emailConfigs.tab`]>
+                          <span
+                            v-if="rcModel.receivers.find(c => c.receiver === 'emailConfigs').config.length"
+                            :class="$style.indicator"
+                          >
+                            {{ rcModel.receivers.find(c => c.receiver === 'emailConfigs').config.length }}
+                          </span>
+                        </template>
                         <template slot-scope="{ model: inputsModel }">
                           <div
                             :key="inputsModel.receiver"
@@ -122,7 +147,7 @@
                             <kube-dynamic-block
                               v-if="inputsModel.enable"
                               v-model="inputsModel.config"
-                              style="width: 100%"
+                              style="width: 580px"
                               :prefix-key="inputsModel.receiver"
                               :layout-comp="blockLayout"
                               :row-comp="blockRowLayout"
@@ -346,6 +371,12 @@
                 :class="$style.inputtag"
               />
             </kube-form-item>
+            <kube-form-item label="matchers">
+              <input-tag
+                v-model="model.route.matchers"
+                :class="$style.inputtag"
+              />
+            </kube-form-item>
             <kube-form-item>
               <u-linear-layout direction="horizontal">
                 <u-button
@@ -458,11 +489,12 @@ export default {
 </script>
 
 <style module>
-.group + .group{
+.group{
     margin-top: 20px;
+    min-height: 360px;
 }
-.group {
-    min-height: 400px;
+.group .header {
+    margin: 10px 0;
 }
 .inputtag {
     width: 580px;
@@ -474,5 +506,19 @@ export default {
 }
 .inputtag > span > a{
     color: #fff!important;
+}
+.indicator{
+    display: inline-block;
+    position: absolute;
+    width: 1.25em;
+    height: 1.25em;
+    line-height: 1.25em;
+    background: #cad4e4;
+    color: #fff;
+    border-radius: 100%;
+    right: 4px;
+    text-align: center;
+    top: 3px;
+    font-size: .8em;
 }
 </style>

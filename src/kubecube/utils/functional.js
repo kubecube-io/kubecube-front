@@ -1,5 +1,6 @@
 import { get, isPlainObject } from 'lodash';
 import BigNumber from 'bignumber.js';
+import parseMS from 'parse-ms';
 export function setValueIfListNotPresent({
     list,
     path,
@@ -79,6 +80,19 @@ export const flattenkeys = obj => {
     });
     return flattened;
 };
+
+const timeKeys = [ 'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds' ];
+const timeUnit = [ 'd', 'h', 'm', 's', 'ms', 'μs', 'ns' ];
+export function niceTiming(second) {
+    const parsed = parseMS(+second * 1000);
+    const str = [];
+    timeKeys.forEach((k, idx) => {
+        if (parsed[k]) {
+            str.push(`${parsed[k]}${timeUnit[idx]}`);
+        }
+    });
+    return str.slice(0, 3).join('');
+}
 
 
 export const getPeriod = (startTime, endTime) => {

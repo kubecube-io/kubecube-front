@@ -49,7 +49,7 @@ import monitorService from 'kubecube/services/monitor';
 import { getStep, getStepTime } from 'kubecube/utils/functional';
 import floatContent from './float-content.vue';
 import legendContent from './legend-content.vue';
-import { niceBytes, BPSunits } from 'kubecube/utils/functional';
+import { niceBytes, BPSunits, niceTiming } from 'kubecube/utils/functional';
 const NumberFormatter = new Intl.NumberFormat('en-GB', {
     notation: 'compact',
     compactDisplay: 'short',
@@ -251,14 +251,24 @@ export default {
                             return `${NumberFormatter.format(value * 100)}%`;
                         };
                     }
-                    if (unit === 'pps' || unit === 'ops') {
+                    if (unit === 'pps') {
                         dataoption.yAxis.format = function(value) {
                             return `${NumberFormatter.format(value)} pps`;
+                        };
+                    }
+                    if (unit === 'ops') {
+                        dataoption.yAxis.format = function(value) {
+                            return `${NumberFormatter.format(value)} ops/s`;
                         };
                     }
                     if (unit === 'Bps') {
                         dataoption.yAxis.format = function(value) {
                             return niceBytes(value, BPSunits);
+                        };
+                    }
+                    if (unit === 's') {
+                        dataoption.yAxis.format = function(value) {
+                            return niceTiming(value);
                         };
                     }
                     dataoption.yAxis.min = min || 0;

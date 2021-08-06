@@ -1,6 +1,6 @@
 <template>
   <div>
-    <u-info-list-group title="监控" />
+    <u-info-list-group :title="`${title} 监控`" />
     <u-linear-layout
       direction="vertical"
       style="margin-bottom: 20px;"
@@ -153,7 +153,7 @@ export default {
             ],
             startTime: (now - 30 * 60 * 1000),
             endTime: now,
-
+            title: '',
 
             loading: false,
             variables: [],
@@ -221,6 +221,7 @@ export default {
             });
 
             const resolved = toMonitorPlainObject(response);
+            this.title = resolved.spec.title;
             this.variables = resolved.spec.variables || [];
             this.rows = resolved.spec.rows || [];
             this.pipeSeq = this.variables.map(v => v.name).join(' > ');

@@ -1,4 +1,4 @@
-import { assign, some, pick, omit, values, toNumber, merge, cloneDeep, get } from 'lodash';
+import { assign, some, pick, pickBy, omit, values, toNumber, merge, cloneDeep, get } from 'lodash';
 import {
     toPlainObject as toSecretPlainObject,
     toK8SObject as toSecretK8SObject,
@@ -22,6 +22,8 @@ export const DEFAULT_CONFIG = {
         group_wait: '30s',
         group_interval: '30s',
         repeat_interval: '4h',
+        matchers: [],
+
     },
     receivers: [],
     templates: [],
@@ -32,6 +34,8 @@ const channels = [
     'webhookConfigs',
     'emailConfigs',
 ];
+
+export const operators = ['=', '!=', '=~', '!~'];
 
 export const MANGER_CONFIGS = {
     wechatConfigs: {
@@ -101,9 +105,9 @@ export function getDefaultReceiver() {
 function resolveConfig(config) {
     const wrappedConfig = merge(cloneDeep(DEFAULT_CONFIG), config);
     wrappedConfig.global.smtp_auth_password_curr = wrappedConfig.global.smtp_auth_password;
-    wrappedConfig.global.smtp_auth_password = '<secret>';
+    wrappedConfig.global.smtp_auth_password = wrappedConfig.global.smtp_auth_password_curr ? '<secret>' : '';
     wrappedConfig.global.wechat_api_secret_curr = wrappedConfig.global.wechat_api_secret;
-    wrappedConfig.global.wechat_api_secret = '<secret>';
+    wrappedConfig.global.wechat_api_secret = wrappedConfig.global.wechat_api_secret_curr ? '<secret>' : '';
     return {
         ...wrappedConfig,
         receivers: resolveReceivers((get(config, 'receivers') || []).filter(c => c)),
@@ -174,7 +178,7 @@ function refactConfig(config) {
     global.wechat_api_secret = global.wechat_api_secret === '<secret>' ? config.global.wechat_api_secret_curr : global.wechat_api_secret;
 
     return {
-        global,
+        global: pickBy(global, d => (typeof d === 'string' ? !!d : true)),
         route: config.route,
         receivers: config.receivers.map(c => refactReceiver(c)),
         ...pick(source, [ 'templates', 'inhibit_rules', 'mute_time_intervals' ]),

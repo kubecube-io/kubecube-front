@@ -1,6 +1,6 @@
 import { get, map, uniq } from 'lodash';
 import monitorService from 'kubecube/services/monitor';
-import { niceBytes, BPSunits } from 'kubecube/utils/functional';
+import { niceBytes, BPSunits, niceTiming } from 'kubecube/utils/functional';
 const NumberFormatter = new Intl.NumberFormat('en-GB', {
     notation: 'compact',
     compactDisplay: 'short',
@@ -25,11 +25,10 @@ export const resolveTemplate = template => {
 export function resolveLegend(template = '') {
     const r = template.split(/\{\{([^}]*)\}\}/);
     return obj => {
-        console.log(obj, template);
+        // console.log(obj, r, template);
         if (r.length === 1) return template;
 
         return r.reduce((str, part) => {
-            part = part.trim();
             if (obj[part]) str += obj[part];
             else str += part;
             return str;
@@ -108,6 +107,13 @@ export function resolveFormatter(unit) {
 
     if (unit === 'pps') {
         formatter = d => `${NumberFormatter.format(d)} pps`;
+    }
+
+    if (unit === 'ops') {
+        formatter = d => `${NumberFormatter.format(d)} ops/s`;
+    }
+    if (unit === 's') {
+        formatter = d => niceTiming(d);
     }
 
     // if (unit === 'pps') {

@@ -51,7 +51,7 @@
                   style="width: 580px"
                 >
                   <template slot-scope="{ model: ruleModel, index: ruleErrorPrefix }">
-                    <kube-form label-size="small">
+                    <kube-form label-size="large">
                       <validation-provider
                         v-slot="{ errors }"
                         :name="`${errorPrefix}-rule-${ruleErrorPrefix}-expr`"
@@ -63,7 +63,7 @@
                           required
                           :message="errors && errors[0]"
                         >
-                          <u-input
+                          <u-textarea
                             v-model="ruleModel.expr"
                             size="normal huge"
                             :color="errors && errors[0] ? 'error' : ''"
@@ -71,6 +71,7 @@
                         </kube-form-item>
                       </validation-provider>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.for : true"
                         layout="list"
                         label="for"
                       >
@@ -80,6 +81,7 @@
                         />
                       </kube-form-item>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.severity : true"
                         layout="list"
                         label="告警程度"
                       >
@@ -96,8 +98,14 @@
                         </u-radios>
                       </kube-form-item>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? (ruleModel.summary || ruleModel.description || ruleModel.runbook_url || ruleModel.annotations.filter(l => l.key).length) : true"
                         layout="list"
-                        label="Summary"
+                        label="Annotations"
+                      />
+                      <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.summary : true"
+                        layout="list"
+                        label="摘要"
                       >
                         <u-textarea
                           v-model="ruleModel.summary"
@@ -105,8 +113,9 @@
                         />
                       </kube-form-item>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.description : true"
                         layout="list"
-                        label="Description"
+                        label="描述信息"
                       >
                         <u-textarea
                           v-model="ruleModel.description"
@@ -114,6 +123,7 @@
                         />
                       </kube-form-item>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.runbook_url : true"
                         layout="list"
                         label="Runbook Url"
                       >
@@ -123,8 +133,9 @@
                         />
                       </kube-form-item>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.annotations.filter(l => l.key).length : true"
                         layout="list"
-                        label="annotations"
+                        label=""
                       >
                         <kube-plain-label-editor
                           v-model="ruleModel.annotations"
@@ -132,6 +143,7 @@
                         />
                       </kube-form-item>
                       <kube-form-item
+                        v-if="ruleModel.hideAdvanced ? ruleModel.labels.filter(l => l.key).length : true"
                         layout="list"
                         label="labels"
                       >
@@ -139,6 +151,14 @@
                           v-model="ruleModel.labels"
                           style="width: 548px"
                         />
+                      </kube-form-item>
+                      <kube-form-item
+                        layout="list"
+                        label=""
+                      >
+                        <u-link @click="ruleModel.hideAdvanced = !ruleModel.hideAdvanced">
+                          {{ ruleModel.hideAdvanced ? '展开更多配置' : '收起未填配置' }}
+                        </u-link>
                       </kube-form-item>
                     </kube-form>
                   </template>

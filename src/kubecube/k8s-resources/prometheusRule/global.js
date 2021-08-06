@@ -21,6 +21,7 @@ export const CRITICALS = [
 
 export function getDefaultRule() {
     return {
+        hideAdvanced: false,
         expr: '',
         for: '',
         severity: 'info',
@@ -42,6 +43,18 @@ function resolveRules(rules) {
         defaultRule.severity = get(r, 'labels.severity');
         defaultRule.labels = toObjectArray(omit(get(r, 'labels', []), [ 'severity' ]), 'key', 'value');
         defaultRule.annotations = toObjectArray(omit(get(r, 'annotations', []), [ 'summary', 'description', 'runbook_url' ]), 'key', 'value');
+        defaultRule.hideAdvanced = Object.values(defaultRule).some(v => {
+            if (typeof v === 'undefined') {
+                return true;
+            }
+            if (typeof v === 'string') {
+                return !v;
+            }
+            if (Array.isArray(v)) {
+                return v.length === 0;
+            }
+            return false;
+        });
         return defaultRule;
     });
 }
