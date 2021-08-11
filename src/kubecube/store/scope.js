@@ -9,6 +9,7 @@ const state = {
     cluster: null,
     namespace: null,
     loading: false,
+    clusterList: [],
 };
 let pageIdentifierCache = '';
 const getters = {

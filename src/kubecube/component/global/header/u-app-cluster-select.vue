@@ -37,6 +37,7 @@ export default {
     }),
     computed: {
         cluster: sync('scope/cluster'),
+        clusterList: sync('scope/clusterList'),
         routeCluster() {
             return this.$route.query.cluster;
         },
@@ -76,6 +77,7 @@ export default {
                     value: i.clusterName,
                     ...i,
                 }));
+                this.clusterList = this.items.slice();
                 setValueIfListNotPresent({
                     list: this.items,
                     path: 'value',

@@ -5,6 +5,7 @@ import { required } from 'vee-validate/dist/rules';
 import isValidGlob from 'is-valid-glob';
 import { ignoredKeys } from 'kubecube/utils/constance';
 import cronValidate from 'node-cron/src/pattern-validation';
+import yamljs from 'yamljs';
 
 export const rules = {
     required: {
@@ -314,5 +315,17 @@ export const rules = {
     duration: {
         validate: value => /^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$/.test(value),
         message: 'duration不合法',
+    },
+
+    yaml: {
+        validate: value => {
+            try {
+                yamljs.parse(value);
+                return true;
+            } catch (err) {
+                return false;
+            }
+        },
+        message: 'yaml 格式错误',
     },
 };

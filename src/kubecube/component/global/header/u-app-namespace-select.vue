@@ -29,6 +29,30 @@ import valveMixin from 'kubecube/mixins/pipe/valve.mixin';
 import {
     setValueIfListNotPresent,
 } from 'kubecube/utils/functional';
+export async function loadNS({
+    tenant,
+    project,
+    cluster,
+}) {
+    const params = {
+        labelSelector: [],
+        pageSize: 10000,
+    };
+    if (tenant) {
+        params.labelSelector.push(`kubecube-tenant-${tenant.value}.tree.hnc.x-k8s.io/depth=2`);
+    }
+    if (project) {
+        params.labelSelector.push(`kubecube-project-${project.value}.tree.hnc.x-k8s.io/depth=1`);
+    }
+    params.labelSelector = params.labelSelector.join(',');
+    const response = await nsService.getNamespaces({
+        pathParams: {
+            cluster,
+        },
+        params,
+    });
+    return response;
+}
 export default {
     extends: valveMixin,
     data: () => ({
@@ -62,22 +86,10 @@ export default {
                 }
                 // const namespace = get(this.project || this.tenant, 'spec.name');
                 this.namespaceLoading = true;
-                const params = {
-                    labelSelector: [],
-                    pageSize: 10000,
-                };
-                if (this.tenant) {
-                    params.labelSelector.push(`kubecube-tenant-${this.tenant.value}.tree.hnc.x-k8s.io/depth=2`);
-                }
-                if (this.project) {
-                    params.labelSelector.push(`kubecube-project-${this.project.value}.tree.hnc.x-k8s.io/depth=1`);
-                }
-                params.labelSelector = params.labelSelector.join(',');
-                const response = await nsService.getNamespaces({
-                    pathParams: {
-                        cluster: this.cluster.value,
-                    },
-                    params,
+                const response = await loadNS({
+                    tenant: this.tenant,
+                    project: this.project,
+                    cluster: this.cluster.clusterName,
                 });
                 this.items = (response.items || []).map(i => {
                     const name = getFunc(i, 'metadata.name');
@@ -118,8 +130,9 @@ export default {
             this.namespace = this.items.find(i => i.value === value);
             const pathArr = this.$route.path.split('/');
             if (pathArr.length > 4 || this.$route.path.endsWith('create')) {
+                const p = this.$router.resolve(pathArr.slice(0, 3).join('/'));
                 this.$router.push({
-                    path: pathArr.slice(0, 3).join('/'),
+                    path: p.route.path,
                 });
             }
             // console.log(this.namespace);

@@ -38,6 +38,7 @@ export default {
     },
     mounted() {
         this.createMonaco();
+
     },
     methods: {
         async loadMonaco() {
@@ -66,6 +67,13 @@ export default {
             editor.onDidChangeModelContent(() => {
                 const value = editor.getModel().getValue();
                 this.model = value;
+            });
+            const editorModel = editor.getModel();
+            this.$watch('value', val => {
+                // console.log(val, editorModel.getValue());
+                if (val !== editorModel.getValue()) {
+                    editor.getModel().setValue(val);
+                }
             });
         },
     },
