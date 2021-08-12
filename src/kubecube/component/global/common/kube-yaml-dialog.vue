@@ -102,7 +102,7 @@ export default {
             this.title = title;
             this.onSubmit = onSubmit || (() => null);
             this.show = true;
-            const ctnt = yamljs.stringify(content, 20, 2);
+            const ctnt = typeof content === 'string' ? content : yamljs.stringify(content, 20, 2);
             const editorOp = Object.assign({}, defaultOption, editorOption);
             this.readOnly = editorOp.readOnly;
             this.$nextTick(() => {
