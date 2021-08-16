@@ -10,8 +10,20 @@
         暂无监控项
       </div>
       <template v-else>
+        <u-linear-layout>
+          <!-- <u-text>时间</u-text> -->
+          <u-date-custom-picker
+            ref="dataPicker"
+            style="margin-left: 10px"
+            :date="{startTime, endTime}"
+            :time-range="periodList"
+            :no-interval="true"
+            @update="updateTime"
+          />
+        </u-linear-layout>
         <kube-pipe
           v-if="variables.length > 0"
+          ref="pipeVariables"
           :graph="pipeSeq"
           :class="$style.variableWrapper"
           @pipestatechange="pipeLoading = $event"
@@ -52,16 +64,6 @@
             </kube-valve>
           </div>
         </kube-pipe>
-        <u-linear-layout>
-          <!-- <u-text>时间</u-text> -->
-          <u-date-custom-picker
-            ref="dataPicker"
-            :date="{startTime, endTime}"
-            :time-range="periodList"
-            :no-interval="true"
-            @update="updateTime"
-          />
-        </u-linear-layout>
       </template>
     </u-linear-layout>
     <template v-if="!pipeLoading">
@@ -130,6 +132,8 @@ import {
 } from 'kubecube/k8s-resources/monitor/index.js';
 import {
     setValueIfListNotPresent,
+    getStep,
+    getStepTime,
 } from 'kubecube/utils/functional';
 import kubeDataBoard from 'kubecube/component/common/kube-data-board/kube-data-board.vue';
 
@@ -207,9 +211,28 @@ export default {
             return this.$route.meta.resource;
 
         },
+        st() {
+            return this.startTime / 1000;
+        },
+        et() {
+            return this.endTime / 1000;
+        },
+        step() {
+            return getStep(this.startTime, this.endTime);
+        },
+        stepTime() {
+            return getStepTime(this.startTime, this.endTime);
+        },
     },
     created() {
         this.load();
+    },
+    mounted() {
+        this.$watch(() => [ this.startTime, this.endTime ], () => {
+            if (this.$refs.pipeVariables) {
+                this.$refs.pipeVariables.pipeRequest();
+            }
+        });
     },
     methods: {
         async load() {
@@ -232,7 +255,11 @@ export default {
         },
         async resolveRequest(valve) {
             const name = valve.name;
-            const vs = await valve.request({ ...this.scope, ...this.variableSelected });
+            const vs = await valve.request({ ...this.scope, ...this.variableSelected }, {
+                start: this.st,
+                end: this.et,
+                step: this.step,
+            });
             console.log(vs);
             this.$set(this.sources, name, vs);
             setValueIfListNotPresent({

@@ -39,11 +39,12 @@ export function resolveLegend(template = '') {
 
 function labelValuesQueryResolver(label, metric) {
     if (!metric) {
-        return async () => {
+        return async (params, otherParams = {}) => {
             const result = await monitorService.getVariableLabel({
                 pathParams: {
                     label,
                 },
+                params: otherParams,
             });
             return map(get(result, 'data.data'), value => ({
                 text: value,
@@ -51,11 +52,12 @@ function labelValuesQueryResolver(label, metric) {
             }));
         };
     }
-    return async params => {
+    return async (params, otherParams = {}) => {
         const queryFunc = resolveTemplate(metric);
         const result = await monitorService.getVariableSeries({
             params: {
                 'match[]': queryFunc(params),
+                ...otherParams,
             },
         });
         const labels = map(get(result, 'data'),
