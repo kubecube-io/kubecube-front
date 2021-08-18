@@ -14,6 +14,11 @@
           :loading="loading"
           :items="data || []"
         >
+          <template #[`item.status.hostIP`]="{ item }">
+            <u-link @click="toNode(item)">
+              {{ item.status.hostIP }}
+            </u-link>
+          </template>
           <template #[`item.creationTimestamp`]="{ item }">
             {{ item.metadata.creationTimestamp | formatLocaleTime }}
           </template>
@@ -164,6 +169,10 @@ export default {
     },
 
     methods: {
+        toNode(item) {
+            const href = window.location.origin + `#/platform/cluster/pivot-cluster/${item.spec.nodeName}/info`;
+            window.open(href, '_blank');
+        },
         getContainerText(type) {
             return (CONTAINERTYPE[type] || {}).text || '业务容器';
         },
