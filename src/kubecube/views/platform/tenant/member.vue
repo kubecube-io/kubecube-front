@@ -50,7 +50,7 @@
             table-width="100%"
             :loading="loading"
             :columns="columns"
-            :items="data ? data.list : []"
+            :items="currentList"
             :error="error"
           >
             <template #[`item.metadata.creationTimestamp`]="{ item }">
@@ -135,6 +135,7 @@ export default {
                 { name: 'metadata.creationTimestamp', title: '创建时间', width: '200px' },
                 { name: 'operation', title: '操作', width: '160px' },
             ],
+            list: [],
         };
     },
     computed: {
@@ -162,6 +163,11 @@ export default {
                 params,
             };
         },
+        currentList() {
+            const start = (this.pagenation.pageNum - 1) * this.pagenation.pageSize;
+            const end = start + this.pagenation.pageSize;
+            return this.list.slice(start, end);
+        },
     },
     methods: {
         resolver(result) {
@@ -169,6 +175,7 @@ export default {
                 list: (getFunc(result, 'items') || []).map(i => toPlainObject(i)),
                 total: getFunc(result, 'total', 0),
             };
+            this.list = r.list;
             return r;
         },
         refresh() {
