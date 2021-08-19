@@ -8,18 +8,13 @@
     @close="close"
   >
     <div style="max-width: 580px;color: #999;padding-bottom: 5px;">
-      在新节点上执行部署脚本:
-    </div>
-    <pre style="white-space: break-spaces; text-indent: 0;">
-        <!-- <code class="hjs bash"> -->
-        export CUSTOMIZE="true";curl -fsSL https://gitee.com/kubecube/manifests/raw/master/entry.sh | bash
-        <!-- </code> -->
-    </pre>
-    <div style="max-width: 580px;color: #999;padding-bottom: 5px;">
       根据文档完成新节点添加：
       <br>
-      <u-link href=" https://www.kubecube.io/docs/部署指南/添加节点/#向集群添加工作节点">
-        https://www.kubecube.io/docs/部署指南/添加节点/#向集群添加工作节点
+      <u-link
+        target="_blank"
+        href="http://www.kubecube.io/docs/installation-guide/add-k8s-node/#向集群添加工作节点"
+      >
+        www.kubecube.io/docs/installation-guide/add-k8s-node/#向集群添加工作节点
       </u-link>
     </div>
 
@@ -47,7 +42,6 @@
 <script>
 import { Modal } from '@micro-app/common/mixins';
 
-const ncsDeployUrl = '';// window.MicroApp.cache.customization.ncsDeployUrl;
 export default {
     mixins: [ Modal ],
     props: {

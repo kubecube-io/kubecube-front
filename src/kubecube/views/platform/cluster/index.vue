@@ -48,7 +48,7 @@
                 <!-- <u-link-list-item @click="setItem(item)">
                   设置
                 </u-link-list-item> -->
-                <u-link-list-item @click="removeItem(item)">
+                <u-link-list-item :disabled="item.clusterName === 'pivot-cluster'" @click="removeItem(item)">
                   删除配置
                 </u-link-list-item>
                 <!-- <u-link-list-item @click="editIngress(item)">
