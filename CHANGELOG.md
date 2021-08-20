@@ -1,3 +1,22 @@
+# V1.0.1
+
+## Features
+
+### Platform management
+- Support tenant, project and member pagenation
+- Disable delete pivot-cluster, change node appending link
+### Resource management
+- Query monitor variables with timing
+- Yaml Viewer bugfix
+
+### Dependencies
+- [KubeCube v1.0.0](https://github.com/kubecube-io/KubeCube/tree/v1.0.0)
+- [WebConsole v1.0.0](https://github.com/kubecube-io/kubecube-webconsole/tree/v1.0.0) 
+
+### Appendix
+- Extract [JChart](https://www.npmjs.com/package/@joskii/jchart)
+
+
 # V1.0.0
 
 ## Features
