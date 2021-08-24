@@ -126,6 +126,7 @@ export default {
                 //     }, interval);
                 // }
             }
+            return this.currentRequest;
         },
         parallelReq() {
             const service = this.service;
