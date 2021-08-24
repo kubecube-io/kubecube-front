@@ -1,5 +1,9 @@
 export default {
     render(h) {
-        return h('router-view', this.$slots.default);
+        return h('router-view', {
+            props: {
+                ...this.$attrs,
+            },
+        }, this.$slots.default);
     },
 };

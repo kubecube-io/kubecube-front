@@ -1,7 +1,7 @@
 <template>
   <kube-valve
     name="project"
-    style="display: inline-block;"
+    style="display: inline-block;max-width: 100%;"
     :request="getProjects"
     :valve="modelValue"
   >

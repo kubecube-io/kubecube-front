@@ -2,11 +2,14 @@
   <kube-form-item
     :label="label"
     :message="message"
+    v-bind="$attrs"
     required
   >
     <u-input
       v-model="model"
       size="huge"
+      v-bind="$attrs"
+
       :class="$style.input"
       :color="message ? 'error' : ''"
       :type="pwdFlag ? 'password' : 'text'"

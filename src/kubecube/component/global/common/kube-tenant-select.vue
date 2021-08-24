@@ -1,7 +1,7 @@
 <template>
   <kube-valve
     name="tenant"
-    style="display: inline-block;"
+    style="display: inline-block;max-width: 100%;"
     :request="getTenants"
     :valve="modelValue"
   >
