@@ -328,4 +328,40 @@ export const rules = {
         },
         message: 'yaml 格式错误',
     },
+    validateRemote: {
+        params: [ 'service', 'message' ],
+        validate: async (value, { service }) => {
+            try {
+                const response = await service(value);
+                return response;
+            } catch (error) {
+                return false;
+            }
+        },
+        message: (field, params) => {
+            return params.message;
+        },
+    },
+    validateCommon: {
+        params: [ 'target', 'message' ],
+        validate: async (value, { target }) => {
+            return !target;
+        },
+        message: (field, params) => {
+            return params.message;
+        },
+    },
+    validateWithRule: {
+        params: [ 'target', 'rule' ],
+        validate: async (value, { rule, target }) => {
+            try {
+                return await validate(target, rule);
+            } catch (err) {
+                return false;
+            }
+        },
+        message: (field, params) => {
+            return rules[params.rule].message;
+        },
+    },
 };

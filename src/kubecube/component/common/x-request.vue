@@ -4,6 +4,7 @@
       :data="data"
       :error="error"
       :loading="loading"
+      :errormessage="errormessage"
     />
   </component>
 </template>
@@ -41,6 +42,7 @@ export default {
             loading: false,
             error: false,
             data: null,
+            errormessage: null,
             // currentRequest: null,
         };
     },
@@ -57,7 +59,7 @@ export default {
         this.request();
     },
     mounted() {
-        this.$watch(() => this.params, (oldvalue, newvalue) => {
+        const watcher = (oldvalue, newvalue) => {
             const a = JSON.stringify(oldvalue);
             const b = JSON.stringify(newvalue);
             // console.log(a);
@@ -66,7 +68,8 @@ export default {
                 this.request();
             }
 
-        }, {
+        };
+        this.$watch(() => this.params, watcher, {
             deep: true,
         });
     },
@@ -85,6 +88,7 @@ export default {
                 this.loading = true;
             }
             this.error = false;
+            this.errormessage = null;
             const service = this.service;
             let currentRequest;
             if (Array.isArray(this.params)) {
@@ -99,6 +103,7 @@ export default {
                     this.data = this.processor(data);
                 }).catch(err => {
                     console.log(err);
+                    this.errormessage = err;
                     this.error = true;
                 })
                     .finally(() => {
@@ -126,6 +131,7 @@ export default {
                 //     }, interval);
                 // }
             }
+
             return this.currentRequest;
         },
         parallelReq() {
@@ -133,7 +139,8 @@ export default {
             return Promise.all(this.params.map(p => service(p).catch(err => { console.log(err); return []; })))
                 .then(result => {
                     this.data = this.processor(result);
-                }).catch(() => {
+                }).catch(err => {
+                    this.errormessage = err;
                     this.error = true;
                 })
                 .finally(() => {
@@ -176,7 +183,8 @@ export default {
                     }
 
                     request(v);
-                }).catch(() => {
+                }).catch(err => {
+                    this.errormessage = err;
                     this.error = true;
                     rej();
                 });

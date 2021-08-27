@@ -175,7 +175,7 @@ export default {
         },
         refresh(tenant) {
             this.$refs.request.request();
-            if (tenant) {
+            if (tenant && typeof tenant === 'string') {
                 this.tenant = {
                     value: tenant,
                 };
