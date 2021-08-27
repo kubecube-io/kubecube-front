@@ -57,8 +57,21 @@
         </tbody>
       </template>
       <template v-else>
+        <tbody v-if="error">
+          <!-- <colgroup v-if="maxHeight">
+          <col :width="tableWidth">
+        </colgroup> -->
+          <tr>
+            <td
+              :colspan="columns.length"
+              style="text-align:center"
+            >
+              <slot name="error" />
+            </td>
+          </tr>
+        </tbody>
         <tbody
-          v-if="items.length"
+          v-else-if="items.length"
         >
           <!-- 滚动条宽度问题 -->
           <!-- <colgroup v-if="maxHeight">
@@ -97,19 +110,7 @@
           </row-group-comp>
         </tbody>
 
-        <tbody v-else-if="error">
-          <!-- <colgroup v-if="maxHeight">
-          <col :width="tableWidth">
-        </colgroup> -->
-          <tr>
-            <td
-              :colspan="columns.length"
-              style="text-align:center"
-            >
-              <slot name="error" />
-            </td>
-          </tr>
-        </tbody>
+
         <tbody v-else>
           <!-- <colgroup v-if="maxHeight">
           <col :width="tableWidth">
