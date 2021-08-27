@@ -22,6 +22,7 @@ export const toPlainObject = (model, mode = 'normal') => {
             ...i,
             disabled: ignoredKeys.some(k => i.key.startsWith(k)),
         })),
+        pureLabels: g('metadata.labels', {}),
         resourceVersion: g('metadata.resourceVersion'),
         creationTimestamp: g('metadata.creationTimestamp'),
         ownerReferences: g('metadata.ownerReferences'),
