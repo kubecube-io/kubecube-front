@@ -38,7 +38,11 @@
               <x-request
                 ref="requestcluster"
                 :service="clusterService"
-                :params="{}"
+                :params="{
+                  params: {
+                    status: 'normal',
+                  },
+                }"
                 :processor="clusterResolver(data)"
               >
                 <template slot-scope="{ loading: quotaLoading }">

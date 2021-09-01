@@ -26,10 +26,11 @@
           <template v-else>
             <u-tabs router>
               <u-tab
-                v-for="(item, index) in tabs"
+                v-for="(item, index) in getTabs(data)"
                 :key="index"
                 :value="item"
                 :title="item.title"
+                :disabled="item.disabled"
                 :to="{ path: item.path }"
               />
             </u-tabs>
@@ -54,17 +55,6 @@ export default {
         clusterName() {
             return this.$route.params.name;
         },
-        tabs() {
-            return [
-                { title: '详情', path: `/platform/cluster/${this.clusterName}/info` },
-                { title: '节点', path: `/platform/cluster/${this.clusterName}/node` },
-                { title: '存储类别', path: `/platform/cluster/${this.clusterName}/storageclass` },
-                { title: '持久存储', path: `/platform/cluster/${this.clusterName}/persistentvolumes` },
-                { title: '网络策略', path: `/platform/cluster/${this.clusterName}/network` },
-                // { title: '集群日志', path: `/platform/cluster/${this.clusterName}/log` },
-                { title: '监控', path: `/platform/cluster/${this.clusterName}/monitor` },
-            ];
-        },
         isInNodeRoute() {
             return this.$route.name.startsWith('platform.cluster.nodedetail');
         },
@@ -73,6 +63,18 @@ export default {
         },
     },
     methods: {
+        getTabs(instance) {
+            const isAbnormal = (instance.status !== 'normal');
+            return [
+                { title: '详情', path: `/platform/cluster/${this.clusterName}/info` },
+                { title: '节点', path: `/platform/cluster/${this.clusterName}/node`, disabled: isAbnormal },
+                { title: '存储类别', path: `/platform/cluster/${this.clusterName}/storageclass`, disabled: isAbnormal },
+                { title: '持久存储', path: `/platform/cluster/${this.clusterName}/persistentvolumes`, disabled: isAbnormal },
+                { title: '网络策略', path: `/platform/cluster/${this.clusterName}/network`, disabled: isAbnormal },
+                // { title: '集群日志', path: `/platform/cluster/${this.clusterName}/log` },
+                { title: '监控', path: `/platform/cluster/${this.clusterName}/monitor`, disabled: isAbnormal },
+            ];
+        },
         resolver(response) {
             return getFunc(response, 'items.[0]');
         },

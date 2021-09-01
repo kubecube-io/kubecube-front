@@ -70,7 +70,11 @@ export default {
                     },
                 });
                 const clusters = get(r1, 'items', []);
-                const response = await clusterService.getClusters();
+                const response = await clusterService.getClusters({
+                    params: {
+                        status: 'normal',
+                    },
+                });
                 const items = (response.items || []).filter(i => clusters.includes(i.clusterName));
                 this.items = items.map(i => ({
                     text: i.clusterName,

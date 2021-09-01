@@ -24,7 +24,11 @@
           <x-request
             ref="requestcluster"
             :service="clusterService"
-            :params="{}"
+            :params="{
+              params: {
+                status: 'normal',
+              },
+            }"
             :processor="quotaResolver(data)"
           >
             <template slot-scope="{ data: quota, loading: quotaLoading, error }">
@@ -47,7 +51,10 @@
                 <template #[`item.operation`]="{ item }">
                   <u-linear-layout gap="small">
                     <u-link-list>
-                      <u-link-list-item @click="editItem(item)">
+                      <u-link-list-item
+                        :disabled="item.status !== 'normal'"
+                        @click="editItem(item)"
+                      >
                         调整配额
                       </u-link-list-item>
                     </u-link-list>

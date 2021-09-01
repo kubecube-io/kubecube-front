@@ -1,6 +1,10 @@
 <template>
+  <u-loading
+    v-if="loading"
+    size="small"
+  />
   <u-select
-    v-if="list.length > 0"
+    v-else-if="list.length > 0"
     v-model="modelValue"
     :data="list"
     v-bind="$attrs"
@@ -25,6 +29,7 @@ export default {
     data() {
         return {
             list: [],
+            loading: false,
         };
     },
     computed: {
@@ -42,7 +47,12 @@ export default {
     },
     methods: {
         async getClusters() {
-            const response = await clusterService.getClusters();
+            this.loading = true;
+            const response = await clusterService.getClusters({
+                params: {
+                    status: 'normal',
+                },
+            });
             this.list = (getFunc(response, 'items') || []).map(i => ({
                 text: i.clusterName,
                 value: i.clusterName,
@@ -56,6 +66,7 @@ export default {
             }, val => {
                 this.modelValue = getFunc(val, 'value');
             });
+            this.loading = false;
         },
     },
 

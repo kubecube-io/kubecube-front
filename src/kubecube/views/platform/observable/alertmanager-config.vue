@@ -82,7 +82,11 @@ export default {
     methods: {
         getAlarmManagerConfigService() {
             return async () => {
-                const clusterRes = await clusterService.getClusters();
+                const clusterRes = await clusterService.getClusters({
+                    params: {
+                        status: 'normal',
+                    },
+                });
                 const list = geFunc(clusterRes, 'items', []);
                 const response = await Promise.all(list.map(async l => {
                     try {
