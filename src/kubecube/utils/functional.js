@@ -171,3 +171,46 @@ export function retryAsync(func, step, times) {
 
     return promise;
 }
+
+
+export function combineRouterParams(...params) {
+    return params.map(p => `[${p}]`).join('-');
+}
+export function departRouteParams(param) {
+    const q = param.split(']-[');
+    q[0] = q[0].substring(1);
+    q[q.length - 1] = q[q.length - 1].substring(0, q[q.length - 1].length - 1);
+    return q;
+}
+
+export function encodeQueryObject(query) {
+    return Object.keys(query).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(query[key])}`).join('&');
+}
+
+export function niceSeconds(second) {
+    const date = new Date(second * 1000).toLocaleString();
+    const p = /(\d?\d:\d\d:\d\d)/.exec(date);
+    const timestr = p[1];
+    if (timestr.length === 7) {
+        return `0${timestr}`;
+    }
+    return timestr;
+}
+
+
+export function readFile(file) {
+    const fileReader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+        fileReader.onerror = () => {
+            fileReader.abort();
+            reject(new Error('Problem parsing file'));
+        };
+
+        fileReader.onload = () => {
+            resolve(fileReader.result);
+        };
+
+        fileReader.readAsText(file);
+    });
+}

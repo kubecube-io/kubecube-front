@@ -73,6 +73,7 @@
 import { get } from 'vuex-pathify';
 import userService from 'kubecube/services/user';
 import { decode } from 'js-base64';
+import { readFile } from 'kubecube/utils/functional';
 export default {
     metaInfo() {
         return {
@@ -89,13 +90,14 @@ export default {
     },
     methods: {
         async download() {
-            // console.log(this.user)
             const response = await userService.getKubeconfigs({
                 params: {
                     user: this.user,
                 },
             });
-            const p = decode(response);
+            const content = await readFile(response);
+            const ctnt = JSON.parse(content);
+            const p = decode(ctnt);
             const filename = 'config.yaml';
             const url = 'data:application/x-yaml;charset=utf-8,' + encodeURIComponent(p);
             const a = document.createElement('a');
@@ -104,7 +106,6 @@ export default {
             document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
             a.click();
             a.remove(); // afterwards we remove the element again
-
         },
     },
 };
