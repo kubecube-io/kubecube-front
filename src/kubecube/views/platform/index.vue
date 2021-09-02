@@ -67,7 +67,10 @@
             <u-sidebar-item>
               组件日志
             </u-sidebar-item> -->
-            <u-sidebar-item :to="{ path: '/platform/audit' }">
+            <u-sidebar-item
+              v-if="auditFeature && auditEnable"
+              :to="{ path: '/platform/audit' }"
+            >
               操作审计
             </u-sidebar-item>
           </u-sidebar-group>
@@ -105,6 +108,7 @@
 <script>
 import { get } from 'vuex-pathify';
 import uAppBreadCrumbs from 'kubecube/component/global/u-app-bread-cumbs.vue';
+import auditService from 'kubecube/services/audit';
 import {
     ROLES,
 } from 'kubecube/utils/constance';
@@ -117,7 +121,13 @@ export default {
     components: {
         uAppBreadCrumbs,
     },
+    data() {
+        return {
+            auditEnable: false,
+        };
+    },
     computed: {
+        auditFeature: get('feature/features@audit'),
         userRole: get('scope/userRole'),
         globalLoading: get('scope/loading'),
         isPlatform() {
@@ -135,13 +145,22 @@ export default {
             console.log(val);
         },
     },
+    created() {
+        this.isAuditEnable();
+    },
     mounted() {
         if (this.$route.path === '/platform') {
             this.$router.replace({
                 path: this.isPlatform ? '/platform/user' : '/platform/role',
             });
         }
-
+    },
+    methods: {
+        async isAuditEnable() {
+            if (this.auditFeature) {
+                this.auditEnable = await auditService.enabled();
+            }
+        },
     },
 };
 </script>
@@ -175,7 +194,7 @@ export default {
     left: 0px;
     top: 64px;
     width: 180px;
-    height: 100%;
+    height: calc(100% - 64px);
 }
 .nav > div {
     position: relative;

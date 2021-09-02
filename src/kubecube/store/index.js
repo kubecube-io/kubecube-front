@@ -4,6 +4,7 @@ import pathify, { make } from 'vuex-pathify';
 import snackbar from './snackbar';
 import confirm from './confirm';
 import scope from './scope';
+import feature from './feature';
 import timer from './timer';
 import lens from './lens';
 import likesSuggestion from './like';
@@ -18,6 +19,7 @@ const store = new Vuex.Store({
         snackbar,
         confirm,
         scope,
+        feature,
         timer,
         lens,
         likesSuggestion,

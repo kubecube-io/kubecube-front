@@ -11,6 +11,10 @@ const userService = Service({
             url: '/audit/export',
             method: 'get',
         },
+        enabled: {
+            url: '/audit/enabled',
+            method: 'get',
+        },
     },
 });
 

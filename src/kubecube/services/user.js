@@ -93,6 +93,11 @@ const userService = Service({
             method: 'post',
             url: '/clusters/nsquota',
         },
+
+        getFeatures: {
+            method: 'get',
+            url: 'extend/feature-config',
+        },
     },
 });
 

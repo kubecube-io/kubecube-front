@@ -104,6 +104,7 @@ export default {
     },
     created() {
         this.resolveRouter();
+        this.$store.dispatch('feature/loadFeature');
     },
     mounted() {
         this.$on('pipestatechange', val => {
