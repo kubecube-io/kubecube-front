@@ -60,17 +60,28 @@ export const rules = {
         validate: v => /[a-z0-9]$/.test(v || ''),
         message: '以小写字母或数字结尾',
     },
+    ConsistofLetterNumberUnderscoresOrDot: {
+        validate: v => /^[-a-z0-9.]*$/.test(v || ''),
+        message: '仅包含小写字母、数字和中划线',
+    },
     ConsistoLetterNumbersUnderscores: {
         validate: v => /^[a-z0-9-]*$/.test(v || ''),
         message: '仅包含小写字母、数字和中划线',
     },
-
+    ConsistoLetterNumbersSplitterDot: {
+        validate: v => /^[._a-z0-9-]*$/.test(v || ''),
+        message: '仅包含字母、数字、中划线、下划线和点',
+    },
+    ConsistofLowercaseLetterNumbersSplitter: {
+        validate: v => /^[_\-.a-z0-9]*$/.test(v || ''),
+        message: '仅包含小写字母、数字和分隔符',
+    },
     ConsistofLowercaseLetterNumbersUnderscores: {
-        validate: v => /^[a-z0-9-]*$/.test(v || ''),
+        validate: v => /^[a-z0-9_]*$/.test(v || ''),
         message: '仅包含小写字母、数字和下划线',
     },
     ConsistofLetterNumbersUnderscores: {
-        validate: v => /^[a-zA-Z0-9-]*$/.test(v || ''),
+        validate: v => /^[a-zA-Z0-9_]*$/.test(v || ''),
         message: '仅包含字母、数字和下划线',
     },
     ConsistofPath: {
@@ -92,6 +103,10 @@ export const rules = {
     ConsistofFloatNumber: {
         validate: v => /^[\+\-]?\d*\.?\d+(?:[Ee][\+\-]?\d+)?$/.test(`${v}` || ''),
         message: '数字格式有误',
+    },
+    ConsistofPercentage: {
+        validate: v => /^[0-9]+%$/.test(`${v}` || ''),
+        message: '仅包含百分比',
     },
     ConsistofNumberOrPercentage: {
         validate: v => /^[-+]?[0-9.]+%?$/.test(`${v}` || ''),
