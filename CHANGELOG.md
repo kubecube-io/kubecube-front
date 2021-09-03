@@ -1,3 +1,12 @@
+# V1.0.2
+## Bug fix
+### Platform management
+- Fix project list refresh issue
+
+### Resource management
+- Fix kubecube config file download issue
+- Fix vaildate rules
+
 # V1.0.1
 
 ## Features
