@@ -119,7 +119,7 @@ export default {
         },
         workloadName(val) {
             this.model = [{
-                key: 'system/app',
+                key: 'kubecube.io/app',
                 value: val,
             }];
         },
