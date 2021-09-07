@@ -126,7 +126,6 @@ export function toK8SObject(model, metadata) {
 
     Object.assign(metadata.annotations, {
         [DISAPTCH_KEY]: g('spec.annotations.dispatch'),
-        'kubernetes.io/ingress.class': 'istio',
         [REWRITE_KEY]: g('spec.annotations.rewrite'),
     });
 
