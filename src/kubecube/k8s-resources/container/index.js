@@ -285,12 +285,31 @@ const resolveVolumes = (volumeMounts, volumes) => {
                 switch (type) {
                     case 'pvc':
                     case 'secret':
-                    case 'configmap':
                         vnames.push(i.name);
                         obj[type].push({
                             resource,
                             ...pick(i, [ 'mountPath', 'subPath' ]),
                         });
+                        break;
+                    case 'configmap':
+                        vnames.push(i.name);
+                        if (volume.configMap.items && volume.configMap.items.length > 0) {
+                            volume.configMap.items.forEach(item => {
+                                obj[type].push({
+                                    resource,
+                                    ...pick(i, [ 'mountPath', 'subPath' ]),
+                                    key: item.key,
+                                    filePath: item.path,
+                                });
+                            });
+                        } else {
+                            obj[type].push({
+                                resource,
+                                ...pick(i, [ 'mountPath', 'subPath' ]),
+                                key: '',
+                                filePath: '',
+                            });
+                        }
                         break;
                     case 'hostpath':
                         vnames.push(i.name);
@@ -365,17 +384,40 @@ const refactVolumes = (
             ...pick(p, [ 'mountPath', 'subPath' ]),
         });
     });
-
+    const configMapVolumnsMap = {};
     configmap.filter(p => p.mountPath && p.resource).forEach(p => {
+        const key = `${p.resource}-${p.mountPath}`;
+        if (!configMapVolumnsMap[key]) {
+            configMapVolumnsMap[key] = {
+                mountPath: p.mountPath,
+                subPath: p.subPath,
+                name: p.resource,
+                defaultMode: 420,
+                optional: false,
+                items: [],
+            };
+        }
+        if (p.key) {
+            configMapVolumnsMap[key].items.push({
+                key: p.key,
+                path: p.filePath,
+            });
+            configMapVolumnsMap[key].subPath = '';
+        }
+    });
+
+    Object.values(configMapVolumnsMap).forEach(p => {
         const name = getVolumeName();
         podVolumesYaml.configMap.push({
             name,
             configMap: {
-                name: p.resource,
+                name: p.name,
+                items: p.items,
                 defaultMode: 420,
                 optional: false,
             },
         });
+
         volumeMounts.push({
             name,
             readOnly: true,
