@@ -87,6 +87,7 @@
 import { pickBy } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
+import workloadExtendService from 'kubecube/services/k8s-extend-resource';
 import PageMixin from 'kubecube/mixins/pagenation';
 import { toPlainObject as toServicePlainObject } from 'kubecube/k8s-resources/service';
 import { toPlainObject as toIngressPlainObject } from 'kubecube/k8s-resources/ingress';
@@ -103,7 +104,7 @@ export default {
         service() {
             switch (this.workload) {
                 case 'services':
-                    return workloadService.getAPIV1;
+                    return workloadExtendService.getWorkloads;
                 case 'ingresses':
                     return workloadService.getNetworking;
                 default:

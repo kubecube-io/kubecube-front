@@ -40,7 +40,7 @@ export const toPlainObject = model => {
     }
     return {
         ...pickBy(g('spec'), v => !isObjectLike(v)),
-        externalIPs: g('spec.externalIPs') || [],
+        externalIPs: g('externalIps') || [],
         ports,
         matchLabels: selector,
         sessionAffinity: g('spec.sessionAffinity', 'None'),
