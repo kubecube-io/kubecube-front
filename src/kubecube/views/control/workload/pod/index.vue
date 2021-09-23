@@ -83,7 +83,7 @@ import { toPlainObject as toPodPlainObject } from 'kubecube/k8s-resources/pod';
 export default {
     metaInfo: {
         title: 'kubecube',
-        titleTemplate: '%s - Pod',
+        titleTemplate: 'Pod - %s',
     },
     mixins: [ PageMixin ],
 

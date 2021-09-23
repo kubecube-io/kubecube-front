@@ -5,6 +5,7 @@
     title-key="title"
     tab-key="tab"
     disabled
+    @tabChange="tabChange"
   >
     <template #tenant="{ model, state }">
       <tenantBoot
@@ -70,6 +71,11 @@ import memberBoot from './member-boot.vue';
 import namespaceBoot from './namespace-boot.vue';
 
 export default {
+    metaInfo() {
+        return {
+            title: this.currentTitle,
+        };
+    },
     components: {
         tenantBoot,
         tenantQuotaBoot,
@@ -80,6 +86,7 @@ export default {
     data() {
         return {
             tabs: [],
+            currentTitle: '',
         };
     },
 
@@ -163,9 +170,15 @@ export default {
                 tenantadmin: null,
             });
         }
+        if (tabs.length > 0) {
+            this.currentTitle = tabs[0].title;
+        }
         return tabs;
     },
     methods: {
+        tabChange(curTab) {
+            this.currentTitle = curTab.title;
+        },
         next(callback) {
             this.$refs.tab.chooseNext();
             if (callback) {

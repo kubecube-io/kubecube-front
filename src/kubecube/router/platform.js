@@ -102,7 +102,7 @@ export default {
             path: 'nsquota',
             component: () => import(/* webpackChunkName: "platform-quota" */'kubecube/views/platform/namespace/index.vue'),
             meta: {
-                breadCrumb: '租户配额',
+                breadCrumb: '空间管理',
             },
         },
         {

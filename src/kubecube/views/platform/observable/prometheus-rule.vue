@@ -145,7 +145,7 @@ export default {
     },
     metaInfo() {
         return {
-            title: '全局告警规则 - kubecube',
+            title: '告警规则 - kubecube',
         };
     },
     data() {

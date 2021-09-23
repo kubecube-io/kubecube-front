@@ -112,7 +112,7 @@ import nsQuotaDialog from './ns-quota-dialog.vue';
 
 export default {
     metaInfo: {
-        title: 'namespace - kubecube',
+        title: '空间管理 - kubecube',
     },
     components: {
         kubeTenantSelect,

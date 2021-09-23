@@ -117,7 +117,7 @@ export default {
         memberDialog,
     },
     metaInfo: {
-        title: 'project - kubecube',
+        title: '项目 - kubecube',
     },
     mixins: [ PageMixin ],
     data() {

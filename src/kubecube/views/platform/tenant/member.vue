@@ -117,7 +117,7 @@ export default {
         // UserUploadDialog,
     },
     metaInfo: {
-        title: 'member - kubecube',
+        title: '成员 - kubecube',
     },
     mixins: [ PageMixin ],
     data() {
