@@ -133,7 +133,7 @@ export default {
     },
     watch: {
         curTab() {
-            this.$emit('tabChange');
+            this.$emit('tabChange', this.currTarget.value);
         },
     },
     created() {
