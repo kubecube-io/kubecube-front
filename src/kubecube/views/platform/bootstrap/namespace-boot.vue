@@ -231,6 +231,7 @@ export default {
             });
 
             this.$toast.success('创建成功');
+            this.$refs.request.request();
 
         },
     },
