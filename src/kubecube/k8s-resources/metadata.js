@@ -25,6 +25,7 @@ export const toPlainObject = (model, mode = 'normal') => {
         pureLabels: g('metadata.labels', {}),
         resourceVersion: g('metadata.resourceVersion'),
         creationTimestamp: g('metadata.creationTimestamp'),
+        deletionTimestamp: g('metadata.deletionTimestamp'),
         ownerReferences: g('metadata.ownerReferences'),
         uid: g('metadata.uid'),
     };
