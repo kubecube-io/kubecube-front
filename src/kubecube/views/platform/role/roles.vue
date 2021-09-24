@@ -17,9 +17,15 @@
       :params="params"
       :processor="resolver"
     >
-      <template slot-scope="{ loading }">
+      <template slot-scope="{ loading, error }">
         <div :class="$style.wrapper">
           <u-loading v-if="loading" />
+          <template v-else-if="error">
+            获取数据失败，请
+            <u-link @click="refresh">
+              重试
+            </u-link>
+          </template>
           <template v-else>
             <div :class="$style.nav">
               <u-button
@@ -85,7 +91,7 @@ export default {
                 current = '租户角色';
                 break;
             case 'project':
-                current = '租户角色';
+                current = '项目角色';
                 break;
             default:
         }

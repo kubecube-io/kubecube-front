@@ -37,6 +37,12 @@
               还没有任何 自定义资源
             </template>
           </template>
+          <template #error>
+            获取数据失败，请
+            <u-link @click="refresh">
+              重试
+            </u-link>
+          </template>
         </kube-table>
         <u-page
           v-if="data && calculatePages(data.total) > 1"
@@ -121,6 +127,9 @@ export default {
             this.pagenation.sortOrder = order;
             this.pagenation.sortName = name;
             this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
+        },
+        refresh() {
+            this.$refs.request.request();
         },
     },
 };

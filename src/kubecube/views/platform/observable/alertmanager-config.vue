@@ -32,6 +32,11 @@
           <template #noData>
             还没有任何 告警策略组 请先创建集群，再创建告警策略组
           </template>
+          <template #error>
+            获取数据失败，请<u-link @click="refresh">
+              重试
+            </u-link>
+          </template>
         </kube-table>
       </template>
     </x-request>

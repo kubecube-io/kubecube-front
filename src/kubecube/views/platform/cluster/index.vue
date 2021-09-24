@@ -28,6 +28,7 @@
             :loading="loading"
             :columns="columns"
             :items="data ? data.list : []"
+            :error="error"
           >
             <template #[`item.clusterName`]="{ item }">
               <u-link :to="`/platform/cluster/${item.clusterName}`">
@@ -58,6 +59,12 @@
                   定制域名后缀
                 </u-link-list-item> -->
               </u-link-list>
+            </template>
+            <template #error>
+              获取数据失败，请
+              <u-link @click="refresh">
+                重试
+              </u-link>
             </template>
           </kube-table>
           <u-page
