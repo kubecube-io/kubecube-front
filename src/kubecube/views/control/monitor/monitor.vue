@@ -138,6 +138,9 @@ import {
 import kubeDataBoard from 'kubecube/component/common/kube-data-board/kube-data-board.vue';
 
 export default {
+    metaInfo: {
+        title: '资源监控 - kubecube',
+    },
     components: {
         kubeDataBoard,
     },

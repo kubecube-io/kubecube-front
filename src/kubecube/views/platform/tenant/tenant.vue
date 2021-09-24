@@ -128,7 +128,7 @@ export default {
         memberDialog,
     },
     metaInfo: {
-        title: 'tenant - kubecube',
+        title: '租客 - kubecube',
     },
     mixins: [ PageMixin ],
     data() {

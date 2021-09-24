@@ -75,6 +75,24 @@ import {
     ROLES,
 } from 'kubecube/utils/constance';
 export default {
+    metaInfo() {
+        let current = '';
+        switch (this.$route.params.identity) {
+            case 'platform':
+                current = '平台角色';
+                break;
+            case 'tenant':
+                current = '租户角色';
+                break;
+            case 'project':
+                current = '租户角色';
+                break;
+            default:
+        }
+        return {
+            title: `${current} - kubecube`,
+        };
+    },
     components: {
         roleDialog,
     },

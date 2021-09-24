@@ -107,7 +107,7 @@ export default {
         UserUploadDialog,
     },
     metaInfo: {
-        title: 'user - kubecube',
+        title: '用户管理 - kubecube',
     },
     filters: {
         formatStatus(val) {

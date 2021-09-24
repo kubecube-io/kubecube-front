@@ -86,7 +86,7 @@ import quotaDialog from './quota-dialog.vue';
 
 export default {
     metaInfo: {
-        title: 'quota - kubecube',
+        title: '租户配额 - kubecube',
     },
     components: {
         kubeTenantSelect,

@@ -34,6 +34,9 @@
 <script>
 import monitorService from 'kubecube/services/monitor';
 export default {
+    metaInfo: {
+        title: '组件监控 - kubecube',
+    },
     data() {
         return {
             service: monitorService.getInnerDashboardByQuery,

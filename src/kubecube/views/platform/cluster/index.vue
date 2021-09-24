@@ -48,7 +48,10 @@
                 <!-- <u-link-list-item @click="setItem(item)">
                   设置
                 </u-link-list-item> -->
-                <u-link-list-item :disabled="item.clusterName === 'pivot-cluster'" @click="removeItem(item)">
+                <u-link-list-item
+                  :disabled="item.clusterName === 'pivot-cluster'"
+                  @click="removeItem(item)"
+                >
                   删除配置
                 </u-link-list-item>
                 <!-- <u-link-list-item @click="editIngress(item)">
@@ -79,13 +82,13 @@ import { get } from 'lodash';
 import PageMixin from 'kubecube/mixins/pagenation';
 import clusterService from 'kubecube/services/cluster';
 import clusterDialog from './dialogs/cluster.vue';
-import workloadService from 'kubecube/services/k8s-resource'
+import workloadService from 'kubecube/services/k8s-resource';
 // import {
 //     toPlainObject
 // } from 'kubecube/k8s-resources/scope/cluster';
 export default {
     metaInfo: {
-        title: 'tenant - kubecube',
+        title: '集群管理 - kubecube',
     },
     filters: {
         statusFilter(val) {

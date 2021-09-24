@@ -193,6 +193,9 @@ const promequery = {
     jobs: 'count (kube_job_labels{cluster="$cluster",namespace="$namespace"})',
 };
 export default {
+    metaInfo: {
+        title: '我的空间 - kubecube',
+    },
     filters: {
         percentageFilter(val) {
             return `${`${(val * 100).toFixed(3)}`.slice(0, 4)}%`;
