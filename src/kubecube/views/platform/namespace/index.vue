@@ -42,8 +42,14 @@
         }"
         :processor="subNamespaceResolver"
       >
-        <template slot-scope="{ data, loading }">
+        <template slot-scope="{ data, loading, error }">
           <u-loading v-if="loading" />
+          <template v-else-if="error">
+            获取数据失败，请
+            <u-link @click="refresh">
+              重试
+            </u-link>
+          </template>
           <x-request
             v-else
             ref="quotarequest"
@@ -51,13 +57,14 @@
             :params="{}"
             :processor="quotaResolver(data)"
           >
-            <template slot-scope="{ data: quotalist, loading: quotaloading }">
+            <template slot-scope="{ data: quotalist, loading: quotaloading, error: quotaerror }">
               <kube-table
                 :class="$style.table"
                 table-width="100%"
                 :loading="quotaloading"
                 :columns="columns"
                 :items="quotalist || []"
+                :error="quotaerror"
               >
                 <template #[`item.resource`]="{ item }">
                   <p>CPU: {{ formatQuota(item.usedCpu, item.totalCpu, normalizeCore) }} Cores</p>

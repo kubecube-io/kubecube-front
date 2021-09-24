@@ -110,6 +110,12 @@
               </kube-table>
             </div>
           </template>
+          <template #error>
+            获取数据失败，请
+            <u-link @click="refresh">
+              重试
+            </u-link>
+          </template>
         </kube-table>
         <u-page
           v-if="data && calculatePages(data.total) > 1"
