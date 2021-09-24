@@ -44,6 +44,13 @@ export default {
         tenant: getFromVuex('scope/tenant'),
         project: getFromVuex('scope/project'),
     },
+    watch: {
+        cluster(val) {
+            if (this.model !== get(val, 'value')) {
+                this.model = get(val, 'value');
+            }
+        },
+    },
     methods: {
         onBeforeSelect(val) {
             // if (!this.isInNSBoard) {

@@ -61,12 +61,20 @@ export default {
     }),
     computed: {
         namespace: sync('scope/namespace'),
+        namespaceList: sync('scope/namespaceList'),
         cluster: get('scope/cluster'),
         tenant: get('scope/tenant'),
         project: get('scope/project'),
         pageIdentifier: get('scope/pageIdentifier'),
         routeNamespace() {
             return this.$route.query.namespace;
+        },
+    },
+    watch: {
+        namespace(val) {
+            if (this.model !== getFunc(val, 'value')) {
+                this.model = getFunc(val, 'value');
+            }
         },
     },
     methods: {
@@ -99,6 +107,8 @@ export default {
                         ...i,
                     };
                 });
+
+                this.namespaceList = this.items;
 
                 setValueIfListNotPresent({
                     list: this.items,

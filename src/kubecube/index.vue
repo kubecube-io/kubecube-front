@@ -54,6 +54,7 @@ export default {
         project: get('scope/project@value'),
         cluster: get('scope/cluster@value'),
         namespace: get('scope/namespace@value'),
+        redirectMannul: get('scope/redirectMannul'),
     },
     watch: {
         user() {
@@ -128,7 +129,7 @@ export default {
                 cluster: this.cluster,
                 namespace: this.namespace,
             };
-            if (JSON.stringify(query) !== JSON.stringify(nextQ)) {
+            if (!this.redirectMannul && JSON.stringify(query) !== JSON.stringify(nextQ)) {
                 this.$router.replace({
                     query: nextQ,
                 }, 'origin');
