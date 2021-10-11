@@ -28,10 +28,10 @@
         {{ instance.nodeCount }}
       </u-info-list-item>
       <u-info-list-item label="CPU">
-        {{ instance.totalCpu }} Cores
+        {{ instance.totalCpu | clusterCup }} Cores
       </u-info-list-item>
       <u-info-list-item label="内存">
-        {{ instance.totalMem }} GiB
+        {{ instance.totalMem | clusterMemory }} GiB
       </u-info-list-item>
       <u-info-list-item label="集群用途">
         {{ instance.isMemberCluster ? '业务集群' : '管控集群' }}
@@ -49,11 +49,18 @@
 import {
     CLUSTER_STATUS_MAP,
 } from 'kubecube/utils/constance';
+import { unitConvertCPU, unitConvertMemory } from 'kubecube/utils/functional';
 
 export default {
     filters: {
         clusterStatus(status) {
             return CLUSTER_STATUS_MAP[status] || '-';
+        },
+        clusterCup(cpu) {
+            return unitConvertCPU(`${cpu}m`); // m -> plain
+        },
+        clusterMemory(memory) {
+            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(3); // Mi --> Gi
         },
     },
     props: {
@@ -69,7 +76,7 @@ export default {
                 },
             });
         },
-    }
+    },
 };
 </script>
 

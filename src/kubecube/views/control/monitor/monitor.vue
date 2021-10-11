@@ -139,7 +139,7 @@ import kubeDataBoard from 'kubecube/component/common/kube-data-board/kube-data-b
 
 export default {
     metaInfo: {
-        title: '资源监控 - kubecube',
+        title: '监控 - kubecube',
     },
     components: {
         kubeDataBoard,

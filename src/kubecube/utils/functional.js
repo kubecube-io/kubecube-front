@@ -46,12 +46,13 @@ export const unitConvertCPU = value => {
 
 // to Mi
 const memUnits = [ 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei' ];
-export const unitConvertMemory = value => {
+export const unitConvertMemory = (value, target = "Mi") => {
     const valueNum = +(value.replace(/(K|M|G|T|P|E)i/g, ''));
     if (`${valueNum}` === value) return value;
     let i = 0;
+    let offset = memUnits.indexOf(target);
     while (!value.endsWith(memUnits[i]) && i < memUnits.length) { i++; }
-    return valueNum * (+new BigNumber(1024).exponentiatedBy(i - 1));
+    return valueNum * (+new BigNumber(1024).exponentiatedBy(i - offset));
 };
 
 // byte to ...
