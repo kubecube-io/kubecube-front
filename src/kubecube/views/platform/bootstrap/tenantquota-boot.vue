@@ -38,11 +38,6 @@
               <x-request
                 ref="requestcluster"
                 :service="clusterService"
-                :params="{
-                  params: {
-                    status: 'normal',
-                  },
-                }"
                 :processor="clusterResolver(data)"
               >
                 <template slot-scope="{ loading: quotaLoading }">
@@ -201,10 +196,13 @@ export default {
                     text: c.clusterName,
                     value: c.clusterName,
                     ...c,
+                    disabled: c.status !== 'normal',
                 }));
+
                 this.clusters = clusters;
                 if (!this.model.cluster) {
-                    this.model.cluster = clusters[0].value;
+                    const normalClusters = clusters.filter(i => !i.disabled);
+                    this.model.cluster = normalClusters[0].value;
                 }
                 return clusters;
             };

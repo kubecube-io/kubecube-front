@@ -50,17 +50,18 @@ export default {
             this.loading = true;
             const response = await clusterService.getClusters({
                 params: {
-                    status: 'normal',
+                    // status: 'normal',
                 },
             });
             this.list = (getFunc(response, 'items') || []).map(i => ({
                 text: i.clusterName,
                 value: i.clusterName,
                 ...i,
+                disabled: i.status !== 'normal',
             }));
 
             setValueIfListNotPresent({
-                list: this.list,
+                list: this.list.filter(i => !i.disabled),
                 path: 'value',
                 current: getFunc(this.model, 'value'),
             }, val => {

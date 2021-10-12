@@ -79,7 +79,7 @@ export default {
                 const clusters = get(r1, 'items', []);
                 const response = await clusterService.getClusters({
                     params: {
-                        status: 'normal',
+                        // status: 'normal',
                     },
                 });
                 const items = (response.items || []).filter(i => clusters.includes(i.clusterName));
@@ -87,14 +87,15 @@ export default {
                     text: i.clusterName,
                     value: i.clusterName,
                     ...i,
+                    disabled: i.status !== 'normal'  //异常的禁用
                 }));
                 this.clusterList = this.items.slice();
                 setValueIfListNotPresent({
-                    list: this.items,
+                    list: this.items.filter(i => !i.disabled),
                     path: 'value',
                     current: this.model || this.routeCluster,
                 }, val => {
-                    console.log(val);
+                    // console.log(val);
                     this.model = val.value;
                     this.cluster = val;
                 });

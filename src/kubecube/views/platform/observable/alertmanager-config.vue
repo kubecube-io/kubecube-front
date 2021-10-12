@@ -17,11 +17,15 @@
           <template #[`item.operation`]="{ item }">
             <u-linear-layout gap="small">
               <u-link-list>
-                <u-link-list-item @click="editItem(item)">
+                <u-link-list-item
+                  disabled="item.cluster.status !== 'normal'"
+                  @click="editItem(item)"
+                >
                   {{ item.config ? '设置': '创建' }}
                 </u-link-list-item>
                 <u-link-list-item
                   v-if="item.config"
+                  disabled="item.cluster.status !== 'normal'"
                   @click="deleteItem(item)"
                 >
                   删除
@@ -89,7 +93,7 @@ export default {
             return async () => {
                 const clusterRes = await clusterService.getClusters({
                     params: {
-                        status: 'normal',
+                        // status: 'normal',
                     },
                 });
                 const list = geFunc(clusterRes, 'items', []);
