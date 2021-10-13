@@ -56,6 +56,9 @@
           @selection:change="onSelectionChange"
         >
           <template #[`item.metadata.name`]="{ item }">
+            <u-tooltip v-if="item.metadata.labels.find(i => i.key === 'node-role.kubernetes.io/master')" content="master 节点" trigger="hover" placement="top">
+              <span :class="$style.master_flag">控</span>
+            </u-tooltip>
             <u-link :to="`/platform/cluster/${instance.clusterName}/${item.metadata.name}`">
               {{ item.metadata.name }}
             </u-link>
@@ -320,6 +323,16 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+  .master_flag{
+    display: inline-block;
+    border-radius: 50%;
+    background: #508ae2;
+    color: #fff;
+    height: 18px;
+    width: 18px;
+    line-height: 18px;
+    text-align: center;
+    font-size: 12px;
+  }
 </style>
