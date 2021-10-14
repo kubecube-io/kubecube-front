@@ -8,6 +8,14 @@ const userService = Service({
             url: '/login',
             method: 'post',
         },
+        gitHubLogin: {
+            url: '/oauth/redirect',
+            method: 'get',
+        },
+        getConfigmap: {
+            template: '/extend/configmap/{name}',
+            method: 'get',
+        },
         getUserList: {
             url: '/user',
             method: 'get',

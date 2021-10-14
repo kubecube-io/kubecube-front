@@ -46,11 +46,11 @@ export const unitConvertCPU = value => {
 
 // to Mi
 const memUnits = [ 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei' ];
-export const unitConvertMemory = (value, target = "Mi") => {
+export const unitConvertMemory = (value, target = 'Mi') => {
     const valueNum = +(value.replace(/(K|M|G|T|P|E)i/g, ''));
     if (`${valueNum}` === value) return value;
     let i = 0;
-    let offset = memUnits.indexOf(target);
+    const offset = memUnits.indexOf(target);
     while (!value.endsWith(memUnits[i]) && i < memUnits.length) { i++; }
     return valueNum * (+new BigNumber(1024).exponentiatedBy(i - offset));
 };
@@ -214,4 +214,32 @@ export function readFile(file) {
 
         fileReader.readAsText(file);
     });
+}
+
+// ?test=1&name=2  -> {"test": "1", "name": "2"}
+export function urlSearchParse(search) {
+    const obj = {};
+    const reg = /[?&][^?&]+=[^?&]+/g;
+    const arr = search.match(reg);
+    if (arr) {
+        arr.forEach(item => {
+            const tempArr = item.substring(1).split('=');
+            const key = decodeURIComponent(tempArr[0]);
+            const val = decodeURIComponent(tempArr[1]);
+            obj[key] = val;
+        });
+    }
+    return obj;
+}
+// {"test": "1", "name": "2"} -> ?test=1&name=2
+export function urlSearchSerialize(obj) {
+    const keys = Object.keys(obj);
+    if (keys.length === 0) {
+        return '';
+    }
+    let str = '?';
+    keys.forEach(key => {
+        str += `${key}=${obj[key]}&`;
+    });
+    return str.slice(0, -1);
 }

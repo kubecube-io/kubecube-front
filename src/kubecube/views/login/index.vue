@@ -125,6 +125,25 @@
               <span :class="$style.error_text">{{ errMsg }}</span>
             </kube-form-item>
           </kube-form>
+          <u-linear-layout
+            v-if="showGitHubLoginBtn"
+            type="flex"
+            justify="center"
+          >
+            <u-button
+              size="large"
+              :class="$style.btn"
+              :icon="gitHubLoginPadding ? 'loading': ''"
+              :disabled="gitHubLoginPadding"
+              @click="jumpToGitHubLogin"
+            >
+              <img
+                :class="$style.login_logo"
+                :src="gitHubImg"
+              >
+              <span>使用GitHub账号登录</span>
+            </u-button>
+          </u-linear-layout>
           <!-- <u-linear-layout
             v-if="openIdFlag || winADFlag"
             type="flex"
@@ -157,6 +176,7 @@ import { sync } from 'vuex-pathify';
 import userService from 'kubecube/services/user';
 import { setItem, getItem, removeItem } from 'kubecube/utils/persistant';
 import passwordDialog from './password.vue';
+import { urlSearchParse, urlSearchSerialize } from 'kubecube/utils/functional';
 export default {
     metaInfo: {
         title: 'kubecube',
@@ -179,10 +199,24 @@ export default {
             showEYE: true,
             isError: false,
             loadingSubmit: false,
+            gitHubImg: require('./assets/github.png'),
+            gitHubLoginPadding: false,
+            gitHubLoginConfig: null,
+            showGitHubLoginBtn: false,
         };
     },
     computed: {
         user: sync('scope/user'),
+    },
+    created() {
+        const obj = urlSearchParse(window.location.search);
+        if (obj.code) {
+            this.showGitHubLoginBtn = true;
+            this.gitHubLoginPadding = true;
+            this.gitHubLogin(obj);
+        } else {
+            this.loadGitHubLoginConfig();
+        }
     },
     methods: {
         async login() {
@@ -216,6 +250,55 @@ export default {
             }
             // }
         },
+        async gitHubLogin(params) {
+            try {
+                const response = await userService.gitHubLogin({
+                    params,
+                });
+                const account = {
+                    AccountId: response.metadata.name,
+                    AccountDisplayName: response.spec.displayName,
+                };
+                setItem('user', JSON.stringify(account));
+                this.user = account;
+                const lastLocation = getItem('lastlocation');
+                if (lastLocation) {
+                    const temp = JSON.parse(lastLocation);
+                    window.location.href = `${temp.path}${urlSearchSerialize(temp.query)}`;
+                } else {
+                    window.location.href = '/';
+                }
+                removeItem('lastlocation');
+            } catch (error) {
+                window.location.href = '/';
+            }
+        },
+        async loadGitHubLoginConfig() {
+            try {
+                const response = await userService.getConfigmap({
+                    pathParams: {
+                        name: 'kubecube-auth-config',
+                    },
+                });
+                const str = response.github;
+                const obj = {};
+                str.split('\n').forEach(i => {
+                    const arr = i.split(': ');
+                    if (arr[0]) {
+                        obj[arr[0]] = arr[1].trim();
+                    }
+                });
+                this.gitHubLoginConfig = obj;
+                if (obj.enabled === 'true') {
+                    this.showGitHubLoginBtn = true;
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        async jumpToGitHubLogin() {
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=${this.gitHubLoginConfig.clientId}&state=STATE&redirect_uri=${this.gitHubLoginConfig.host}/#/login`;
+        },
     },
 };
 </script>
@@ -236,9 +319,9 @@ export default {
 .login_form{
     float: none;
     width: 410px;
-    height: 300px;
     margin: auto;
     padding-top: 30px;
+    padding-bottom: 30px;
     box-sizing: border-box;
     background: #fff;
     transition: box-shadow 0.2s;
@@ -336,5 +419,11 @@ input:focus{
     width: 100%;
     text-align: center;
     color: #ff5c57;
+}
+.login_logo{
+    height: 20px;
+    width: 20px;
+    margin-bottom: -4px;
+    margin-right: 4px;
 }
 </style>
