@@ -5,7 +5,7 @@
         </div>
         <div :class="$style.body">
             <u-checkboxes v-if="data.length > 0" v-model="checkedList">
-                <div v-for="item in data" :key="item" :class="$style.item">
+                <div v-for="item in data" :key="item.value" :class="$style.item">
                     <u-checkbox :label="item.value" :title="item.text" :disabled="!!item.disabled">
                         {{item.text}}
                     </u-checkbox>
@@ -109,10 +109,12 @@ export default {
     watch: {
         value(val) {
             this.checkedList = val;
+            this.$emit('change', val);
         },
         checkedList(val) {
             this.$emit('update:value', val);
             this.$emit('input', val);
+            this.$emit('change', val);
         },
     },
     methods: {
