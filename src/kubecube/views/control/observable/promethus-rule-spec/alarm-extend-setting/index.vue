@@ -128,12 +128,16 @@
                   :key="conditionItem.key"
                 >
                   <td>
-                    <u-select
-                      v-model="conditionItem.record"
-                      :data="rules"
-                      size="huge"
-                      @select="handleRuleSelect($event, conditionItem)"
-                    />
+                    <validation-provider
+                      rules="required"
+                    >
+                      <u-select
+                        v-model="conditionItem.record"
+                        :data="rules"
+                        size="huge"
+                        @select="handleRuleSelect($event, conditionItem)"
+                      />
+                    </validation-provider>
                   </td>
                   <td>
                     <u-linear-layout gap="small">
