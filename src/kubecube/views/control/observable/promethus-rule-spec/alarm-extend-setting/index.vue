@@ -33,28 +33,7 @@
         label="集群"
         required
       >
-        <x-request
-          :service="loadClusterService"
-          :params="{params: {status: 'normal'}}"
-          :processor="loadClusterProcessor"
-        >
-          <template slot-scope="{loading, data }">
-            <u-loading v-if="loading" />
-            <u-select
-              v-else-if="data && data.length > 0"
-              v-model="model.clusterName"
-              :data="data"
-              :disabled="isEdit"
-              @select="handleClusterNameSelect"
-            />
-            <u-select
-              v-else
-              v-model="model.clusterName"
-              size="huge normal"
-              :data="[{ text: '暂无集群' }]"
-            />
-          </template>
-        </x-request>
+        {{ cluster }}
       </kube-form-item>
       <kube-form-item
         v-if="model.dimension !== 'namespace'"
@@ -68,7 +47,7 @@
         />
       </kube-form-item>
       <validation-provider
-        v-if="model.clusterName"
+        v-if="cluster"
         v-slot="{ errors, validate }"
         rules="required"
       >
@@ -98,7 +77,7 @@
           <x-request
             v-if="!model.targetsAllChecked"
             :service="loadTargets"
-            :params="{ scope: model.scope, clusterName: model.clusterName, dimension: model.dimension }"
+            :params="{ scope: model.scope, clusterName: cluster, dimension: model.dimension }"
           >
             <template slot-scope="{ loading, data }">
               <u-loading v-if="loading" />
@@ -114,7 +93,7 @@
         </kube-form-item>
       </validation-provider>
       <kube-form-item
-        v-if="model.clusterName"
+        v-if="cluster"
         label="规则"
         layout="block"
         required
@@ -129,7 +108,7 @@
         </u-radios>
         <x-request
           :service="getRules"
-          :params="{ dimension: model.dimension, scope: model.scope, clusterName: model.clusterName }"
+          :params="{ dimension: model.dimension, scope: model.scope, clusterName: cluster }"
         >
           <template slot-scope="{ data: rules }">
             <u-form-table :style="{'margin-bottom': '20px'}">
@@ -194,31 +173,10 @@
         label="集群"
         required
       >
-        <x-request
-          :service="loadClusterService"
-          :params="{params: {status: 'normal'}}"
-          :processor="loadClusterProcessor"
-        >
-          <template slot-scope="{ loading, data }">
-            <u-loading v-if="loading" />
-            <u-select
-              v-else-if="data && data.length > 0"
-              v-model="model.clusterName"
-              :data="data"
-              :disabled="isEdit"
-              @select="handleClusterNameSelect"
-            />
-            <u-select
-              v-else
-              v-model="model.clusterName"
-              size="huge normal"
-              :data="[{ text: '暂无集群' }]"
-            />
-          </template>
-        </x-request>
+        {{ cluster }}
       </kube-form-item>
       <validation-provider
-        v-if="model.clusterName"
+        v-if="cluster"
         v-slot="{ errors, validate }"
         rules="required"
       >
@@ -227,7 +185,7 @@
           style="display:none"
         >
         <kube-form-item
-          v-if="model.clusterName"
+          v-if="cluster"
           label="空间"
           required
           layout="block"
@@ -235,7 +193,7 @@
         >
           <x-request
             :service="loadNamespacesServer"
-            :params="{clusterName: model.clusterName}"
+            :params="{clusterName: cluster}"
           >
             <template slot-scope="{ loading, data }">
               <u-loading v-if="loading" />
@@ -305,11 +263,9 @@ export default {
     },
     data() {
         return {
-            console: window.console,
             loadClusterService: clusterService.getClusters,
             model: this.extendInfo ? this.extendInfo : {
                 perspect: 'metric',
-                clusterName: '',
                 dimension: 'pod',
                 namespace: [],
                 events: [],
@@ -335,6 +291,7 @@ export default {
     computed: {
         tenant: get('scope/tenant'),
         project: get('scope/project'),
+        cluster: get('scope/cluster@value'),
         scopesChoice() {
             return this.scopeTypesFunc(scopesChoice);
         },
@@ -365,10 +322,6 @@ export default {
                 this.model.targets = [];
             }
         },
-        handleClusterNameSelect() {
-            this.model.targets = [];
-            this.model.targetsAllChecked = false;
-        },
         handleScopeSelect() {
             this.model.targets = [];
             this.model.targetsAllChecked = false;
@@ -377,7 +330,6 @@ export default {
         handlePerspectSelect(event) {
             this.model.targets = [];
             this.model.targetsAllChecked = false;
-            this.model.clusterName = '';
             if (event.value === 'metric') {
                 this.model.conditions = [{ key: 0, operator: '', value: '', record: '' }];
             } else if (event.value === 'event') {
@@ -393,18 +345,6 @@ export default {
             if (this.model.conditions.length > 1) {
                 this.model.conditions.splice(index, 1);
             }
-        },
-        loadClusterProcessor(res) {
-            const data = res.items.map(item => {
-                return {
-                    text: item.clusterName,
-                    value: item.clusterName,
-                };
-            });
-            if (this.model.clusterName === '' && data.length > 0 && !data.find(i => i.value === this.model.clusterNam)) {
-                this.model.clusterName = data[0].value;
-            }
-            return data;
         },
         async loadNamespaces(clusterName) {
             const params = {
@@ -467,7 +407,8 @@ export default {
             }
         },
         async getWorkloads() {
-            const { scope, dimension, clusterName } = this.model;
+            const { scope, dimension } = this.model;
+            const clusterName = this.cluster;
             const namespaces = await this.loadNamespaces(clusterName);
             const ServiceMapping = {
                 deployment: k8sResourceService.getWorkloads,
@@ -509,7 +450,8 @@ export default {
             });
         },
         async getPVC() {
-            const { scope, clusterName } = this.model;
+            const { scope } = this.model;
+            const clusterName = this.cluster;
             const namespaces = await this.loadNamespaces(clusterName);
             const cephsReponse = await k8sResourceService.getStorage({
                 params: {
@@ -564,7 +506,7 @@ export default {
             });
         },
         async getNamespaces() {
-            const { clusterName } = this.model;
+            const clusterName = this.cluster;
             const namespaces = await this.loadNamespaces(clusterName);
             return namespaces;
         },
@@ -620,7 +562,6 @@ export default {
         $getExpr() {
             const {
                 perspect,
-                clusterName,
                 namespace,
                 events,
                 targets,
@@ -630,10 +571,10 @@ export default {
             if (perspect === 'metric') {
                 const joinStr = operation === 'and' ? ' and on(target) ' : ' or ';
                 return conditions.map(item => {
-                    return `(${item.record}{cluster="${clusterName}",target=~"${targets.join('|')}"}) ${item.operator} ${item.value}`;
+                    return `(${item.record}{target=~"${targets.join('|')}"}) ${item.operator} ${item.value}`;
                 }).join(joinStr);
             } else if (perspect === 'event') {
-                return `kube_event_count{cluster="${clusterName}",namespace=~"${namespace.join('|')}",reason=~"${events.join('|')}"}`;
+                return `kube_event_count{namespace=~"${namespace.join('|')}",reason=~"${events.join('|')}"}`;
             }
             return '';
         },
