@@ -22,6 +22,8 @@ export const CRITICALS = [
 export function getDefaultRule() {
     return {
         hideAdvanced: false,
+        entryModel: '',
+        extendInfo: null,
         expr: '',
         for: '',
         severity: 'info',
@@ -99,7 +101,7 @@ function refactRule(rule, name) {
     const obj = {
         alert: name,
         expr,
-        label: {
+        labels: {
             severity,
             ...KVtoObject(labels.filter(l => l.key), 'key', 'value'),
         },

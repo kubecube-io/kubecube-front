@@ -134,6 +134,9 @@ export default {
                     redirect: { name: 'control.workload.info' },
                     component: () => /* webpackChunkName: "control-workload" */ import('../views/control/workload/detail/index.vue'),
                     meta: {
+                        breadDisabled(name, arr) {
+                            return arr[0] === 'PrometheusRule';
+                        },
                         breadCrumb(name) { return name; },
                     },
                     children: [
