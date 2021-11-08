@@ -74,10 +74,18 @@
             :message="errors && errors[0]"
           >
             <u-input
+              :type="pwdFlag ? 'password' : 'text'"
               v-model="model.password"
               size="normal huge"
               :color="errors && errors[0] ? 'error' : ''"
-            />
+              :readonly="readonlyPassword"
+              @focus="readonlyPassword=false"
+            >
+              <i
+                :class="pwdFlag ? $style.eye : $style.eyeclose"
+                @click="pwdFlag = !pwdFlag"
+              />
+            </u-input>
           </kube-form-item>
         </validation-provider>
 
@@ -151,6 +159,8 @@ export default {
         return {
             type: 'create',
             model: this.genModel(),
+            pwdFlag: true,
+            readonlyPassword: true,
         };
     },
     computed: {
@@ -225,6 +235,22 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.eyeclose:after{
+    position: absolute;
+    font-size: 18px;
+    icon-font: url(kubecube/assets/eyeclose.svg);
+    right: 5px;
+    color: #ccc;
+}
+.eye:after{
+    position: absolute;
+    font-size: 18px;
+    icon-font: url(kubecube/assets/eye.svg);
+    right: 5px;
+    color: #ccc;
+}
+.close:hover, .eye:hover, .eyeclose:hover{
+    cursor: pointer;
+}
 </style>
