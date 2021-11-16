@@ -241,12 +241,13 @@ export default {
                     const {
                         min, max, unit,
                     } = this.meta.axes.left;
+                    const unitList = [ 'bytes', 'percentunit', '%', 'pps', 'ops', 'ops', 'Bps', 's' ];
                     if (unit === 'bytes') {
                         dataoption.yAxis.format = function(value) {
                             return niceBytes(value);
                         };
                     }
-                    if (unit === 'percentunit') {
+                    if (unit === 'percentunit' || unit === '%') {
                         dataoption.yAxis.format = function(value) {
                             return `${NumberFormatter.format(value * 100)}%`;
                         };
@@ -269,6 +270,11 @@ export default {
                     if (unit === 's') {
                         dataoption.yAxis.format = function(value) {
                             return niceTiming(value);
+                        };
+                    }
+                    if (unit && !unitList.includes(unit)) {
+                        dataoption.yAxis.format = function(value) {
+                            return `${NumberFormatter.format(value)} ${unit}`;
                         };
                     }
                     dataoption.yAxis.min = min || 0;
