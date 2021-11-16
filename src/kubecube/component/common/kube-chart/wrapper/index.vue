@@ -42,7 +42,7 @@
           @change="onchange"
         >
           <template slot="operations">
-            <slot name="operations" />
+            <slot name="modaloperations" />
           </template>
           <component
             :is="chart"
