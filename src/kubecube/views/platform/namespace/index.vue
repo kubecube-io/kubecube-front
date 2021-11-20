@@ -178,14 +178,20 @@ export default {
                 title: '删除',
                 content: `确认要删除 ${item.namespace} 吗？`,
                 ok: async () => {
-                    await workloadService.deleteAPIV1Instance({
-                        pathParams: {
-                            cluster: item.cluster,
-                            namespace: item.namespace,
-                            resource: 'resourcequotas',
-                            name: `${item.cluster}.${this.tenant.value}.${item.project}.${item.namespace}`,
-                        },
-                    });
+                    try {
+                        await workloadService.deleteAPIV1Instance({
+                            pathParams: {
+                                cluster: item.cluster,
+                                namespace: item.namespace,
+                                resource: 'resourcequotas',
+                                name: `${item.cluster}.${this.tenant.value}.${item.project}.${item.namespace}`,
+                            },
+                        });
+                    } catch (error) {
+                        if (error.reason !== 'NotFound') {
+                            throw error;
+                        }
+                    }
                     await workloadService.deleteNamespaceCRResource({
                         pathParams: {
                             cluster: item.cluster,
