@@ -6,14 +6,9 @@
     >
       <u-radios
         v-model="model.perspect"
-        :disabled="isEdit"
-        @select="handlePerspectSelect"
       >
         <u-radio label="metric">
           维度
-        </u-radio>
-        <u-radio label="event">
-          事件
         </u-radio>
       </u-radios>
     </kube-form-item>
@@ -172,69 +167,6 @@
         </u-form-table-add-button>
       </kube-form-item>
     </template>
-    <template v-else-if="model.perspect === 'event'">
-      <kube-form-item
-        label="集群"
-        required
-      >
-        {{ cluster }}
-      </kube-form-item>
-      <validation-provider
-        v-if="cluster"
-        v-slot="{ errors, validate }"
-        rules="required"
-      >
-        <input
-          v-model="model.namespace"
-          style="display:none"
-        >
-        <kube-form-item
-          v-if="cluster"
-          label="空间"
-          required
-          layout="block"
-          :message="errors && errors[0]"
-        >
-          <x-request
-            :service="loadNamespacesServer"
-            :params="{clusterName: cluster}"
-          >
-            <template slot-scope="{ loading, data }">
-              <u-loading v-if="loading" />
-              <u-checkbox-card
-                v-else
-                key="spaces"
-                :data="data || []"
-                :value.sync="model.namespace"
-                @change="validate"
-              />
-            </template>
-          </x-request>
-        </kube-form-item>
-      </validation-provider>
-      <validation-provider
-        v-slot="{ errors, validate }"
-        rules="required"
-      >
-        <input
-          v-model="model.events"
-          style="display:none"
-        >
-        <kube-form-item
-          label="事件"
-          required
-          layout="block"
-          :message="errors && errors[0]"
-        >
-          <u-checkbox-card
-            key="events"
-            :data="eventNotices"
-            :value.sync="model.events"
-            @change="validate"
-          />
-        </kube-form-item>
-      </validation-provider>
-    </template>
   </kube-form>
 </template>
 <script>
@@ -271,8 +203,6 @@ export default {
             model: this.extendInfo ? this.extendInfo : {
                 perspect: 'metric',
                 dimension: 'pod',
-                namespace: [],
-                events: [],
                 scope: 'deployment',
                 targets: [],
                 operation: 'or',
@@ -330,15 +260,6 @@ export default {
             this.model.targets = [];
             this.model.targetsAllChecked = false;
             this.model.conditions = [{ key: 0, operator: '', value: '', record: '' }];
-        },
-        handlePerspectSelect(event) {
-            this.model.targets = [];
-            this.model.targetsAllChecked = false;
-            if (event.value === 'metric') {
-                this.model.conditions = [{ key: 0, operator: '', value: '', record: '' }];
-            } else if (event.value === 'event') {
-                this.model.conditions = [];
-            }
         },
         loadNamespacesServer({ clusterName }) { return this.loadNamespaces(clusterName); },
         addCondition() {
@@ -566,8 +487,6 @@ export default {
         $getExpr() {
             const {
                 perspect,
-                namespace,
-                events,
                 targets,
                 operation,
                 conditions,
@@ -577,8 +496,6 @@ export default {
                 return conditions.map(item => {
                     return `(${item.record}{target=~"${targets.join('|')}"}) ${item.operator} ${item.value}`;
                 }).join(joinStr);
-            } else if (perspect === 'event') {
-                return `kube_event_count{namespace=~"${namespace.join('|')}",reason=~"${events.join('|')}"}`;
             }
             return '';
         },
