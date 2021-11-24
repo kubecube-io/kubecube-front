@@ -58,15 +58,38 @@
           </kube-form-item>
         </validation-provider>
 
-        <kube-form-item
-          label="网络类型"
+        <validation-provider
+          v-slot="{ errors }"
+          name="storage"
+          rules="required"
         >
-          <u-select
-            v-model="model.networkType"
-            :data="networkTypes"
-            size="large"
-          />
-        </kube-form-item>
+          <kube-form-item
+            :message="uploadErrorMsg || (errors && errors[0])"
+            label="网络类型"
+            required
+          >
+            <u-linear-layout
+              type="flex"
+              alignment="center"
+            >
+              <u-input
+                v-if="otherNetworkType"
+                v-model="model.networkType"
+                size="large"
+              />
+              <u-select
+                v-else
+                v-model="model.networkType"
+                :data="networkTypes"
+                size="large"
+              />
+              <u-checkbox
+                v-model="otherNetworkType"
+                style="width: 80px"
+              >其他</u-checkbox>
+            </u-linear-layout>
+          </kube-form-item>
+        </validation-provider>
         <u-submit-button
           :click="submit.bind(this)"
           place="right"
@@ -115,6 +138,7 @@ export default {
             model: getDefaultCluster(),
             isEdit: false,
             networkTypes: Object.keys(CLUSTER_NETWORK_TYPE_MAP).map(key => ({ text: CLUSTER_NETWORK_TYPE_MAP[key].text, value: key })),
+            otherNetworkType: false,
         };
     },
 
