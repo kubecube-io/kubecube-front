@@ -44,61 +44,51 @@
       >
         <template slot-scope="{ data, loading, error }">
           <u-loading v-if="loading" />
-          <template v-else-if="error">
-            获取数据失败，请
-            <u-link @click="refresh">
-              重试
-            </u-link>
-          </template>
-          <x-request
+          <kube-table
             v-else
-            ref="quotarequest"
-            :service="quotaService"
-            :params="{}"
-            :processor="quotaResolver(data)"
+            :class="$style.table"
+            table-width="100%"
+            :loading="loading"
+            :columns="columns"
+            :items="data || []"
+            :error="error"
           >
-            <template slot-scope="{ data: quotalist, loading: quotaloading, error: quotaerror }">
-              <kube-table
-                :class="$style.table"
-                table-width="100%"
-                :loading="quotaloading"
-                :columns="columns"
-                :items="quotalist || []"
-                :error="quotaerror"
-              >
-                <template #[`item.resource`]="{ item }">
-                  <p>CPU: {{ formatQuota(item.usedCpu, item.totalCpu, normalizeCore) }} Cores</p>
-                  <p>内存: {{ formatQuota(item.usedMem, item.totalMem) }} Mi</p>
-                  <p>GPU: {{ formatQuota(item.usedGpu, item.totalGpu) }} Cores</p>
-                </template>
-                <template #[`item.memory`]="{ item }">
-                  <p>{{ formatQuota(item.usedStorage, item.totalStorage) }}</p>
-                </template>
-                <template #[`item.operation`]="{item}">
-                  <u-link-list>
-                    <u-link-list-item @click="editItem(item)">
-                      修改
-                    </u-link-list-item>
-                    <u-link-list-item @click="deleteItem(item)">
-                      删除
-                    </u-link-list-item>
-                  </u-link-list>
-                </template>
-                <template #noData>
-                  还没有任何 空间, 现在就
-                  <u-link @click="openCreateModal">
-                    立即创建
-                  </u-link>
-                  一个吧。
-                </template>
-                <template #error>
-                  获取数据失败，请<u-link @click="refresh">
-                    重试
-                  </u-link>
-                </template>
-              </kube-table>
+            <template #[`item.resourceQuato`]="{ item }">
+              <template v-if="item.resourceQuato">
+                <p>CPU: {{ item.resourceQuato.used['requests.cpu'] | clusterCup }} / {{item.resourceQuato.hard['requests.cpu'] | clusterCup }} Cores</p>
+                <p>内存: {{ item.resourceQuato.used['requests.memory'] | clusterMemory }} / {{ item.resourceQuato.hard['requests.memory'] | clusterMemory }} Gi</p>
+                <p>GPU: {{ item.resourceQuato.used['requests.nvidia.com/gpu'] }} / {{ item.resourceQuato.hard['requests.nvidia.com/gpu'] }} Cores</p>
+              </template>
+              <div v-else>
+                -
+              </div>
             </template>
-          </x-request>
+            <template #[`item.memory`]="{ item }">
+              <p>{{ formatQuota(item.usedStorage, item.totalStorage) }}</p>
+            </template>
+            <template #[`item.operation`]="{item}">
+              <u-link-list>
+                <u-link-list-item @click="editItem(item)">
+                  修改
+                </u-link-list-item>
+                <u-link-list-item @click="deleteItem(item)">
+                  删除
+                </u-link-list-item>
+              </u-link-list>
+            </template>
+            <template #noData>
+              还没有任何 空间, 现在就
+              <u-link @click="openCreateModal">
+                立即创建
+              </u-link>
+              一个吧。
+            </template>
+            <template #error>
+              获取数据失败，请<u-link @click="refresh">
+                重试
+              </u-link>
+            </template>
+          </kube-table>
         </template>
       </x-request>
     </u-linear-layout>
@@ -116,6 +106,7 @@ import clusterService from 'kubecube/services/cluster';
 import workloadService from 'kubecube/services/k8s-resource';
 import kubeTenantSelect from 'kubecube/component/global/common/kube-tenant-select.vue';
 import nsQuotaDialog from './ns-quota-dialog.vue';
+import { unitConvertMemory, unitConvertCPU } from 'kubecube/utils/functional';
 
 export default {
     metaInfo: {
@@ -125,17 +116,23 @@ export default {
         kubeTenantSelect,
         nsQuotaDialog,
     },
+    filters: {
+        clusterCup(cpu) {
+            return unitConvertCPU(`${cpu}`); // m -> plain
+        },
+        clusterMemory(memory) {
+            return Number(`${unitConvertMemory(memory, 'Gi')}`).toFixed(3); // Mi --> Gi
+        },
+    },
     data() {
         return {
             tenant: null,
             pipeLoading: true,
-            subNamespaceService: clusterService.getSubnamespace,
-            quotaService: clusterService.getClusters,
             columns: [
                 { name: 'namespace', title: '空间' },
                 { name: 'cluster', title: '集群' },
                 { name: 'project', title: '项目' },
-                { name: 'resource', title: '共享资源（已分配/配额）' },
+                { name: 'resourceQuato', title: '共享资源（已分配/配额）' },
                 // { name: 'memory', title: '持久存储（已分配/配额）' },
                 { name: 'operation', title: '操作', width: '160px' },
             ],
@@ -145,6 +142,26 @@ export default {
 
     },
     methods: {
+        async subNamespaceService(params) {
+            const response = await clusterService.getSubnamespace(params);
+            const quatoServerArr = [];
+            response.items.forEach(namespace => {
+                quatoServerArr.push(workloadService.getAPIV1Instance({
+                    pathParams: {
+                        cluster: namespace.cluster,
+                        namespace: namespace.namespace,
+                        resource: 'resourcequotas',
+                        name: `${namespace.cluster}.${params.params.tenant}.${namespace.project}.${namespace.namespace}`,
+                    },
+                }).then(result => result).catch(() => null));
+            });
+            const resList = await Promise.all(quatoServerArr);
+            resList.forEach((res, index) => {
+                const ns = response.items[index];
+                ns.resourceQuato = res && res.status;
+            });
+            return response;
+        },
         normalizeCore(d) {
             return d / 1000;
         },
@@ -152,23 +169,7 @@ export default {
             return `${normalize(used)}/${normalize(capacity)}`;
         },
         subNamespaceResolver(response) {
-            return {
-                list: response.items,
-                clusters: uniq(response.items.map(i => i.cluster)),
-            };
-        },
-        quotaResolver(data) {
-            return response => {
-                return data.list.map(d => {
-                    const { cluster } = d;
-                    const clusters = response.items || [];
-                    const c = clusters.find(c => c.clusterName === cluster);
-                    return {
-                        ...d,
-                        ...c,
-                    };
-                });
-            };
+            return response.items;
         },
         editItem(item) {
             this.$refs.nsquotadialog.open(item);
