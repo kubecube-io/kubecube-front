@@ -79,7 +79,7 @@ export default function Service({
                         // router.replace('/noauth');
                     } else {
                         // console.log(error)
-                        notifyFunc.error(error);
+                        notifyFunc.error((data && data.message) || error);
                         // notifyFunc({
                         //     content: error,
                         //     color: 'error',
