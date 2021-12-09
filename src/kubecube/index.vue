@@ -104,7 +104,11 @@ export default {
         },
     },
     created() {
-        this.resolveRouter();
+        try {
+            this.resolveRouter();
+        } catch (error) {
+            this.roleLoading = false;
+        }
         this.$store.dispatch('feature/loadFeature');
     },
     mounted() {
