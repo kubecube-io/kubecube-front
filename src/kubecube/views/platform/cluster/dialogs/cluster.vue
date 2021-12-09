@@ -161,18 +161,11 @@ export default {
         async submit() {
             const data = cloneDeep(this.model);
             data.kubeConfig = encode(data.kubeConfig);
-            const response = await clusterService.addCluster({
+            await clusterService.addCluster({
                 data,
             });
-            const p = decode(response);
-            const filename = 'bootstap.sh';
-            const url = 'data:text/plain;charset=utf-8,' + encodeURIComponent(p);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-            a.click();
-            a.remove(); // afte
+            this.show = false;
+            this.$emit('refresh');
         },
     },
 };
