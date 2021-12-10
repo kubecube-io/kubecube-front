@@ -50,7 +50,7 @@
                   设置
                 </u-link-list-item> -->
                 <u-link-list-item
-                  :disabled="item.clusterName === 'pivot-cluster'"
+                  :disabled="item.clusterName === 'pivot-cluster' || item.status === 'deleting' || item.status === 'processing'"
                   @click="removeItem(item)"
                 >
                   删除配置
@@ -106,7 +106,8 @@ export default {
                     return '不正常';
                 case 'processing':
                     return '运行中';
-
+                case 'deleting':
+                    return '删除中';
                 default:
                     return '-';
             }
