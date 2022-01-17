@@ -55,9 +55,9 @@
                 >
                   删除配置
                 </u-link-list-item>
-                <!-- <u-link-list-item @click="editIngress(item)">
+                <u-link-list-item @click="editDomainSuffix(item)">
                   定制域名后缀
-                </u-link-list-item> -->
+                </u-link-list-item>
               </u-link-list>
             </template>
             <template #error>
@@ -81,6 +81,10 @@
       ref="clusterDialog"
       @refresh="refresh"
     />
+    <domainSuffixDialog
+      ref="domainSuffixDialog"
+      @refresh="refresh"
+    />
   </div>
 </template>
 
@@ -90,6 +94,7 @@ import PageMixin from 'kubecube/mixins/pagenation';
 import clusterService from 'kubecube/services/cluster';
 import clusterDialog from './dialogs/cluster.vue';
 import workloadService from 'kubecube/services/k8s-resource';
+import domainSuffixDialog from './dialogs/domainSuffix.vue';
 // import {
 //     toPlainObject
 // } from 'kubecube/k8s-resources/scope/cluster';
@@ -115,6 +120,7 @@ export default {
     },
     components: {
         clusterDialog,
+        domainSuffixDialog,
     },
     mixins: [ PageMixin ],
     data() {
@@ -129,7 +135,7 @@ export default {
                 { name: 'namespaceCount', title: '空间' },
                 { name: 'status', title: '状态' },
                 // { name: 'metadata.creationTimestamp', title: '创建时间' },
-                { name: 'operation', title: '操作', width: '120px' },
+                { name: 'operation', title: '操作', width: '160px' },
             ],
         };
     },
@@ -164,9 +170,9 @@ export default {
                 },
             });
         },
-        // editIngress(item) {
-
-        // },
+        editDomainSuffix(item) {
+            this.$refs.domainSuffixDialog.open(item);
+        },
         // editInfo(item) {
 
         // },

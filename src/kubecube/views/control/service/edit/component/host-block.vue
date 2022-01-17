@@ -47,12 +47,13 @@
                       label="域名"
                       required
                     >
-                      <u-input
+                      <host-input
                         v-model="row.host"
-                        size="normal large"
-                        :color="errors && errors[0] ? 'error' : ''"
+                        size="normal medium"
+                        :errors="errors"
+                        :port="port"
+                        :domain-suffix-list="domainSuffixList"
                       />
-                      <u-text> :{{ port }}</u-text>
                     </kube-form-item>
                   </validation-provider>
                 </u-linear-layout>
@@ -95,11 +96,13 @@ import blockLayout from 'kubecube/component/common/kube-dynamic-block-layout/ind
 import blockRowLayout from 'kubecube/component/common/kube-dynamic-block-layout/row.vue';
 import secretSelect from './secret-select.vue';
 import pathTable from './path-table.vue';
-
+import k8sCommonExtendResourceService from 'kubecube/services/k8s-common-extend-resource';
+import hostInput from './host-input.vue';
 export default {
     components: {
         secretSelect,
         pathTable,
+        hostInput,
     },
     mixins: [ makeVModelMixin ],
     props: {
@@ -113,11 +116,13 @@ export default {
 
             blockLayout,
             blockRowLayout,
+            domainSuffixList: [],
         };
     },
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        project: get('scope/project@value'),
         requestParam() {
             return {
                 pathParams: {
@@ -127,6 +132,9 @@ export default {
                 },
             };
         },
+    },
+    created() {
+        this.loadDomainSuffix();
     },
     methods: {
         resolver(response) {
@@ -155,6 +163,18 @@ export default {
         },
         getRowErrorTip() {
 
+        },
+        async loadDomainSuffix() {
+            const res = await k8sCommonExtendResourceService.getResources({
+                pathParams: {
+                    resource: 'ingressDomainSuffix',
+                },
+                params: {
+                    cluster: this.cluster,
+                    project: this.project,
+                },
+            });
+            this.domainSuffixList = res.map(val => ({ value: val, text: val }));
         },
     },
 };
