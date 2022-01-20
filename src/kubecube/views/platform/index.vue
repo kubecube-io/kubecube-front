@@ -54,7 +54,7 @@
             </u-sidebar-item>
           </u-sidebar-group>
           <u-sidebar-group
-            v-if="isPlatform"
+            v-if="isPlatform && showControlOperation"
             class="m-sidebar-group"
           >
             <span slot="title"><u-icons name="cluster" />管控运维</span>
@@ -138,6 +138,9 @@ export default {
         },
         isProject() {
             return this.userRole[ROLES.PROJECT_ADMIN];
+        },
+        showControlOperation() {
+            return this.auditFeature && this.auditEnable;
         },
     },
     watch: {
