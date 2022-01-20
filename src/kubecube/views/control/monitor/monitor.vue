@@ -1,6 +1,6 @@
 <template>
   <div>
-    <u-info-list-group :title="`${title} 监控`" />
+    <!-- <u-info-list-group :title="`${title} 监控`" /> -->
     <u-linear-layout
       direction="vertical"
       style="margin-bottom: 20px;"
