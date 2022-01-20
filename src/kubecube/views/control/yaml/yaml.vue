@@ -42,7 +42,7 @@
         </u-button>
       </u-linear-layout>
     </div>
-    <div style="margin-bottom: 20px">
+    <!-- <div style="margin-bottom: 20px">
       <u-notice icon="warning">
         为保证通过 YAML 文件创建的资源能够通过KubeCube进行管理，平台将自动设置KubeCube内置标签。
         <u-link
@@ -51,7 +51,7 @@
           {{ isPreview ? '返回编辑' : '预览' }}
         </u-link>
       </u-notice>
-    </div>
+    </div> -->
     <div
       ref="editor"
       :class="$style.editor"
@@ -71,6 +71,13 @@
             @click="scope.submit"
           >
             确定
+          </u-button>
+          <u-button
+            :disabled="!!readOnly || scope.submitting"
+            :icon="scope.submitting ? 'loading' : ''"
+            @click="scope.submit(true)"
+          >
+            预检测
           </u-button>
           <u-button @click="close">
             取消
@@ -364,7 +371,7 @@ export default {
             }
 
         },
-        async submit() {
+        async submit(dryRun) {
             this.yamlErrorTip = '';
             let content = this.editor.getModel().getValue();
             content = yamljs.parse(content);
@@ -373,10 +380,17 @@ export default {
                 pathParams: {
                     cluster: this.cluster,
                 },
+                params: {
+                    ...(dryRun === true ? { dryRun: true } : {}),
+                },
                 data: content,
             });
-            this.editor.dispose();
-            this.close();
+            if (dryRun === true) {
+                this.$toast.success('预检测成功');
+            } else {
+                this.editor.dispose();
+                this.close();
+            }
         },
     },
 };
