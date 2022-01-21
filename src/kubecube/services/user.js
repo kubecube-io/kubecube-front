@@ -77,7 +77,7 @@ const userService = Service({
         },
         createUserKey: {
             url: '/key/create',
-            method: 'get',
+            method: 'post',
         },
         removeUserKey: {
             url: '/key',
