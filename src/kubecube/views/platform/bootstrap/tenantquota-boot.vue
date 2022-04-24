@@ -120,6 +120,7 @@ import clusterService from 'kubecube/services/cluster';
 import scopeService from 'kubecube/services/scope';
 import hardQuota from '../quota/hard-quota-table.vue';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
+import BigNumber from 'bignumber.js';
 
 export default {
     components: {
@@ -210,16 +211,15 @@ export default {
         quotaResolver([ cubeQuotaResponse, clusterQuota ]) {
             this.quotaType = cubeQuotaResponse ? 'edit' : 'create';
             this.model.model = toCubeResourceQoutaPlainObject(cubeQuotaResponse);
-            console.log(clusterQuota);
             this.model.used = {
-                usedCpu: unitConvertCPU(clusterQuota.assignedCpu),
-                usedMemory: unitConvertMemory(clusterQuota.assignedMem),
-                usedGpu: unitConvertCPU(clusterQuota.assignedGpu),
+              usedCpu: this.model.model.status.used.cpu,
+              usedMemory: this.model.model.status.used.memory,
+              usedGpu: this.model.model.status.used.gpu,
             };
             this.model.availables = {
-                cpu: unitConvertCPU(clusterQuota.capacityCpu), // - unitConvertCPU(clusterQuota.assignedCpu),
-                memory: unitConvertMemory(clusterQuota.capacityMem), // - unitConvertMemory(clusterQuota.assignedMem),
-                gpu: unitConvertCPU(clusterQuota.capacityGpu), // - unitConvertCPU(clusterQuota.assignedGpu),
+                cpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityCpu)).minus(unitConvertCPU(clusterQuota.assignedCpu)).plus(this.model.model.status.hard.cpu),
+                memory: +new BigNumber(unitConvertMemory(clusterQuota.capacityMem)).minus(unitConvertMemory(clusterQuota.assignedMem)).plus(this.model.model.status.hard.memory),
+                gpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityGpu)).minus(unitConvertCPU(clusterQuota.assignedGpu)).plus(this.model.model.status.hard.gpu),
                 // storage: item.totalStorage - item.usedStorage,
             };
         },
