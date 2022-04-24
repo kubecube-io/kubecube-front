@@ -45,7 +45,6 @@
           />
         </template>
       </secret-select>
-
       <host-block
         v-model="model.spec.rulesConfig"
         :port="model.spec.port"
@@ -168,7 +167,6 @@ export default {
                     data: yaml,
                 });
             }
-
             this.$router.push({ path: '/control/ingresses/list' });
         },
     },

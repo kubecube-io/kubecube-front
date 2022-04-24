@@ -60,6 +60,9 @@
                 <u-link-list-item @click="editInfo(item)">
                   修改名称
                 </u-link-list-item>
+                <u-link-list-item @click="editDomainSuffix(item)">
+                  定制域名后缀
+                </u-link-list-item>
               </u-link-list>
             </template>
             <template #noData>
@@ -93,6 +96,10 @@
       ref="memberdialog"
       @refresh="refresh"
     />
+    <domainSuffixDialog
+      ref="domainSuffixDialog"
+      @refresh="refresh"
+    />
   </div>
 </template>
 
@@ -110,11 +117,13 @@ import {
 import {
     ROLES,
 } from 'kubecube/utils/constance';
+import domainSuffixDialog from './dialogs/domainSuffix.vue';
 export default {
     components: {
         projectDialog,
         kubeTenantSelect,
         memberDialog,
+        domainSuffixDialog,
     },
     metaInfo: {
         title: '项目 - kubecube',
@@ -130,7 +139,7 @@ export default {
                 { name: 'metadata.name', title: '项目标识' },
                 { name: 'tenant', title: '所属租户' },
                 { name: 'metadata.creationTimestamp', title: '创建时间', width: '200px' },
-                { name: 'operation', title: '操作', width: '160px' },
+                { name: 'operation', title: '操作', width: '220px' },
             ],
             list: [],
         };
@@ -198,6 +207,9 @@ export default {
         openCreateModal() {
             this.$refs.dialog.open();
             console.log(this.$refs.user);
+        },
+        editDomainSuffix(item) {
+            this.$refs.domainSuffixDialog.open(item);
         },
 
     },
