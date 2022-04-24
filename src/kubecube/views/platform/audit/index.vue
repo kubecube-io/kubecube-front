@@ -135,7 +135,7 @@ export default {
                 { title: '时间', name: 'EventTime', sortable: true },
                 { title: 'IP地址', name: 'SourceIpAddress' },
                 { title: '事件名称', name: 'EventName', textwrap: true },
-                { title: '资源', name: 'ResourceList', textwrap: true },
+                { title: '资源', name: 'ResourceReports', textwrap: true },
                 { title: '状态', name: 'ResponseStatus' },
             ],
             debounceonChange: debounce(this.onChange, 300),
@@ -150,7 +150,7 @@ export default {
             return {
                 list: (response.Events || []).map(event => ({
                     ...event,
-                    ResourceList: (event.ResourceList || []).map(({ ResourceType, ResourceName, ResourceId }) => `资源类型:${ResourceType}, 资源名称:${ResourceName}, 资源ID:${ResourceId}`).join(','),
+                    ResourceReports: (event.ResourceReports || []).map(({ ResourceType, ResourceName, ResourceId }) => `资源类型:${ResourceType}, 资源名称:${ResourceName}, 资源ID:${ResourceId}`).join(','),
                 })),
                 total: response.Total,
             };
