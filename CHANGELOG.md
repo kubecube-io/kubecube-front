@@ -1,3 +1,20 @@
+# V1.2.0
+## Bug fix
+### Platform management
+- Fix cluster allocable resources in the tenant quota adjustment page
+### Resource management
+- Fix create userKey issue
+## Features
+### Resource management
+- Support dry run action for yaml edit
+- remove monitor title
+- Support configuration for ingress domain suffix
+
+# V1.1.1
+## Bug fix
+### Resource management
+- Fix imagePullSecrets format 
+
 # V1.0.2
 ## Bug fix
 ### Platform management
