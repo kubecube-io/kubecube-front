@@ -9,6 +9,9 @@
 - Support dry run action for yaml edit
 - remove monitor title
 - Support configuration for ingress domain suffix
+### Dependencies
+- [KubeCube v1.2.0](https://github.com/kubecube-io/KubeCube/tree/v1.2.0)
+- [WebConsole v1.2.0](https://github.com/kubecube-io/kubecube-webconsole/tree/v1.2.0) 
 
 # V1.1.1
 ## Bug fix
