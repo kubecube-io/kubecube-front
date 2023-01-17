@@ -43,8 +43,8 @@
       :params="{
         params: {
           ...searchbody,
-          startTime: searchbody.startTime / 1000,
-          endTime: searchbody.endTime / 1000,
+          startTime: searchbody.startTime,
+          endTime: searchbody.endTime,
           page: pagenation.pageNum,
           size: pagenation.pageSize,
           sortBy: pagenation.sortName,
