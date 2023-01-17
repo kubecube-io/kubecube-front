@@ -30,7 +30,10 @@
             <u-detail-operate-item @click="editItem">
               设置
             </u-detail-operate-item>
-            <u-detail-operate-item @click="editYAML">
+            <u-detail-operate-item
+              v-if="workload !== 'logconfigs'"
+              @click="editYAML"
+            >
               YAML 设置
             </u-detail-operate-item>
           <!-- </template>
@@ -117,15 +120,16 @@ import {
     toPlainObject as toSecretPlainObject,
 } from 'kubecube/k8s-resources/secret';
 import {
-    toPlainObject as toLogconfgPlainObject,
-} from 'kubecube/k8s-resources/logconfigs';
-import {
     toPlainObject as toPrometheusRulePlainObject,
 } from 'kubecube/k8s-resources/prometheusRule';
 import {
     rulespecCRD,
 } from 'kubecube/views/control/observable/utils.js';
 import modifyReplicasDialog from './dialog/modify-replicas.vue';
+import logseerService from 'kubecube/services/logseer';
+import {
+    toPlainObject as toLogconfgPlainObject,
+} from 'kubecube/k8s-resources/logconfigs-new';
 export default {
     metaInfo() {
         return {
@@ -164,7 +168,7 @@ export default {
                 case 'ingresses':
                     return workloadService.getNetworkingInstance;
                 case 'logconfigs':
-                    return workloadService.getNeteaseResourceInstance;
+                    return logseerService.getLogconfigInstance;
                 case 'PrometheusRule':
                     return workloadService.getNamespaceCRResourceInstance;
                 default:
@@ -190,7 +194,7 @@ export default {
                 case 'ingresses':
                     return workloadService.deleteNetworkingInstance;
                 case 'logconfigs':
-                    return workloadService.deleteNeteaseResource;
+                    return logseerService.deleteLogconfig;
                 default:
                     return null;
             }

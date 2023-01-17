@@ -25,6 +25,9 @@ import kubeLabelEditor from 'kubecube/component/global/k8s/label-editor';
 import kubePlainLabelEditor from 'kubecube/component/global/k8s/plain-label-editor.vue';
 import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue';
 
+// elComponent
+import elInputSearch from 'kubecube/elComponent/inputSearch';
+
 const SKELETON_KEY = 'SKELETON_KEY';
 const SKELETON_RAW_DATA = 'SKELETON_RAW_DATA';
 function loadingElm(el) {
@@ -56,6 +59,7 @@ function addEllipsis(el, length) {
 
 Vue.use({
     install(_Vue) {
+        _Vue.component('ElInputSearch', elInputSearch);
         _Vue.component('XRequest', xRequest);
         _Vue.component('XScope', xScope);
         _Vue.component('KubeForm', kubeForm);

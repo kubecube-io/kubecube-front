@@ -4,23 +4,38 @@
     :get-default-item="getDataTemplate"
     :columns="[
       {
-        title: '',
-        dataIndex: 'path',
+        title: '类型',
+        dataIndex: 'type',
+      },
+      {
+        title: 'Key',
+        dataIndex: 'key',
       }
     ]"
   >
-    <template #path="{record, index}">
+    <template #type="{ record }">
+      <el-select
+        v-model="record.type"
+        placeholder="请选择"
+      >
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.text"
+          :value="item.value"
+        />
+      </el-select>
+    </template>
+    <template #key="{record, index}">
       <el-form-item
         :prop="`${prefixProp}.${index}.path`"
         :rules="[
-          validators.noRedundance(exsitKeys, false),
-          ...(required ? [{ required: true, message: '不能为空'}] : []),
-          ...rules
+
         ]"
       >
         <el-input
-          v-model="record.path"
-          :placeholder="placeholder"
+          v-model="record.key"
+          placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"
         />
       </el-form-item>
     </template>
@@ -38,6 +53,7 @@ export default {
     mixins: [ makeVModelMixin ],
     props: {
         errorPrefix: String,
+        rules: Object,
         prefixProp: {
             type: String,
             default: '',
@@ -46,18 +62,15 @@ export default {
             type: String,
             default: '',
         },
-        required: {
-            type: Boolean,
-            default: false,
-        },
-        rules: {
-            type: Array,
-            default: () => [],
-        },
     },
     data() {
         return {
             validators,
+            options: [
+                { text: 'label', value: 'labels' },
+                { text: 'env', value: 'env' },
+                { text: 'annotation', value: 'annotations' },
+            ],
         };
     },
     computed: {
@@ -68,7 +81,8 @@ export default {
     methods: {
         getDataTemplate() {
             return {
-                path: '',
+                type: '',
+                key: '',
             };
         },
     },

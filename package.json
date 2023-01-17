@@ -41,6 +41,7 @@
         "color-string": "^1.5.5",
         "cron-parser": "^3.5.0",
         "deep-object-diff": "^1.1.0",
+        "element-ui": "^2.15.12",
         "eslint-config-2o3t": "^2.0.1",
         "gl-matrix": "^3.3.0",
         "i-font-awesome.vue": "^5.2.0",
@@ -85,7 +86,10 @@
     "devDependencies": {
         "husky": "^2.7.0",
         "lint-staged": "^9.5.0",
-        "webpack-cli": "^3.3.11"
+        "webpack-cli": "^3.3.11",
+        "node-sass": "^4.14.1",
+        "sass-loader": "^8.0.2",
+        "style-loader": "^2.0.0"
     },
     "husky": {
         "hooks": {

@@ -24,6 +24,10 @@ module.exports = {
             link: path.resolve(__dirname, 'src/client/components/'),
             description: '公共依赖组件',
         },
+        elComponent: {
+            link: path.resolve(__dirname, 'src/client/elComponent/'),
+            description: 'el扩展组件',
+        },
         base: path.resolve(__dirname, 'src/client/base/'),
         mixins: path.resolve(__dirname, 'src/client/base/mixins/'),
         filters: path.resolve(__dirname, 'src/client/filters/'),

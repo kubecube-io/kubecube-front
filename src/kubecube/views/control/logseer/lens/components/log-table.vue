@@ -287,7 +287,7 @@ export default {
     left: 0;
     top: 0;
     background: #fff;
-    z-index: 999;
+    z-index: 1200;
 }
 .root{
     /* border: 1px solid #ebf0f5;

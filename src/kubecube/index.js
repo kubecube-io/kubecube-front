@@ -1,3 +1,4 @@
+import 'kubecube/style/global.scss';
 import 'kubecube/style/index.css';
 import Vue from 'vue';
 import 'nprogress/nprogress.css';
@@ -22,6 +23,9 @@ import store from 'kubecube/store';
 import './plugins/vee-validate';
 import './plugins/vue-meta';
 import './plugins/kubecube';
+// 引入Element
+import ElementUI from 'element-ui';
+Vue.use(ElementUI, { size: 'medium' });
 new Vue({
     el: '#app',
     router,

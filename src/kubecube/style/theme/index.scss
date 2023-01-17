@@ -1,0 +1,996 @@
+
+// Button
+
+@include b(button) {
+    &:hover,
+    &:focus,
+    &:active {
+        text-decoration: none !important;
+    }
+
+    & + & {
+        margin-left: 12px;
+    }
+
+    &:not(.el-button-primary) {
+        @include m(default) {
+            &:hover,
+            &:focus {
+                color: $--color-primary-hover-self;
+                border-color: $--color-primary-hover-self;
+                background-color: $--color-white;
+            }
+            &:active {
+                color: $--color-primary-active-self;
+                border-color: $--color-primary-active-self;
+                background-color: $--color-white;
+            }
+            &.is-disabled,
+            &.is-disabled:hover,
+            &.is-disabled:focus,
+            &.is-disabled:active {
+                color: $--color-text-placeholder;
+                border-color: $--disabled-border-base;
+                background-color: $--disabled-fill-base;
+            }
+        }
+    }
+    @include m(text) {
+        &:hover,
+        &:focus {
+            color: $--color-primary-hover-self;
+        }
+        &:active {
+            color: $--color-primary-active-self;
+        }
+    }
+
+    // @each $type in (primary, success, warning, danger, info) {
+    //     @include m(#{$type}) {
+    //         &:hover,
+    //         &:focus {
+    //             background-color: $--color-#{$type}-hover-self;
+    //             border-color: $--color-#{$type}-hover-self;
+    //         }
+    //         &:active {
+    //             border-color: $--color-#{$type}-active-self;
+    //             background-color: $--color-#{$type}-active-self;
+    //         }
+    //     }
+    // }
+
+    @include m(danger) {
+        &:hover,
+        &:focus {
+            background-color: $--color-danger-hover-self;
+            border-color: $--color-danger-hover-self;
+        }
+        &:active {
+            background-color: $--color-danger-active-self;
+            border-color: $--color-danger-active-self;
+        }
+    }
+    @include m(success) {
+        &:hover,
+        &:focus {
+            background-color: $--color-success-hover-self;
+            border-color: $--color-success-hover-self;
+        }
+        &:active {
+            background-color: $--color-success-active-self;
+            border-color: $--color-success-active-self;
+        }
+    }
+    @include m(info) {
+        &:hover,
+        &:focus {
+            background-color: $--color-info-hover-self;
+            border-color: $--color-info-hover-self;
+        }
+        &:active {
+            background-color: $--color-info-active-self;
+            border-color: $--color-info-active-self;
+        }
+    }
+    @include m(primary) {
+        &:hover,
+        &:focus {
+            background-color: $--color-primary-hover-self;
+            border-color: $--color-primary-hover-self;
+        }
+        &:active {
+            border-color: $--color-primary-active-self;
+            background-color: $--color-primary-active-self;
+        }
+        &.is-disabled,
+        &.is-disabled:hover,
+        &.is-disabled:focus,
+        &.is-disabled:active {
+            border-color: $--color-primary-disable-self;
+            background-color: $--color-primary-disable-self;
+        }
+    }
+}
+
+// Radio
+
+@include b(radio) {
+    color: $-color-title-color-self;
+    @include e(input) {
+        .el-radio__inner {
+            &::after {
+                width: $--radio-checked-input-width-self;
+                height: $--radio-checked-input-height-self;
+                background-color: $--radio-checked-input-background-color;
+            }
+        }
+        @include when(disabled) {
+            .el-radio__inner {
+                background-color: $--background-color-base;
+                border-color: $--disabled-border-base;
+                cursor: not-allowed;
+            }
+            &.is-checked {
+                .el-radio__inner {
+                    border-color: $--disabled-border-base;
+                    &::after {
+                        background-color: $-color-background-color-self;
+                    }
+                }
+            }
+            & + span.el-radio__label {
+                color: $--color-info;
+            }
+        }
+        @include when(checked) {
+            & + .el-radio__label {
+                color: $-color-title-color-self;
+            }
+        }
+    }
+}
+@include b(radio-button) {
+    &:focus:not(.is-focus):not(:active):not(.is-disabled) {
+        /*获得焦点时 样式提醒*/
+        box-shadow: none;
+    }
+}
+
+// checkbox
+@include b(checkbox) {
+    color: $-color-title-color-self;
+    @include e(input) {
+        @include when(disabled) {
+            .el-checkbox__inner {
+                background-color: $--background-color-base;
+                border-color: $--disabled-border-base;
+                cursor: not-allowed;
+            }
+            &.is-checked {
+                .el-checkbox__inner {
+                    border-color: $--disabled-border-base;
+                    background-color: $--background-color-base;
+                    &::after {
+                        border-color: $-color-background-color-self;
+                    }
+                }
+            }
+            & + span.el-checkbox__label {
+                color: $--color-info;
+            }
+        }
+        @include when(checked) {
+            & + .el-checkbox__label {
+                color: $-color-title-color-self;
+            }
+        }
+    }
+}
+
+// Select
+
+@include b(select) {
+    width: 100%;
+    .el-tag {
+        &--info {
+            background-color: $--select-el-tag-info-background-color-self;
+            border-color: $--select-el-tag-info-border-color-self;
+            color: $--select-el-tag-info-color-self;
+        }
+        &__close.el-icon-close {
+            &,
+            &:hover {
+                color: $--select-el-tag-close-icon-color-self;
+                background-color: $--select-el-tag-close-icon-background-color-self;
+            }
+        }
+    }
+    .el-input {
+        & .el-select__caret {
+            color: $--color-text-regular;
+        }
+    }
+    & .el-select-dropdown {
+        left: 0 !important;
+        max-width: 100%;
+        position: absolute !important;
+    }
+}
+
+@include b(select-dropdown) {
+    & .el-select-dropdown__item {
+        padding-right: 32px;
+    }
+    & .el-select-dropdown__item.selected {
+        font-weight: $--font-weight-primary;
+        &::after {
+            position: absolute;
+            right: 20px;
+            font-family: 'element-icons';
+            content: '\e6da';
+            font-size: 12px;
+            font-weight: bold;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    }
+}
+
+// Pagination
+@include b(pagination) {
+    @include when(background) {
+        .btn-prev,
+        .btn-next,
+        .el-pager li {
+            font-weight: $--pagination-background-li-font-weight-self;
+            background-color: $--pagination-background-li-background-self;
+            border: $--pagination-background-li-border-self;
+            margin: 0 4px;
+        }
+        .el-pager li {
+            &:not(.disabled) {
+                &.active,
+                &:hover {
+                    border-color: $--pagination-background-li-hover-border-self;
+                }
+            }
+        }
+        .btn-prev,
+        .btn-next {
+            .el-icon {
+                font-weight: $--pagination-background-li-font-weight-self;
+            }
+            &:not(:disabled) {
+                &:hover {
+                    border-color: $--pagination-background-li-hover-border-self;
+                    color: $--color-primary;
+                }
+            }
+        }
+    }
+    @include e(sizes) {
+        margin-right: 0;
+    }
+    @include e(total) {
+        margin-right: 3px;
+    }
+    @include e(jump) {
+        margin-left: 4px;
+    }
+}
+
+// Input
+@include b(input-number) {
+    width: 100%;
+    @include when(controls-right) {
+        .el-input__inner {
+            text-align: left;
+        }
+        @include e((increase, decrease)) {
+            background: transparent;
+            border-left: $--input-increase-decrease-border-self;
+            &:not(.is-disabled):hover {
+                & i {
+                    font-weight: $--input-increase-decrease-hover-font-weight-self;
+                }
+            }
+        }
+        @include e(increase) {
+            border-bottom: $--input-increase-decrease-border-self;
+        }
+    }
+}
+@include b(input-group) {
+    a.el-button {
+        border-color: transparent;
+        background-color: transparent;
+        color: inherit;
+        border-top: 0;
+        border-bottom: 0;
+    }
+}
+@include b(textarea) {
+    @include e(inner) {
+        padding: 5px 12px;
+    }
+}
+
+@include b(input) {
+    @include e(inner) {
+        padding: 0 12px;
+        color: $-color-title-color-self;
+        &::placeholder {
+            color: $-color-background-color-self;
+        }
+    }
+    @include when(disabled) {
+        .el-input__inner {
+            color: $--color-info;
+
+            &::placeholder {
+                color: $-color-background-color-self;
+            }
+        }
+    }
+}
+
+@each $type in (textarea, input, input-group) {
+    @include b(#{$type}) {
+        @include e((append, prepend)) {
+            color: $--color-text-regular;
+        }
+    }
+}
+
+// .input-with-select {
+//     @include e((append, prepend)) {
+//         .el-select {
+//             &:hover,
+//             &:focus {
+//                 input {
+//                     border: 1px solid $--input-focus-border;
+//                 }
+//             }
+//         }
+//     }
+// }
+
+// autocomplete
+@include b(autocomplete-suggestion) {
+    & li {
+        color: $--autocomplete-suggestion-li-color-self;
+    }
+}
+
+@include b(breadcrumb) {
+    margin-bottom: 12px;
+    height: 32px;
+    line-height: 32px;
+    @include e(separator) {
+        margin: 0 5px;
+        color: $--color-primary;
+    }
+    @include e(item) {
+        @include e(inner) {
+            color: $-color-description-color-self;
+            &.is-link,
+            & a {
+                color: $--color-primary;
+                font-weight: $--font-weight-primary;
+            }
+        }
+        &:nth-last-child(2) {
+            .el-breadcrumb__separator {
+                color: $-color-description-color-self;
+            }
+        }
+    }
+}
+
+// tabs
+@include b(tabs) {
+    @include e(item) {
+        color: $-color-title-color-self;
+        @include when(disabled) {
+            color: $--color-info;
+        }
+    }
+    @include e((nav-next, nav-prev)) {
+        color: $--color-text-regular;
+    }
+    @include m((top, bottom)) {
+        @include e(nav-wrap) {
+            &::after {
+                height: 1px;
+                background-color: $--border-color-base;
+            }
+        }
+        .el-tabs__item.is-top:nth-child(2),
+        .el-tabs__item.is-bottom:nth-child(2) {
+            padding-left: $--el-tabs-item-top-bottom-child-padding-self;
+        }
+        .el-tabs__item.is-top:last-child,
+        .el-tabs__item.is-bottom:last-child {
+            padding-right: $--el-tabs-item-top-bottom-child-padding-self;
+        }
+    }
+    &[page='main'] {
+        .el-tabs__active-bar {
+            display: none;
+        }
+        .el-tabs__item {
+            box-sizing: content-box;
+            height: $--input-height;
+            margin-bottom: 2px;
+            &:not(.is-active):hover {
+                color: $--color-text-primary;
+                background-color: $--el-tabs-item-hover-background-self;
+                cursor: pointer;
+            }
+            @include when(active) {
+                border: $--el-tabs-item-acitve-border-self;
+                margin-bottom: -1px;
+                border-bottom: $--el-tabs-item-acitve-border-bottom-self;
+                border-top: $--el-tabs-item-acitve-border-top-self;
+            }
+        }
+        .el-tabs__nav-wrap {
+            &::after {
+                height: 1px;
+                background-color: $--el-tabs-item-acitve-border-self;
+            }
+        }
+    }
+}
+
+// dialog
+@include b(dialog) {
+    min-width: 640px;
+    width: 10%;
+    @include e(header) {
+        position: relative;
+        border-bottom: $--dialog-header-bottom-self;
+        padding: $--dialog-header-padding-self;
+        height: $--dialog-header-height-self;
+        line-height: $--dialog-header-height-self;
+        color: $--dialog-header-font-color-self;
+    }
+    @include e(headerbtn) {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    @include e(title) {
+        font-size: 16px;
+        color: $--dialog-header-font-color-self;
+    }
+    @include e(body) {
+        padding: $--dialog-body-padding-left-right-self;
+    }
+    @include e(footer) {
+        border-top: $--dialog-header-bottom-self;
+        padding: $--dialog-header-padding-self;
+        height: $--dialog-header-height-self;
+        line-height: $--dialog-header-height-self;
+    }
+}
+
+// table
+@include b(table) {
+    .el-table__cell {
+        padding: $--table-cell-normal-padding-self;
+    }
+    @each $type in (medium, small) {
+        @include m($type) {
+            th {
+                padding: 0 !important;
+                height: 40px;
+                line-height: 40px;
+            }
+            font-size: $--table-cell-medium-font-size-self;
+            .el-table__cell {
+                padding: $--table-cell-medium-padding-self;
+            }
+            .el-link {
+                font-size: $--table-cell-medium-font-size-self;
+            }
+            .el-link:hover:after {
+                border-bottom: none !important;
+            }
+        }
+    }
+    @include m(border) {
+        border: none;
+        .el-table__cell {
+            border-right: none;
+        }
+        th {
+            position: relative;
+            &::after {
+                content: ' ';
+                position: absolute;
+                border-right: $--table-border;
+                border-right-color: $-color-background-color-self;
+                top: 50%;
+                height: 30%;
+                right: 0;
+                transform: translateY(-50%);
+            }
+            &:nth-last-child(1),
+            &:nth-last-child(2) {
+                &:after {
+                    display: none;
+                }
+            }
+        }
+        &::after {
+            background-color: transparent;
+        }
+        tbody {
+            tr:last-of-type {
+                td.el-table__cell {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+    @include e(column-resize-proxy) {
+        border-left: 1px solid $--color-primary-disable-self;
+    }
+    .cell {
+        line-height: 22px;
+    }
+    thead {
+        th.el-table__cell {
+            font-weight: 500;
+        }
+    }
+}
+
+// menu
+@include b(menu) {
+    @include m(horizontal) {
+        & > .el-menu-item {
+            color: $-color-title-color-self;
+            &:hover {
+                color: $--color-primary !important;
+            }
+            @include when(active) {
+                color: $--color-primary !important;
+            }
+        }
+    }
+    &:not(.el-menu--horizontal) {
+        @include b(submenu) {
+            & .el-menu-item {
+                height: $--menu-item-height-self;
+                line-height: $--menu-item-height-self;
+                padding-left: $--menu-sub-item-padding-left-self;
+                @include when(active) {
+                    border-right: $--menu-item-acitve-border-right-self;
+                }
+            }
+            @include e(title) {
+                height: $--menu-item-height-self;
+                line-height: $--menu-item-height-self;
+            }
+        }
+        @include b(menu-item) {
+            height: $--menu-item-height-self;
+            line-height: $--menu-item-height-self;
+            @include when(active) {
+                background: $--select-option-hover-background;
+                border-right: $--menu-item-acitve-border-right-self;
+            }
+        }
+    }
+}
+
+// form
+@include b(form) {
+    @include m(label-top) {
+        & .el-form-item__label {
+            padding: 0;
+            padding-right: 14px;
+            margin-bottom: 10px;
+        }
+    }
+    .el-table {
+        line-height: 1;
+        .cell {
+            // overflow: visible;
+        }
+    }
+    &:not(.el-form--inline) {
+        .el-form-item__label {
+            position: relative;
+            padding-right: 26px;
+            color: $--form-label-color;
+        }
+    }
+}
+@include b(form-item) {
+    @include when(required) {
+        & > .el-form-item__label:before,
+        & .el-form-item__label-wrap > .el-form-item__label:before {
+            color: #f24957 !important;
+            position: absolute;
+            top: 50%;
+            margin-top: 2px;
+            right: 12px;
+            transform: translate(-50%, -50%);
+        }
+    }
+}
+
+// alert
+@include b(alert) {
+    padding: 4px 16px;
+    @include e(closebtn) {
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .el-alert__description {
+        margin: 0;
+    }
+    @include m(success) {
+        &.is-light {
+            color: $--color-text-regular;
+            border: $--alert-success-border-self;
+            .el-alert__description {
+                color: $--alert-description-color-self;
+            }
+        }
+        .el-icon-success {
+            color: $--color-success;
+        }
+    }
+    @include m(info) {
+        &.is-light {
+            color: $--color-text-regular;
+            border: $--alert-info-border-self;
+            .el-alert__description {
+                color: $--alert-description-color-self;
+            }
+        }
+        .el-icon-info {
+            color: $--color-primary;
+        }
+    }
+    @include m(warning) {
+        &.is-light {
+            color: $--color-text-regular;
+            border: $--alert-warning-border-self;
+            .el-alert__description {
+                color: $--alert-description-color-self;
+            }
+        }
+        .el-icon-warning {
+            color: $--color-warning;
+        }
+    }
+    @include m(error) {
+        &.is-light {
+            color: $--color-text-regular;
+            border: $--alert-error-border-self;
+            .el-alert__description {
+                color: $--alert-description-color-self;
+            }
+        }
+        .el-icon-error {
+            color: $--color-danger;
+        }
+    }
+}
+// el-descriptions
+@include b(descriptions) {
+    @include e(table) {
+        margin-bottom: $--el-descriptions-margin-padding-self;
+    }
+    @include e(header) {
+        box-sizing: content-box;
+        padding: 6px $--el-descriptions-margin-padding-self;
+        margin: 0;
+        height: 30px;
+        line-height: 30px;
+        color: $--color-text-regular;
+        background-color: #f5f7fa;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    @include e(title) {
+        font-size: 14px;
+        font-weight: normal;
+    }
+    .el-descriptions-item__label {
+        padding: 16px 0 16px $--el-descriptions-margin-padding-self;
+        line-height: 24px;
+        white-space: nowrap;
+        color: $--color-info;
+    }
+    .el-descriptions-item__content {
+        padding: 0 0 16px $--el-descriptions-margin-padding-self;
+    }
+    & .el-descriptions-item {
+        padding: 16px 0 16px $--el-descriptions-margin-padding-self;
+        line-height: 24px;
+        white-space: nowrap;
+        .el-descriptions-item__container {
+            //align-items: center;
+            align-items: baseline;
+        }
+        .el-descriptions-item__label {
+            margin-right: $--el-descriptions-margin-padding-self;
+            padding: 0;
+        }
+        .el-descriptions-item__content {
+            white-space: normal;
+            padding: 0;
+        }
+        .el-descriptions-tooltip {
+            display: inline;
+            white-space: nowrap;
+        }
+    }
+    .el-descriptions-tooltip {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    & .is-bordered {
+        margin-top: $--el-descriptions-margin-padding-self;
+        .is-bordered-label {
+            padding-left: $--el-descriptions-margin-padding-self;
+        }
+        .el-descriptions-item__content {
+            padding-left: $--el-descriptions-margin-padding-self;
+        }
+        .el-descriptions-tooltip {
+            white-space: nowrap;
+            max-width: 140px;
+        }
+    }
+    & .el-descriptions-item[colspan='1'] {
+        .el-descriptions-item__content {
+            width: 100%;
+        }
+    }
+    //& .el-descriptions-item__label.has-colon::after {
+    //    content: '';
+    //}
+    & .el-descriptions-subtitle {
+        padding: 16px $--el-descriptions-margin-padding-self 0 $--qz-layout-padding-height-self;
+    }
+    & .el-descriptions-subtitle__title {
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+        vertical-align: middle;
+    }
+    & .el-descriptions-subtitle__point::before {
+        content: '';
+        display: inline-block;
+        background: $--color-primary;
+        height: 20px;
+        width: 4px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+}
+
+// notification
+@include b(notification) {
+    border: 1px solid $--border-color-base;
+    box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+    @include e(icon) {
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+    }
+    @include e(title) {
+        font-size: 16px;
+        line-height: 1.3;
+    }
+    @include e(content) {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 14px;
+        margin-top: 3px;
+        color: $-color-description-color-self;
+        word-break: break-all;
+    }
+}
+
+// tooltip
+@include b(tooltip) {
+    @include e(popper) {
+        max-width: 60%;
+    }
+}
+// popover
+@include b(popover) {
+    max-width: 60%;
+}
+// main
+@include b(main) {
+    padding: 12px 24px;
+}
+
+// transfer
+@include b(transfer) {
+    @include e(buttons) {
+        padding: 0 8px;
+        .el-button {
+            display: block;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding: $--button-padding-vertical;
+            @include m(small) {
+                padding: $--button-small-padding-vertical;
+            }
+            @include m(mini) {
+                padding: $--button-mini-padding-vertical;
+            }
+        }
+    }
+    @include b(transfer-panel) {
+        @include e(list) {
+            &::-webkit-scrollbar {
+                height: 4px;
+                width: 4px;
+            }
+            &::-webkit-scrollbar-thumb {
+                background: #d9d9d9;
+                outline: none;
+                border-radius: 5px;
+                &:hover {
+                    background: #999;
+                }
+            }
+        }
+    }
+}
+
+@include b(step) {
+    @include e(head) {
+        @include when(success) {
+            color: $--color-primary;
+            border-color: $--color-primary;
+        }
+        @include when(process) {
+            @include e(icon) {
+                @include when(text) {
+                    border-width: 0;
+                    background-color: $--color-primary;
+                    color: $--color-white;
+                }
+            }
+        }
+    }
+    @include e(icon) {
+        width: 32px;
+        height: 32px;
+        @include when(text) {
+            border-width: 1px;
+        }
+    }
+    @include e(title) {
+        color: $--color-text-regular;
+        @each $type in (wait, success, finish) {
+            @include when($type) {
+                color: $--color-text-regular;
+            }
+        }
+        @include when(process) {
+            font-weight: normal;
+            color: $-color-title-color-self;
+        }
+    }
+    @include e(description) {
+        color: $--color-text-regular;
+        @each $type in (process, wait, success, finish) {
+            @include when($type) {
+                color: $--color-text-regular;
+            }
+        }
+    }
+    @include when(horizontal) {
+        display: flex;
+        @include e(head) {
+            width: auto;
+        }
+        @include e(main) {
+            width: 100%;
+            padding-left: 8px;
+        }
+        @include e(title) {
+            display: flex;
+            align-items: center;
+            line-height: 32px;
+        }
+        @include e(title__process) {
+            flex: 1;
+            position: relative;
+            &::before {
+                content: ' ';
+                position: absolute;
+                left: 8px;
+                right: 8px;
+                height: 1px;
+                background: $-color-background-color-self;
+            }
+            @include when(success) {
+                &::before {
+                    background: $--color-primary;
+                }
+            }
+        }
+        @include e(line) {
+            display: none;
+            top: 15px;
+            height: 1px;
+        }
+        &:last-of-type {
+            @include e(title__process) {
+                display: none;
+            }
+        }
+    }
+
+    @include when(vertical) {
+        @include e(line) {
+            background-color: $-color-background-color-self;
+            width: 1px;
+            left: 15px;
+            top: 40px;
+            bottom: 8px;
+        }
+        @include e(head) {
+            width: 32px;
+            @include when(success) {
+                .el-step__line {
+                    background-color: $--color-primary;
+                }
+            }
+        }
+        @include e(title) {
+            line-height: 32px;
+        }
+
+        @include e(main) {
+            padding-left: 8px;
+        }
+    }
+}
+// drawer
+@include b(drawer) {
+    @include e(header) {
+        height: 48px;
+        line-height: 48px;
+        margin-bottom: 0;
+        padding: 0 24px;
+        color: $-color-title-color-self;
+        font-weight: 500;
+        font-size: 16px;
+        border-bottom: 1px solid rgba(229, 229, 229, 1);
+    }
+}
+
+@include b(date-table) {
+    @include when(week-mode) {
+        .el-date-table__row {
+            &:hover {
+                div {
+                    background-color: $-color-background-date-picker-hover-self;
+                }
+            }
+            &.current div {
+                background-color: $-color-background-date-picker-hover-self;
+            }
+        }
+    }
+    td {
+        &.today:not(.disabled) span {
+            background-color: $-color-background-date-picker-hover-self;
+        }
+    }
+}

@@ -20,6 +20,7 @@
 <script>
 import { get, sync } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
+import logseerService from 'kubecube/services/logseer';
 import {
     setValueIfListNotPresent,
 } from 'kubecube/utils/functional';
@@ -27,7 +28,7 @@ export default {
     inject: [ 'forceToRefresh' ],
     data() {
         return {
-            service: workloadService.getNeteaseResource,
+            service: logseerService.getLogconfigList,
             tasks: [],
         };
     },
@@ -36,12 +37,10 @@ export default {
         clusterName: get('scope/cluster@value'),
         requestParam() {
             return {
-                pathParams: {
+                pathParams: {},
+                params: {
                     cluster: this.clusterName,
                     namespace: this.namespace,
-                    resource: 'logconfigs',
-                },
-                params: {
                     pageSize: 10000,
                 },
             };
@@ -53,8 +52,8 @@ export default {
             const list = [
                 { text: '全部任务', value: 'all' },
                 ...(response.items || []).map(i => ({
-                    text: i.metadata.name,
-                    value: i.metadata.name,
+                    text: i.name,
+                    value: i.name,
                 })) ];
 
             setValueIfListNotPresent({
