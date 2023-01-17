@@ -1,0 +1,180 @@
+/* 轻舟定制化内容(变量值覆盖) start */
+
+// Brand Color
+$--color-primary: #3377ff !default;
+// Functional Color
+$--color-danger: #f54545 !default;
+$--color-success: #00b85b !default;
+$--color-warning: #faab0c !default;
+$--color-info: #999999 !default;
+$--color-white: #ffffff !default;
+
+$--background-color-base: #f5f5f5 !default;
+
+/* Disable base
+-------------------------- */
+$--disabled-fill-base: $--background-color-base !default;
+// $--disabled-color-base: #333 !default;
+$--disabled-border-base: #e5e5e5 !default;
+
+/// color|1|Border Color|3
+$--border-color-base: #e5e5e5 !default;
+
+$--border-radius-base: 2px !default;
+$--color-text-placeholder: #b2b2b2 !default;
+
+$--color-text-regular: #666 !default;
+
+/// fontWeight|1|Font Weight|1
+$--font-weight-primary: 400 !default;
+
+/* 轻舟定制化内容(变量值覆盖) end */
+
+/** 自定义全局变量 start */
+
+$--color-primary-hover-self: #5c98ff !default;
+$--color-primary-disable-self: #9dbbff !default;
+$--color-primary-active-self: #2158d9 !default;
+$--color-transparent-self: transparent !default;
+$--color-danger-hover-self: #ff7570 !default;
+$--color-danger-active-self: #cf3035 !default;
+$--color-success-hover-self: #1fc46c !default;
+$--color-success-active-self: #00914e !default;
+$--color-info-hover-self: #a6a6a6 !default;
+$--color-info-active-self: #808080 !default;
+$-color-description-color-self: #666666 !default;
+$-color-title-color-self: #333 !default;
+$-color-background-color-self: #ccc !default;
+$-color-background-date-picker-hover-self: #ebf3ff !default;
+
+/** 自定义全局变量 end*/
+
+/* 轻舟定制化内容(变量值覆盖) start */
+
+$--border-color-hover: $--color-primary-hover-self !default;
+$--input-focus-border: #4679fa !default;
+
+/* 轻舟定制化内容(变量值覆盖) end */
+
+// Radio
+$--radio-checked-input-height-self: 7px !default;
+$--radio-checked-input-width-self: 7px !default;
+
+// Select
+$--select-el-tag-close-icon-background-color-self: $--color-transparent-self !default;
+$--select-el-tag-close-icon-color-self: #c5c9d0 !default;
+$--select-el-tag-info-background-color-self: #e8effe !default;
+$--select-el-tag-info-border-color-self: $--color-transparent-self !default;
+$--select-el-tag-info-color-self: $--color-text-regular !default;
+
+// Pagination
+$--pagination-background-li-border-self: 1px solid $--border-color-base !default;
+$--pagination-background-li-font-weight-self: normal !default;
+$--pagination-background-li-background-self: $--color-white !default;
+$--pagination-background-li-active-background-self: $--color-primary !default;
+$--pagination-background-li-hover-border-self: $--color-primary-hover-self !default;
+
+/** 自定义全局变量 */
+
+/** Botton
+------------------------*/
+$--button-padding-vertical: 8px !default;
+/// padding||Spacing|3
+$--button-padding-horizontal: 24px !default;
+$--button-medium-padding-vertical: 8px !default;
+$--button-medium-padding-horizontal: 24px !default;
+$--button-small-padding-vertical: 7px !default;
+$--button-small-padding-horizontal: 24px !default;
+$--button-mini-padding-vertical: 5px !default;
+$--button-mini-padding-horizontal: 24px !default;
+
+/* Input
+------------------------*/
+// todo: $--disabled-color-base和这个颜色一样 ,
+// $--input-font-color: $--color-text-regular
+// $--input-font-color:#333 !default;
+$--input-height: 36px !default;
+$--input-medium-height: 32px !default;
+$--input-small-height: 28px !default;
+$--input-mini-height: 28px !default;
+
+/* Input-Number
+------------------------*/
+$--input-increase-decrease-hover-font-weight-self: bold;
+$--input-increase-decrease-border-self: 1px solid $--color-transparent-self !default;
+
+/* Radio
+------------------------*/
+$--radio-checked-icon-color: $--color-white !default;
+$--radio-checked-input-background-color: $--color-primary !default;
+
+/* Select
+------------------------*/
+$--select-option-hover-background: #edf2fe !default;
+// $--select-option-selected-font-color: $--color-white !default;
+
+/* Table
+------------------------*/
+$--table-header-background-color: #f5f7fa !default;
+$--table-row-hover-background-color: #f0f7ff !default;
+$--table-cell-normal-padding-self: 10px 0 !default;
+$--table-cell-medium-padding-self: 8px 0 !default;
+$--table-cell-medium-font-size-self: 12px !default;
+
+/* autocomplete
+------------------------*/
+$--autocomplete-suggestion-li-color-self: $-color-description-color-self !default;
+
+/* checkbox
+------------------------*/
+$--checkbox-disabled-input-fill: $--background-color-base !default;
+$--checkbox-disabled-checked-input-fill: $--disabled-border-base !default;
+$--checkbox-disabled-checked-icon-color: $--color-white !default;
+
+/* tabs
+------------------------*/
+$--el-tabs-item-top-bottom-child-padding-self: 20px !default;
+$--el-tabs-item-hover-background-self: #f6f7f9 !default;
+$--el-tabs-item-acitve-border-self: 1px solid #e4e7ed !default;
+$--el-tabs-item-acitve-border-bottom-self: 2px solid#fff !default;
+$--el-tabs-item-acitve-border-top-self: 2px solid #3377ff !default;
+
+/* dialog
+------------------------*/
+$--dialog-header-bottom-self: 1px solid #e0e0e0 !default;
+$--dialog-header-height-self: 54px !default;
+$--dialog-header-font-color-self: $-color-description-color-self !default;
+$--dialog-body-padding-left-right-self: 24px !default;
+$--dialog-header-padding-self: 0 $--dialog-body-padding-left-right-self !default;
+
+// menu-item
+$--menu-item-height-self: 44px !default;
+$--menu-sub-item-padding-left-self: 48px !important !default;
+$--menu-item-acitve-border-right-self: 4px solid #508ae2 !important !default;
+
+// form
+$--form-label-color: $-color-description-color-self !default;
+
+// alert
+$--alert-success-color: rgba(38, 189, 113, 0.102185) !default;
+$--alert-info-color: rgba(51, 126, 255, 0.1) !default;
+$--alert-warning-color: rgba(255, 178, 26, 0.1) !default;
+$--alert-danger-color: rgba(242, 73, 87, 0.1) !default;
+$--alert-success-border-self: 1px solid $--color-success !default;
+$--alert-info-border-self: 1px solid $--color-primary !default;
+$--alert-warning-border-self: 1px solid $--color-warning !default;
+$--alert-error-border-self: 1px solid $--color-danger !default;
+$--alert-description-color-self: $-color-description-color-self !default;
+
+/* descriptions
+------------------------*/
+$--el-descriptions-margin-padding-self: 12px !default;
+// qz-layout
+$--qz-layout-margin-height-self: 12px !default;
+$--qz-layout-margin-page-width-self: 24px !default;
+$--qz-layout-margin-block-width-self: 12px !default;
+
+$--qz-layout-padding-height-self: 12px !default;
+$--qz-layout-padding-page-width-self: 24px !default;
+$--qz-layout-padding-block-width-self: 12px !default;
+

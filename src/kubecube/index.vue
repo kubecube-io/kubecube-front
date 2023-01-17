@@ -188,7 +188,7 @@ export default {
 </script>
 
 <style module>
-.container{
+.container {
     padding-top: 64px;
     width: 100vw;
     height: 100vh;

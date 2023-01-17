@@ -6,23 +6,17 @@
       label-size="large"
     >
       <u-info-list-item label="日志任务名称">
-        {{ instance.metadata.name }}
-      </u-info-list-item>
-      <u-info-list-item label="日志源类型">
-        {{ instance.type | logType }}
-      </u-info-list-item>
-      <u-info-list-item label="集群名称">
-        {{ cluster }}
-      </u-info-list-item>
-      <u-info-list-item label="空间">
-        {{ namespace }}
+        {{ instance.name }}
       </u-info-list-item>
       <u-info-list-item label="创建时间">
-        {{ instance.metadata.creationTimestamp | smartDateFormat }}
+        {{ instance.createTime | formatLocaleTime }}
+      </u-info-list-item>
+      <u-info-list-item label="集群/空间">
+        {{ cluster }}/{{ namespace }}
       </u-info-list-item>
       <u-info-list-item label="标签选择器">
         <span
-          v-for="label in instance.metadata.labels"
+          v-for="label in instance.labelSelector"
           :key="label.key"
           class="u-chip"
           :title="label.key + ':' + label.value"
@@ -61,7 +55,7 @@
           <kube-table
             table-width="100%"
             :columns="[
-              { title: '类型', name: 'label' },
+              { title: '类型', name: 'type' },
               { title: 'Key', name: 'key' }]"
             :items="input.matchFields"
           />
@@ -73,29 +67,23 @@
           <kube-table
             table-width="100%"
             :columns="[
-              { title: '类型', name: 'label' },
-              { title: 'Key', name: 'key' }]"
+              { title: 'key', name: 'key' },
+              { title: 'value', name: 'value' }]"
             :items="input.fields"
           />
         </u-info-list-item>
         <u-info-list-item
-          v-if="input.multiline.pattern"
+          v-if="input.multiline"
           label="日志多行配置"
         >
           <kube-table
             table-width="100%"
             :columns="[
-              { title: 'Pattern', name: 'pattern' },
-              { title: 'Negate', name: 'negate' },
-              { title: 'Negate', name: 'match' }]"
+              { title: 'active', name: 'active' },
+              { title: 'pattern', name: 'pattern' }
+            ]"
             :items="[input.multiline]"
           />
-        </u-info-list-item>
-        <u-info-list-item
-          v-if="input.maxBytes"
-          label="单条日志大小上限"
-        >
-          {{ input.maxBytes }} bytes
         </u-info-list-item>
         <u-info-list-item
           v-if="input.excludeFiles.length"
@@ -104,16 +92,16 @@
           {{ input.excludeFiles.map(p => p.path).join(', ') }}
         </u-info-list-item>
         <u-info-list-item
-          v-if="input.maxBytes"
+          v-if="input.ignoreOlder"
           label="忽略日志文件时长"
         >
-          {{ input.ignore_older }} h
+          {{ input.ignoreOlder.num }} {{ input.ignoreOlder.unit }}
         </u-info-list-item>
         <u-info-list-item
-          v-if="input.cleanLogs[input.retainMode]"
+          v-if="input.cleanLogs && (input.cleanLogs.retainDays || input.cleanLogs.retainDays === 0)"
           label="日志保留"
         >
-          {{ input.retainMode | modeFilter }} {{ input.cleanLogs[input.retainMode] }} {{ input.retainMode | modeUnitFilter }}
+          {{ input.cleanLogs.retainDays }} 天
         </u-info-list-item>
       </kube-list-block>
     </u-info-list-group>
@@ -154,6 +142,18 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+.tagWrap :global(.el-tag) {
+  margin-right: 4px;
+  margin-bottom: 4px;
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 800px;
+}
 </style>

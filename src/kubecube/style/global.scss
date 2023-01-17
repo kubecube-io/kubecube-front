@@ -1,0 +1,39 @@
+/* element-ui */
+$--font-path: 'element-ui/lib/theme-chalk/fonts';
+$--color-primary: #37f !default;
+@import './theme/var.scss';
+@import "~element-ui/packages/theme-chalk/src/index";
+@import './theme/index.scss';
+
+@include b(button) {
+  & [type=button]{
+      -webkit-appearance: none;
+  }
+  &[square] {
+      padding: $--button-padding-vertical;
+  }
+  @include m(medium) {
+      &[square] {
+          padding: $--button-medium-padding-vertical;
+      }
+  }
+  @include m(small) {
+      &[square] {
+          padding: $--button-small-padding-vertical;
+      }
+  }
+  @include m(mini) {
+      &[square] {
+          padding: $--button-mini-padding-vertical;
+      }
+  }
+}
+
+
+/* global css*/
+.global-row-margin-bottom {
+  margin-bottom: 12px;
+}
+.kube-el-tooltip-popper {
+    max-width: 400px !important;
+}
