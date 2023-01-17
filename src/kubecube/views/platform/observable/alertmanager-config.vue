@@ -18,14 +18,14 @@
             <u-linear-layout gap="small">
               <u-link-list>
                 <u-link-list-item
-                  disabled="item.cluster.status !== 'normal'"
+                  :disabled="item.cluster.status !== 'normal'"
                   @click="editItem(item)"
                 >
                   {{ item.config ? '设置': '创建' }}
                 </u-link-list-item>
                 <u-link-list-item
                   v-if="item.config"
-                  disabled="item.cluster.status !== 'normal'"
+                  :disabled="item.cluster.status !== 'normal'"
                   @click="deleteItem(item)"
                 >
                   删除
