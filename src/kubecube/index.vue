@@ -12,6 +12,7 @@
     <router-view v-else />
     <u-confirm ref="confirm" />
     <kube-yaml-dialog ref="kubeyaml" />
+    <global-error-modal ref="globalErrorModal"/>
   </div>
 </template>
 
@@ -27,6 +28,7 @@ import platfromRoutes from 'kubecube/router/platform';
 import ControlRoutes from 'kubecube/router/control';
 import OpenAPIRoutes from 'kubecube/router/user';
 import ControlNamespaceRoutes from 'kubecube/router/control-namespace';
+import globalErrorModal from 'kubecube/component/global/global-error-modal/index.vue';
 import {
     ROLES,
 } from 'kubecube/utils/constance';
@@ -34,6 +36,7 @@ export default {
     components: {
         UAppHeader,
         kubeYamlDialog,
+        globalErrorModal
     },
     extends: pipeMixin,
     metaInfo: {
@@ -117,7 +120,7 @@ export default {
         });
         Vue.$confirm = Vue.prototype.$confirm = this.$refs.confirm.open.bind(this.$refs.confirm);
         Vue.$editResource = Vue.prototype.$editResource = this.$refs.kubeyaml.open.bind(this.$refs.kubeyaml);
-
+        Vue.$globalErrorModal = Vue.prototype.$globalErrorModal = this.$refs.globalErrorModal.open.bind(this.$refs.globalErrorModal);
     },
     methods: {
         replaceToControlQuery() {

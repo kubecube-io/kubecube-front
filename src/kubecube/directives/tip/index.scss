@@ -1,0 +1,27 @@
+
+$--default-background-border-color: #303133;
+$--default-color: #fff;
+
+.qz-directive-tips {
+    background: $--default-background-border-color !important;
+    padding: 10px !important;
+    border: none !important;
+    color: $--default-color !important;
+    font-size: 12px !important;
+    min-width: 10px !important;
+    word-wrap: break-word;
+    z-index: 7001 !important;
+    .el-popover__title {
+        color: $--default-color !important;
+    }
+    @each $type in (top, left, bottom, right) {
+        &[x-placement^='#{$type}'] {
+            .popper__arrow {
+                border-#{$type}-color: $--default-background-border-color !important;
+                &::after {
+                    border-#{$type}-color: $--default-background-border-color !important;
+                }
+            }
+        }
+    }
+}

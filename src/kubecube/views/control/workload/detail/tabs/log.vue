@@ -19,7 +19,7 @@
                     :title="item.text"
                 />
             </el-select>
-            <el-select
+            <el-input
               v-else
               style="width:200px"
               placeholder="暂无Container"
@@ -61,7 +61,7 @@
                     :title="item.text"
                 />
             </el-select>
-            <el-select
+            <el-input
               v-else
               style="width:200px"
               placeholder="暂无副本"
@@ -84,7 +84,7 @@
                     :title="item.text"
                 />
             </el-select>
-            <el-select
+            <el-input
               v-else
               style="width:200px"
               placeholder="暂无Container"

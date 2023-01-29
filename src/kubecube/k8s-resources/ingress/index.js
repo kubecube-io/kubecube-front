@@ -2,11 +2,13 @@ import {
     toPlainObject as toCommonPlainObject,
     toK8SObject as toCommonK8SObject,
     toPatchObject as toPatchCommonObject,
+    toModifyK8SObject as toModifyCommonK8SObject
 } from '../base/common';
 import {
     toPlainObject as toSpecPlainObject,
     toK8SObject as toSpecK8SObject,
     patchK8SObject as toPatchSpecObject,
+    toModifyK8SObject as toModifySpecObject,
 } from './spec';
 
 import {
@@ -33,3 +35,12 @@ export function patchK8SObject(model) {
         toPatchSpecObject,
     });
 }
+
+export function toModifyK8SObject(model) {
+    return toModifyCommonK8SObject(model)({
+        apiVersion: 'networking.k8s.io/v1',
+        kind: 'Ingress',
+        toModifySpecObject,
+    })
+}
+
