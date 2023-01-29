@@ -15,8 +15,8 @@
         v-model="model"
         :disabled="disabled"
         size="normal huge"
-        maxlength="64"
-        maxlength-message="不得超过 64 个字符"
+        maxlength="63"
+        maxlength-message="不得超过 63 个字符"
         :color="errors && errors[0] ? 'error' : ''"
         placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"
       />

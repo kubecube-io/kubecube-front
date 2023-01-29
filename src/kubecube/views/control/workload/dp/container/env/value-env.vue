@@ -26,8 +26,8 @@
             <u-input
               v-model="item.key"
               size="huge"
-              maxlength="64"
-              placeholder="1-64位字母、数字或下划线组成，以字母开头"
+              maxlength="63"
+              placeholder="1-63位字母、数字或下划线组成，以字母开头"
               :color="errors && errors[0] ? 'error' : ''"
             />
           </kube-form-item>

@@ -45,8 +45,8 @@
             label="项目名称"
             required
             :message="errors && errors[0]"
-            maxlength="64"
-            maxlength-message="不得超过 64 个字符"
+            maxlength="63"
+            maxlength-message="不得超过 63 个字符"
           >
             <u-input
               v-model="model.spec.displayName"
