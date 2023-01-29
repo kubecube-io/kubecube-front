@@ -18,12 +18,12 @@
         <!-- <u-button @click="exportNode">
           导出节点信息
         </u-button> -->
-        <u-button
+        <!-- <u-button
           v-if="selectRows.length"
           @click="showNodeTypeModal = true"
         >
           设置节点类型
-        </u-button>
+        </u-button> -->
         <u-button
           icon="refresh"
           square
@@ -53,7 +53,6 @@
           :items="data ? data.list : []"
           :error="error"
           @sort="onSort"
-          @selection:change="onSelectionChange"
         >
           <template #[`item.metadata.name`]="{ item }">
             <u-tooltip v-if="item.metadata.labels.find(i => i.key === 'node-role.kubernetes.io/master')" content="master 节点" trigger="hover" placement="top">
@@ -162,7 +161,7 @@ export default {
             service: workloadService.getResourceListWithoutNamespace,
             selectRows: [],
             columns: [
-                { type: 'selection', width: '60px' },
+                // { type: 'selection', width: '60px' },
                 { title: '名称', name: 'metadata.name', sortable: true },
                 { title: 'IP', name: 'status.nodeIP', width: '120px', sortable: true },
                 { title: 'CPU', name: 'status.capacity.cpu', width: '80px' },

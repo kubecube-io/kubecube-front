@@ -1,50 +1,30 @@
 <template>
-  <u-modal
+  <el-dialog
     title="编辑标签"
-    ok-button=""
-    cancel-button=""
     :visible.sync="show"
-    size="large"
     @close="close"
   >
-    <validation-observer
-      ref="observer"
-      v-slot="{ invalid }"
-    >
-      <label-editor
-        v-model="model"
-        style="margin-bottom: 20px;"
-      />
-      <u-submit-button
-        ref="submit"
-        :click="submit.bind(this)"
-        place="right"
-      >
-        <template slot-scope="scope">
-          <u-linear-layout>
-            <u-button
-              :disabled="scope.submitting || invalid"
-              :icon="scope.submitting ? 'loading' : null "
-              color="primary"
-              @click="scope.submit"
-            >
-              确定
-            </u-button>
-            <u-button @click="close">
-              取消
-            </u-button>
-          </u-linear-layout>
-        </template>
-      </u-submit-button>
-    </validation-observer>
-  </u-modal>
+    <el-form v-if="show" ref="form" :model="model" label-position="right">
+      <el-form-item>
+        <labelEditor
+          prefixKey="labels"
+          v-model="model.labels"
+          prefixProp="labels"
+        />
+      </el-form-item>
+    </el-form>
+    <div slot="footer">
+      <el-button @click="close">取 消</el-button>
+      <el-button type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script>
-import { get, cloneDeep } from 'lodash';
+import { get, cloneDeep, set } from 'lodash';
 import { Modal } from '@micro-app/common/mixins';
 import workloadService from 'kubecube/services/k8s-resource';
-import labelEditor from 'kubecube/component/global/k8s/label-editor';
+import labelEditor from  'kubecube/elComponent/label-editor.vue';
 import { ignoredKeys } from 'kubecube/utils/constance';
 export default {
     components: {
@@ -56,15 +36,18 @@ export default {
     },
     data() {
         return {
-            model: [],
+            model: {
+              labels: [],
+            },
             raw: null,
+            submitLoading: false,
         };
     },
     methods: {
         open(item) {
             console.log(item);
             const labels = get(item, 'metadata.labels', []);
-            this.model = labels.map(i => ({
+            this.model.labels = labels.map(i => ({
                 ...i,
                 disabled: ignoredKeys.some(k => i.key.startsWith(k)),
             }));
@@ -73,21 +56,40 @@ export default {
             this.show = true;
         },
         async submit() {
-            const labels = {};
-            this.model.forEach(l => {
-                labels[l.key] = l.value;
-            });
-            const data = { metadata: { labels } };
-            await workloadService.modifyResourceWithoutNamespace({
+            // 触发校验
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                return;
+            }
+            this.submitLoading = true;
+            try {
+              const data = await workloadService.getResourceWithoutNamespace({
                 pathParams: {
                     cluster: this.instance.clusterName,
                     resource: 'nodes',
                     name: get(this.raw, 'metadata.name'),
                 },
-                data,
-            });
-            this.show = false;
-            this.$emit('refresh');
+              });
+              const labels = {};
+              this.model.labels.filter(l => l.key).forEach(l => {
+                  labels[l.key] = l.value;
+              });
+              set(data, 'metadata.labels', labels)
+              await workloadService.updateResourceWithoutNamespace({
+                  pathParams: {
+                      cluster: this.instance.clusterName,
+                      resource: 'nodes',
+                      name: get(this.raw, 'metadata.name'),
+                  },
+                  data,
+              });
+              this.show = false;
+              this.$emit('refresh');
+            } catch (error) {
+              console.log(error)
+            }
+            this.submitLoading = false;
         },
     },
 };
