@@ -1,12 +1,13 @@
 <template>
   <div :class="$style.root">
+    <div v-if="loading" :class="$style.loadingBox"><div :class="$style.loadingTextWrap"><i class="el-icon-loading" style="font-size: 24px"/> 正在加载数据</div></div>
     <!-- <button
       :class="$style.pageBtn"
       @click="scrollTo(-5)"
     >
       向上翻页
     </button> -->
-    <table :class="[$style.table, $style.tableScroll]">
+    <table :class="[$style.table, $style.tableScroll]" :theme="theme">
       <thead :class="[$style.row, $style.thead]">
         <tr :class="$style.row">
           <th :class="[$style.col, $style.col1]">
@@ -24,6 +25,16 @@
         ref="tbody"
         :class="$style.tbody"
       >
+        <tr
+          :class="$style.row"
+          style="height: 25px"
+        >
+          <td :class="[$style.col, $style.col1]">
+          </td>
+          <td :class="[$style.col, $style.coln, $style.logContent]" style="text-align: center">
+            {{ hasMoreOld ?  '' : '暂无更多历史日志' }}
+          </td>
+        </tr>
         <template v-if="data.length > 0">
           <tr
             v-for="d in data"
@@ -35,21 +46,26 @@
             <td :class="[$style.col, $style.col1]">
               {{ d.timestamp | formatLocaleTime }}
             </td>
-            <td :class="[$style.col, $style.coln]">
-              {{ d.content }}
-            </td>
+            <td :class="[$style.col, $style.coln, $style.logContent]">{{ d.content }}</td>
           </tr>
         </template>
         <template v-else>
           <tr :class="$style.row">
+            <td :class="[$style.col, $style.col1]"></td>
             <td
-              colspan="2"
               style="text-align: center"
             >
               暂无日志
             </td>
           </tr>
         </template>
+        <tr
+          :class="$style.row"
+          style="height: 25px"
+        >
+          <td :class="[$style.col, $style.col1]"></td>
+          <td :class="[$style.col, $style.coln, $style.logContent]"></td>
+        </tr>
       </tbody>
     </table>
     <!-- <button
@@ -85,20 +101,24 @@ export default {
     props: {
         podName: String,
         containerName: String,
+        autoRefresh: Boolean,
+        theme: String,
     },
     data() {
         return {
 
             data: [],
-            offsetFrom: 2000100,
-            // offsetTo: 200000
-            drainBefore: false,
+            offsetFrom: 2000000,
+            offsetTo: 200100,
             currentId: null,
             selection: {
                 referenceLineNum: 0,
                 logFilePosition: 'end',
                 referenceTimestamp: 'newest',
             },
+            limit: 30,
+            hasMoreOld: true,
+            loading: true,
         };
     },
     computed: {
@@ -113,70 +133,186 @@ export default {
                 },
                 params: {
                     containerName: this.containerName,
-                    offsetFrom: this.offsetFrom - loadStep,
-                    offsetTo: this.offsetFrom,
+                    offsetFrom: this.offsetFrom,
+                    offsetTo: this.offsetTo,
                     ...this.selection,
                 },
             };
         },
     },
+    watch: {
+        autoRefresh(val) {
+            if(val) {
+                this.handleAutoRefresh();
+            } else {
+              if (this.autoRefreshTimer) {
+                  clearTimeout(this.autoRefreshTimer);
+                  this.autoRefreshTimer = null;
+              }
+            }
+        }
+    },
     created() {
-        this.invokeBeforeAPI();
+        this.reInit();
     },
     mounted() {
         this.$watch(() => [ this.podName, this.containerName ], this.reInit);
     },
+    destroyed() {
+        clearTimeout(this.autoRefreshTimer);
+    },
     methods: {
-        reInit() {
+        async handleAutoRefresh() {
+            this.removeScrollBehaviour();
+            this.scrollToBottom();
+            this.selection = {
+                referenceLineNum: 0,
+                logFilePosition: 'end',
+                referenceTimestamp: 'newest',
+            };
+            this.limit = this.limit < 30 ? 30 : this.limit;
+            this.offsetFrom = 200000;
+            this.offsetTo = this.offsetFrom + this.limit;
+            const logs = await this.invokeBeforeAPI();
+            if (this.limit > logs.length) {
+                this.hasMoreOld = false;
+            } else {
+                this.hasMoreOld = true;
+            }
+            this.limit = logs.length;
+            this.scrollToBottom();
+            this.loading = true;
+            await this.delayFun(1000);
+            this.loading = false;
+            this.bindScrollBehaviour();
+            if (this.autoRefreshTimer) {
+                clearTimeout(this.autoRefreshTimer);
+                this.autoRefreshTimer = null;
+            }
+            this.autoRefreshTimer = setTimeout(() => {
+                if(this.autoRefresh) {
+                  this.handleAutoRefresh();
+                }
+            }, 3000)
+        },
+        async reInit() {
+            this.$emit('update:autoRefresh', false)
             console.log('xxxxxxxxxxxxxxx');
+            this.hasMoreOld = true;
             this.data = [];
-            this.offsetFrom = 2000100;
-            this.drainBefore = false;
+            this.offsetFrom = 200000;
+            this.limit = 30;
+            this.offsetTo = this.offsetFrom + this.limit;
             const elem = this.$refs.tbody;
-            elem.removeEventListener('scroll', this.scrollHandler);
-            this.invokeBeforeAPI(true);
+            // elem.removeEventListener('scroll', this.scrollHandler);
+            this.selection = {
+                referenceLineNum: 0,
+                logFilePosition: 'end',
+                referenceTimestamp: 'newest',
+            };
+            // this.invokeBeforeAPI();
+            this.removeScrollBehaviour();
+            const logs = await this.invokeBeforeAPI();
+            if (this.limit > logs.length) {
+                this.hasMoreOld = false;
+            } else {
+                this.hasMoreOld = true;
+            }
+            this.limit = logs.length;
+            this.$nextTick(() => {
+                this.scrollToBottom();
+                this.bindScrollBehaviour();
+            });
         },
         bindScrollBehaviour() {
             const elem = this.$refs.tbody;
             elem.addEventListener('scroll', this.scrollHandler);
         },
-        scrollHandler() {
+        removeScrollBehaviour() {
             const elem = this.$refs.tbody;
-            if (elem.scrollTop <= 0) {
-                this.invokeBeforeAPI();
+            if (elem) {
+              elem.removeEventListener('scroll', this.scrollHandler);
             }
         },
-        async invokeBeforeAPI() {
-            if (this.drainBefore) {
-                return;
+        scrollHandler() {
+            this.$emit('update:autoRefresh', false)
+            const elem = this.$refs.tbody;
+            if (elem.scrollTop <= 1) {
+                this.loadOldLog();
+            } else if(elem.scrollTop + 1 >= elem.scrollHeight - elem.clientHeight) {
+                this.loadNewLog();
             }
-
+        },
+        scrollToTop() {
+            const elem = this.$refs.tbody;
+            elem.scrollTop = 25;
+        },
+        scrollToBottom() {
+            const elem = this.$refs.tbody;
+            elem.scrollTop = elem.scrollHeight - elem.clientHeight - 25;
+        },
+        async loadOldLog() {
+            if(!this.hasMoreOld) {
+              return;
+            }
+            this.removeScrollBehaviour();
+            this.limit += 20;
+            this.offsetFrom = this.offsetTo - this.limit;
+            const logs = await this.invokeBeforeAPI();
+            if (this.limit > logs.length) {
+                this.hasMoreOld = false;
+            } else {
+                this.hasMoreOld = true;
+            }
+            this.limit = logs.length;
+            this.scrollToTop();
+            this.bindScrollBehaviour();
+        },
+        async loadNewLog() {
+          this.removeScrollBehaviour();
+          // this.limit += 20;
+          this.limit = this.limit < 30 ? 30 : this.limit;
+          this.offsetFrom = 200000;
+          this.offsetTo = this.offsetFrom + this.limit;
+          this.selection = {
+              referenceLineNum: 0,
+              logFilePosition: 'end',
+              referenceTimestamp: 'newest',
+          };
+          const logs = await this.invokeBeforeAPI();
+          if (this.limit > logs.length) {
+              this.hasMoreOld = false;
+          } else {
+              this.hasMoreOld = true;
+          }
+          this.limit = logs.length;
+          this.scrollToBottom();
+          this.bindScrollBehaviour();
+        },
+        async invokeBeforeAPI() {
+            this.loading = true;
             const { logs, selection } = await workloadExtendService.getlog(this.logParams);
-            const currentId = getFunc(logs[logs.length - 1], 'timestamp');
-            const hits = unionBy(
-                logs,
-                this.data,
-                'timestamp'
-            );
-            this.data = hits;
+            this.data = logs;
+            await this.delayFun(1000);
+            this.loading = false;
             this.offsetFrom = selection.offsetFrom;
             this.offsetTo = selection.offsetTo;
-            this.drainBefore = selection.offsetFrom < 0;
             Object.assign(this.selection, {
                 referenceLineNum: selection.referencePoint.lineNum,
                 logFilePosition: selection.logFilePosition,
                 referenceTimestamp: selection.referencePoint.timestamp,
             });
-
-            if (currentId) {
-                this.$nextTick(() => {
-                    document.getElementById(currentId).scrollIntoView();
-                    this.bindScrollBehaviour();
-                });
-            }
+            return logs;
         },
         scrollTo() {
 
+        },
+        async delayFun(val = 1000) {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve();
+            }, val)
+          })
         },
     },
 
@@ -186,7 +322,27 @@ export default {
 <style module>
 .root{
     height: 100%;
+    position: relative;
 }
+.loadingBox{
+  background: rgba(0, 0, 0, .3);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loadingBox .loadingTextWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
 .table{
     width: 100%;
     /* margin: 10px 0; */
@@ -195,6 +351,15 @@ export default {
     table-layout: fixed;
     border-collapse: collapse;
 }
+.table[theme="dark"] > .thead .col {
+  background-color: #2B2631;
+}
+.table[theme="dark"] {
+  background-color: #000000;
+}
+.table[theme="dark"] .col {
+  color: #ffffff;
+}
 .table.tableScroll{
     width: 100%;
     position: relative;
@@ -202,8 +367,6 @@ export default {
 .table > .thead .col{
     background-color: #f5f7fa;
     padding: 16px;
-}
-.table > .thead .coln{
 }
 .tableScroll > .thead,
 .tableScroll > .tbody{
@@ -228,7 +391,9 @@ export default {
 .tableScroll > .tbody .row[focus]:hover .col1 {
     background-color: yellowgreen;
 }
-
+.logContent {
+  white-space: pre-wrap;
+}
 .col {
     padding: 2px 16px;
     font-size: 14px;
@@ -272,5 +437,8 @@ export default {
 .tableScroll > .tbody .row:hover .col1{
     background-color: rgb(255, 244, 239);
     border-right-color:rgb(255, 222, 139);
+}
+.tableScroll > .tbody .row:hover .col{
+    color: rgb(52, 55, 65);
 }
 </style>

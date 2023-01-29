@@ -1,75 +1,111 @@
 <template>
   <div>
     <template v-if="workload === 'pods'">
-      <u-linear-layout style="margin-bottom: 20px">
-        <u-text>Container</u-text>
-        <u-select
-          v-if="containers.length"
-          key="contianerlist"
-          v-model="containerName"
-          :data="containers"
-          size="normal"
-        />
-        <u-select
-          v-else
-          key="nonecontainer"
-          :data="[{ text: '暂无Container' }]"
-          size="normal"
-          disabled
-        />
-        <u-link @click="toPodLog">
-          查看详细日志
-        </u-link>
-      </u-linear-layout>
+      <div :class="$style.line_layout" style="margin-bottom: 20px">
+        <div style="display: inline-block">
+            <span style="margin-right:8px;line-height:32px">Container</span>
+            <el-select
+                v-if="containers.length"
+                key="contianerlist"
+                v-model="containerName"
+                placeholder="请选择"
+                style="width: 200px"
+            >
+                <el-option
+                    v-for="item in containers"
+                    :key="item.value"
+                    :label="item.text"
+                    :value="item.value"
+                    :title="item.text"
+                />
+            </el-select>
+            <el-select
+              v-else
+              style="width:200px"
+              placeholder="暂无Container"
+              :disabled="true"
+            />
+        </div>
+        <el-checkbox v-model="autoRefresh">
+            自动刷新
+        </el-checkbox>
+        <span @click="switchSetting" :class="$style.switchButton">
+            <span style="margin-right: 8px">切换背景</span>
+            <i :class="$style.themeIcon" :theme="theme"></i>
+        </span>
+      </div>
     </template>
     <x-request
       v-else
-      component="u-linear-layout"
+      component="div"
       :service="podService"
       :params="params"
       :processor="resolver"
       style="margin-bottom: 20px"
+      :class="$style.line_layout"
     >
       <template slot-scope="{ data }">
-        <u-text>副本</u-text>
-        <u-select
-          v-if="data && data.length"
-          key="podlist"
-          v-model="podName"
-          :data="data"
-          size="normal"
-        />
-        <u-select
-          v-else
-          key="nonepod"
-          :data="[{ text: '暂无副本' }]"
-          size="normal"
-          disabled
-        />
-        <u-text>Container</u-text>
-        <u-select
-          v-if="containers.length"
-          key="contianerlist"
-          v-model="containerName"
-          :data="containers"
-          size="normal"
-        />
-        <u-select
-          v-else
-          key="nonecontainer"
-          :data="[{ text: '暂无Container' }]"
-          size="normal"
-          disabled
-        />
-        <u-link @click="toPodLog">
-          查看详细日志
-        </u-link>
+        <div style="display: inline-block">
+            <span style="margin-right:8px;line-height:32px">副本</span>
+            <el-select
+                v-if="data && data.length"
+                v-model="podName"
+                placeholder="请选择"
+                style="width: 200px"
+            >
+                <el-option
+                    v-for="item in data"
+                    :key="item.value"
+                    :label="item.text"
+                    :value="item.value"
+                    :title="item.text"
+                />
+            </el-select>
+            <el-select
+              v-else
+              style="width:200px"
+              placeholder="暂无副本"
+              :disabled="true"
+            />
+        </div>
+        <div style="display: inline-block">
+            <span style="margin-right:8px;line-height:32px">Container</span>
+            <el-select
+                v-if="containers.length"
+                v-model="containerName"
+                placeholder="请选择"
+                style="width: 200px"
+            >
+                <el-option
+                    v-for="item in containers"
+                    :key="item.value"
+                    :label="item.text"
+                    :value="item.value"
+                    :title="item.text"
+                />
+            </el-select>
+            <el-select
+              v-else
+              style="width:200px"
+              placeholder="暂无Container"
+              :disabled="true"
+            />
+        </div>
+        <el-checkbox v-model="autoRefresh">
+            自动刷新
+        </el-checkbox>
+        <span @click="switchSetting" :class="$style.switchButton">
+            <span style="margin-right: 8px">切换背景</span>
+            <i :class="$style.themeIcon" :theme="theme"></i>
+        </span>
       </template>
     </x-request>
     <template v-if="podName && containerName">
       <logContext
         :container-name="containerName"
         :pod-name="podName"
+        :autoRefresh.sync="autoRefresh"
+        :theme="theme"
       />
     </template>
   </div>
@@ -78,7 +114,7 @@
 <script>
 import { get as getFunc, omit } from 'lodash';
 import { get } from 'vuex-pathify';
-// import workloadService from 'kubecube/services/k8s-resource';
+// import workloadService from '@micro-app/ncs/kubecube/services/k8s-resource';
 import workloadExtendService from 'kubecube/services/k8s-extend-resource';
 import {
     setValueIfListNotPresent,
@@ -87,7 +123,19 @@ import {
     toPlainObject as toPodPlainObject,
 } from 'kubecube/k8s-resources/pod/index.js';
 import logContext from './component/log-context.vue';
-
+function formatStartTime(val){
+    if(!val)
+        return Date.now() - 3600 * 24 * 1000;
+    return val;
+}
+function formatEndTime(val){
+    if(!val)
+        return Date.now();
+    return val;
+}
+function formatFilters(filters){
+    return encodeURIComponent(JSON.stringify(filters))
+}
 export default {
     components: {
         logContext,
@@ -111,11 +159,17 @@ export default {
             podName: this.$route.query.podName || null,
             containerName: this.$route.query.containerName || null,
             pods: [],
+            interval: '1m',
+            task: 'all',
+            autoRefresh: false,
+            theme: 'light',
         };
     },
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        tenant: get('scope/tenant'),
+        project: get('scope/project'),
         workload() {
             return this.$route.params.workload;
         },
@@ -128,7 +182,8 @@ export default {
                 },
                 params: {
                     // labelSelector: this.instance.spec.matchLabels.map(l => `${l.key}=${l.value}`).join(','),
-                    selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
+                    selector: `metadata.ownerReferences.uid=${this.instance.metadata.uid}`
+                    // selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
                 },
             };
         },
@@ -154,6 +209,9 @@ export default {
         }
     },
     methods: {
+        switchSetting() {
+            this.theme = this.theme === 'light' ? 'dark' : 'light';
+        },
         resolver(response) {
             const items = (response.items || []).map(r => {
                 const pod = toPodPlainObject(r);
@@ -185,27 +243,26 @@ export default {
             // this.containerName = getFunc(items, '[0].containers[0].containerName');
             return items;
         },
-        toPodLog() {
-            this.$store.dispatch('lens/setToDefault');
-            this.$store.commit('like/RESET');
-            this.$store.dispatch('timer/setTimer');
-
-            this.$store.commit('lens/setFilters', [
-                {
-                    key: 'pod_name',
-                    operator: 'is',
-                    value: this.podName,
-                },
-            ]);
-
-            this.$router.push({
-                path: '/control/lens/normal',
-            });
-        },
     },
 };
 </script>
 
 <style module>
-
+.line_layout > * {
+    margin-right: 12px;
+}
+.switchButton {
+    float: right;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.themeIcon::before {
+    font-size: 22px;
+    color: #c9cfd8;
+    icon-font: url(kubecube/assets/log-white.svg);
+}
+.themeIcon[theme="dark"]::before {
+    icon-font: url(kubecube/assets/log-black.svg);
+}
 </style>
