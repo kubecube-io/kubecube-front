@@ -244,7 +244,7 @@ export default {
     width: 350px !important;
     padding: 0 30px !important;
 }
-input:focus{
+.input:focus{
     border-color: #4486e9;
     box-shadow: 0 0 2px #4486e9;
 }

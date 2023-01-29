@@ -1,37 +1,37 @@
 import { pickBy, isObjectLike, flatten, uniq, groupBy, zipObjectDeep, omit } from 'lodash';
 import { getFromModel } from '../base/utils';
 
-const DISAPTCH_KEY = 'nginx.ingress.kubernetes.io/load-balance';
+let DISAPTCH_KEY = 'nginx.ingress.kubernetes.io/load-balance';
 
-const COOKIE_KEY = 'nginx.ingress.kubernetes.io/session-cookie-name';
-const HASH_KEY = 'ingress.netease.com/session-cookie-hash';
+let COOKIE_KEY = 'nginx.ingress.kubernetes.io/session-cookie-name';
+let HASH_KEY = 'nginx.ingress.kubernetes.io/session-cookie-hash';
 const HASH_VALUE = 'md5';
-const AFFINITY_KEY = 'ingress.netease.com/affinity';
+let AFFINITY_KEY = 'nginx.ingress.kubernetes.io/affinity';
 const AFFINITY_VALUE = 'cookie';
 
-const REWRITE_KEY = 'ingress.netease.com/rewrite-target';
+let REWRITE_KEY = 'nginx.ingress.kubernetes.io/rewrite-target';
 
 export const toPlainObject = model => {
     const g = getFromModel(model);
 
-    const tls = (g('spec.tls') || []);
-    const port = tls.length ? 443 : 80;
-    const singleTLS = {
+    const tls = (g('spec.tls') || []); // 证书列表
+    const port = tls.length ? 443 : 80; // 端口号
+    const singleTLS = { // 所有域名使用相同证书
         enable: tls.length === 1,
         secretName: g('spec.tls[0].secretName'),
     };
 
-    const annotations = g('metadata.annotations', {});
-    const rules = g('spec.rules') || [];
+    const annotations = g('metadata.annotations', {}); // annotations
+    const rules = g('spec.rules') || []; // 转发规则
     const rulesConfig = rules.map(rule => {
         const gr = getFromModel(rule);
-        const host = gr('host');
-        const httpPath = (gr('http.paths') || []).map(item => {
+        const host = gr('host'); // 域名
+        const httpPath = (gr('http.paths') || []).map(item => { // 路径列表
             const gp = getFromModel(item);
             return {
-                path: gp('path'),
-                service: gp('backend.service.name'),
-                port: gp('backend.service.port.number'),
+                path: gp('path'),  // 路径
+                service: gp('backend.service.name'), // 服务名
+                port: gp('backend.service.port.number'), // 服务端口号
             };
         });
         return {
@@ -61,16 +61,16 @@ export const toPlainObject = model => {
         ...pickBy(g('spec'), v => !isObjectLike(v)),
         port,
         annotations: {
-            dispatch: annotations[DISAPTCH_KEY] || 'round_robin',
-            enableSession: !!annotations[COOKIE_KEY],
-            cookieName: annotations[COOKIE_KEY],
-            rewrite: annotations[REWRITE_KEY],
+            dispatch: annotations[DISAPTCH_KEY] || 'round_robin', // 调度算法
+            enableSession: !!annotations[COOKIE_KEY], // 会话保持
+            cookieName: annotations[COOKIE_KEY], // Cookie 名称
+            rewrite: annotations[REWRITE_KEY], // 重写目标
         },
-        tls,
-        singleTLS,
-        rules: g('spec.rules'),
-        rulesConfig,
-        pathInfos,
+        tls, // 证书列表
+        singleTLS, // 所有域名使用相同证书
+        rules: g('spec.rules'), // 原始转发规则
+        rulesConfig, // 转换后的转发规则
+        pathInfos, // 详情页-负载均衡详情
         services: uniq(services),
     };
 };
@@ -136,7 +136,7 @@ export function toK8SObject(model, metadata) {
             [COOKIE_KEY]: g('spec.annotations.cookieName'),
         });
     } else {
-        metadata.annotations = omit(metadata.annotations, [ 'AFFINITY_KEY', 'HASH_KEY', 'COOKIE_KEY' ]);
+        metadata.annotations = omit(metadata.annotations, [ AFFINITY_KEY, HASH_KEY, COOKIE_KEY ]);
     }
 
     return zipObjectDeep(effectKeys, [
@@ -146,6 +146,13 @@ export function toK8SObject(model, metadata) {
 }
 
 export function patchK8SObject(model, metadata) {
+    const pureSourceSpec = model.puresource.spec;
+    const newK8SSpecObject = toK8SObject(model, metadata);
+    const remains = omit(pureSourceSpec, effectKeys);
+    return Object.assign({}, remains, newK8SSpecObject);
+}
+
+export function toModifyK8SObject(model, metadata) {
     const pureSourceSpec = model.puresource.spec;
     const newK8SSpecObject = toK8SObject(model, metadata);
     const remains = omit(pureSourceSpec, effectKeys);

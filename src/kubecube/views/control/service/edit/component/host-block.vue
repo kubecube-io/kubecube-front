@@ -1,9 +1,5 @@
 <template>
-  <kube-form-item
-    label="转发规则"
-    required
-    layout="block"
-  >
+  <div>
     <x-request
       ref="request"
       style="margin-top: 10px"
@@ -12,75 +8,57 @@
       :processor="resolver"
     >
       <template slot-scope="{ data, loading }">
-        <u-loading v-if="loading" />
-        <template v-else>
-          <!-- <validation-provider
-         v-else
-    ref="provider"
-    :name="`HOST`"
-    :detect-input="false"
-    :rules="{
-      arrayRequired: {
-        filterkey: ['host', 'service', 'port']
-      },
-    }"
-  > -->
-          <kube-dynamic-block
-            v-model="model"
-            :layout-comp="blockLayout"
-            :row-comp="blockRowLayout"
-            :column-comp="null"
-            :data-template="getRuleTemplate"
-
-            button-name="添加"
-          >
-            <template slot-scope="{ model: row, index: hostIndex }">
-              <kube-form label-size="small">
-                <u-linear-layout direction="vertical">
-                  <validation-provider
-                    v-slot="{ errors }"
-                    :name="`Host-${hostIndex}`"
-                    rules="required"
-                  >
-                    <kube-form-item
-                      :message="errors && errors[0]"
-                      label="域名"
-                      required
-                    >
-                      <host-input
-                        v-model="row.host"
-                        size="normal medium"
-                        :errors="errors"
-                        :port="port"
-                        :domain-suffix-list="domainSuffixList"
-                      />
-                    </kube-form-item>
-                  </validation-provider>
-                </u-linear-layout>
-                <secret-select
-                  v-if="enableSecret"
-                  v-model="row.secretName"
-                  :init-visible="true"
-                />
-
-                <path-table
-                  v-model="row.httpPath"
-                  :default-service="defaultService"
-                  :service-list="data"
-                  :index="hostIndex"
-                />
-              </kube-form>
-            </template>
-          </kube-dynamic-block>
-        </template>
-        <!--
-            <
-            validation-provider
-          >
-            -->
+        <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
+        <dynamicCard
+          v-else
+          v-model="model"
+          :initialAdd="true"
+          :minCount="1"
+          :getDefaultItem="getRuleTemplate"
+          addButtonText="添加分组"
+          :validateFile="prefixProp"
+        >
+          <template slot-scope="{ item: ruleModel, index: ruleIndex }">
+            <el-form-item 
+              label="域名"
+              :rules="[
+                validators.required(),
+              ]"
+              :prop="`${prefixProp}.${ruleIndex}.host`"
+              style="margin-bottom: 24px"
+            >
+              <host-input
+                v-model="ruleModel.host"
+                :port="port"
+                :domainSuffixList="domainSuffixList"
+              />
+            </el-form-item>
+            <secretSelect
+              v-if="enableSecret"
+              v-model="ruleModel.secretName"
+              :init-visible="true"
+              :prefixProp="`${prefixProp}.${ruleIndex}.secretName`"
+            />
+            <el-form-item 
+              label="路径"
+              :rules="[
+                validators.required(),
+              ]"
+              :prop="`${prefixProp}.${ruleIndex}.httpPath`"
+            >
+              <path-table
+                v-model="ruleModel.httpPath"
+                :default-service="defaultService"
+                :service-list="data"
+                :index="ruleIndex"
+                :prefixProp="`${prefixProp}.${ruleIndex}.httpPath`"
+              />
+            </el-form-item>
+          </template>
+        </dynamicCard>
       </template>
     </x-request>
-  </kube-form-item>
+  </div>
 </template>
 
 <script>
@@ -98,19 +76,29 @@ import secretSelect from './secret-select.vue';
 import pathTable from './path-table.vue';
 import k8sCommonExtendResourceService from 'kubecube/services/k8s-common-extend-resource';
 import hostInput from './host-input.vue';
+import dynamicCard from 'kubecube/elComponent/dynamic-card/index.vue';
+import dynamicBlock from 'kubecube/elComponent/dynamic-block/index.vue';
+import * as validators from 'kubecube/utils/validators';
 export default {
     components: {
         secretSelect,
         pathTable,
         hostInput,
+        dynamicCard,
+        dynamicBlock
     },
     mixins: [ makeVModelMixin ],
     props: {
         enableSecret: Boolean,
         port: Number,
+        prefixProp: {
+            type: String,
+            default: ''
+        },
     },
     data() {
         return {
+            validators,
             service: workloadService.getAPIV1,
             defaultService: '',
 

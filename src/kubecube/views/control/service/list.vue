@@ -40,6 +40,9 @@
               {{ item.metadata.name }}
             </u-link>
           </template>
+          <template #[`item.spec.rules`]="{ item }">
+            {{ ingressRuleFilter(item) }}
+          </template>
 
           <template #[`item.metadata.creationTimestamp`]="{ item }">
             {{ item.metadata.creationTimestamp | formatLocaleTime }}
@@ -89,7 +92,7 @@
 </template>
 
 <script>
-import { pickBy } from 'lodash';
+import { pickBy, get as getFun } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
 import workloadExtendService from 'kubecube/services/k8s-extend-resource';
@@ -173,7 +176,7 @@ export default {
                     return [
                         { title: '名称', name: 'metadata.name', sortable: true, textwrap: true },
                         { title: '外部访问地址', name: 'outside', width: '120px' },
-                        { title: '规则', name: 'spec.clusterIP', width: '100px' },
+                        { title: '规则', name: 'spec.rules', width: '200px' },
                         { title: '创建时间', name: 'metadata.creationTimestamp', width: '160px', sortable: true },
                         { title: '操作', name: 'operation', width: '160px' },
                     ];
@@ -214,6 +217,20 @@ export default {
         },
     },
     methods: {
+        ingressRuleFilter(item) {
+            const strArr = []
+            const rules = getFun(item, 'spec.rules', []);
+            rules.forEach(rule => {
+                const host = getFun(rule, 'host');
+                const paths =  getFun(rule, 'http.paths', []);
+                paths.forEach(path => {
+                    let target = `${getFun(path, 'backend.service.name', '')}:${getFun(path, 'backend.service.port.number', '')}`
+                    let source = `${host}${getFun(path, 'path', '')}`;
+                    strArr.push(`${source}->${target}`);
+                })
+            })
+            return strArr.join(', ')
+        },
         resolver(response) {
             console.log(response);
             const list = (response.items || []).map(this.toPlainObject);

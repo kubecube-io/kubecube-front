@@ -322,10 +322,10 @@ export default {
 }
 .itemWrap{
     margin-bottom: 15px;
-    border: 1px solid var(--border-color-base);
+    border: 1px solid #e5e5e5;
 }
 .closeItemBox {
-    background: var(--background-color-base);
+    background: #f5f5f5;
     min-height: 40px;
     padding: 0 15px;
     display: flex;
@@ -348,11 +348,11 @@ export default {
 }
 .errorIcon{
   line-height: 20px;
-  color: var(--color-danger);
+  color: #f54545;
   line-height: 20px !important;
 }
 .openItemBox {
-    background: var(--color-white);
+    background: #fff;
     padding: 0 16px;
 }
 .openItemHeadBox {

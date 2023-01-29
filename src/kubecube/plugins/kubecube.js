@@ -28,6 +28,9 @@ import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue
 // elComponent
 import elInputSearch from 'kubecube/elComponent/inputSearch';
 
+// 指令集
+import directives from 'kubecube/directives';
+
 const SKELETON_KEY = 'SKELETON_KEY';
 const SKELETON_RAW_DATA = 'SKELETON_RAW_DATA';
 function loadingElm(el) {
@@ -164,6 +167,9 @@ Vue.use({
 
                 });
             },
+        });
+        directives.forEach(directive => {
+            _Vue.directive(directive.name, directive);
         });
     },
 });

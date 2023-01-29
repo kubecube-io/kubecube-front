@@ -1,10 +1,12 @@
 <template>
-  <kube-form-item
+  <el-form-item
     label="证书"
-    required
-    layout="block"
-    v-bind="$attrs"
+    :prop="prefixProp"
+    :rules="[
+      ...(visible ? [ validators.required() ] : []),
+    ]"
   >
+    <div v-if="description" style="color: #999">{{description}}</div>
     <x-request
       ref="request"
       :service="service"
@@ -17,32 +19,52 @@
           :data="data"
           :setVisible="setVisible"
         />
-
-        <template v-if="visible">
-          <br v-if="$attrs.description">
-          <u-select
+        <div v-if="visible">
+          <el-select
             v-if="(data || []).length > 0"
-            v-model="model"
-            :data="data || []"
-            size="large"
-          />
-          <u-select
+            v-model="model" 
+            filterable
+            placeholder="请选择"
+          >
+            <el-option
+              v-for="item in data"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value"
+              :title="item.text"
+            />
+          </el-select>
+          <el-input
             v-else
             v-model="model"
             disabled
-            size="large"
-            :data="[{text: '暂无证书'}]"
+            placeholder="暂无证书"
           />
-          <u-quick-create
+          <div>
+            如需新的证书，可
+            <el-link
+              type="primary"
+              @click="openNewWindow({ path: '/control/secrets/list', query: $route.query })"
+            >
+              创建证书
+            </el-link>
+            <i
+              style="font-size:16px; margin-left: 8px"
+              :class="loading ? 'el-icon-loading' : 'el-icon-refresh-right'"
+              @click="refresh"
+            />
+          </div>
+
+          <!-- <u-quick-create
             :loading="loading"
             :to="{ path: `/control/secrets/list` }"
             name="证书"
             @refresh="refresh"
-          />
-        </template>
+          /> -->
+        </div>
       </template>
     </x-request>
-  </kube-form-item>
+  </el-form-item>
 </template>
 
 <script>
@@ -54,6 +76,7 @@ import { toPlainObject as toMetadataPlainObject } from 'kubecube/k8s-resources/m
 import {
     setValueIfListNotPresent,
 } from 'kubecube/utils/functional';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin ],
     props: {
@@ -70,12 +93,21 @@ export default {
             default: false,
         },
         initVisible: Boolean,
+        prefixProp: {
+            type: String,
+            default: ''
+        },
+        description: {
+            type: String,
+            default: ''
+        }
     },
     data() {
         return {
             service: workloadService.getAPIV1,
             workloadName: null,
             visible: this.initVisible,
+            validators,
         };
     },
     computed: {
@@ -92,8 +124,14 @@ export default {
         },
     },
     methods: {
+        openNewWindow(link) {
+            const routeData = this.$router.resolve(link);
+            const { origin, pathname } = window.location;
+            const url = `${origin}${pathname}${(routeData.href || '').match(/#\S*/)[0]}`;
+            window.open(url, '_blank');
+        },
         resolver(response) {
-            const list = (response.items || []).map(toMetadataPlainObject).map(metadata => {
+            const list = (response.items || []).filter(item => item.type === "kubernetes.io/tls").map(toMetadataPlainObject).map(metadata => {
                 return {
                     text: metadata.name,
                     value: metadata.name,
@@ -110,6 +148,7 @@ export default {
             return list;
         },
         setVisible(val) {
+            console.log(val)
             this.visible = val;
         },
         refresh() {
