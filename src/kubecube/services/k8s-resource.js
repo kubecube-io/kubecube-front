@@ -23,6 +23,10 @@ const service = Service({
                 'Content-Type': 'application/strategic-merge-patch+json',
             },
         },
+        updateResourceWithoutNamespace: {
+            method: 'put',
+            template: '/{cluster}/api/v1/{resource}/{name}',
+        },
         deleteResourceWithoutNamespace: {
             method: 'delete',
             template: '/{cluster}/api/v1/{resource}/{name}',
