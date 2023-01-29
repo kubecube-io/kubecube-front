@@ -32,10 +32,10 @@ export function toPlainObject(model) {
     const type = g('type', SECRET_TYPES_ENUM.Opaque);
     return {
         ...obj,
-        type,
-        data: toObjectArray(g('data') || {}, 'key', 'value').map(d => ({ ...d, value: decode(d.value) })),
-        dockerData: type === SECRET_TYPES_ENUM.DockerConfigJson ? decodeDockerJSON(g('data') || {}) : [],
-        dataSource: g('data') || {},
+        type, // Secret 类型
+        data: toObjectArray(g('data') || {}, 'key', 'value').map(d => ({ ...d, value: decode(d.value) })), // opaque类型 数据
+        dockerData: type === SECRET_TYPES_ENUM.DockerConfigJson ? decodeDockerJSON(g('data') || {}) : [], // DockerConfigJson类型 数据
+        dataSource: g('data') || { 'tls.crt': '', 'tls.key': '' }, // IngressTLS类型 数据
     };
 }
 
@@ -48,13 +48,13 @@ export function toK8SObject(model) {
     );
     const type = g('type');
     let data;
-    if (type === SECRET_TYPES_ENUM.Opaque) {
-        data = KVtoObject(g('data').map(d => ({ ...d, value: encode(d.value) })), 'key', 'value');
+    if (type === SECRET_TYPES_ENUM.Opaque) { // opaque
+        data = KVtoObject(g('data').map(d => ({ ...d, value: encode(d.value) })), 'key', 'value'); // key-value
     }
-    if (type === SECRET_TYPES_ENUM.IngressTLS) {
-        data = g('dataSource');
+    if (type === SECRET_TYPES_ENUM.IngressTLS) { // IngressTLS
+        data = g('dataSource'); // 包含证书及密钥
     }
-    if (type === SECRET_TYPES_ENUM.DockerConfigJson) {
+    if (type === SECRET_TYPES_ENUM.DockerConfigJson) { // DockerConfigJson
         const temp = {
             auths: {},
         };
@@ -63,7 +63,7 @@ export function toK8SObject(model) {
             temp.auths[host] = { username, password, email, auth: encode(username + ':' + password) };
         });
         data = {
-            '.dockerconfigjson': encode(JSON.stringify(temp)),
+            '.dockerconfigjson': encode(JSON.stringify(temp)), // 包含镜像仓库、用户名、密码、邮件
         };
     }
 
