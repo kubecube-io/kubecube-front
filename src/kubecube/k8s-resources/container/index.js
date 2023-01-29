@@ -10,15 +10,17 @@ import {
     flatten,
     get,
     cloneDeep,
+    omit
 } from 'lodash';
 import { unitConvert } from 'kubecube/utils/functional';
 import { RESOURCE_REQUEST_MAP } from 'kubecube/utils/constance';
+import store from 'kubecube/store';
 import {
     toPlainObject as toStatusPlainObject,
 } from './status';
 let uniqueid = 1;
 
-function resolveEnv(env) {
+function resolveEnv(env) { //环境变量处理
     const obj = {
         value: [],
         secretKeyRef: [],
@@ -28,34 +30,34 @@ function resolveEnv(env) {
     };
     env.forEach(i => {
         const c = getFromModel(i);
-        const name = c('name');
+        const envName = c('name');
         const valueFrom = c('valueFrom');
 
         if (!valueFrom) {
-            obj.value.push({ key: name, value: c('value') });
+            obj.value.push({ key: envName, value: c('value') });
         } else {
             if (valueFrom.configMapKeyRef) {
-                const { key, value } = valueFrom.configMapKeyRef;
-                obj.configMapKeyRef.push({ key: name, configmap: key, configmapKey: value });
+                const { key, name } = valueFrom.configMapKeyRef;
+                obj.configMapKeyRef.push({ key: envName, configmap: name, configmapKey: key });
             }
             if (valueFrom.fieldRef) {
                 const { fieldPath } = valueFrom.fieldRef;
-                obj.fieldRef.push({ key: name, field: fieldPath });
+                obj.fieldRef.push({ key: envName, field: fieldPath });
             }
             if (valueFrom.resourceFieldRef) {
                 const { containerName, resource } = valueFrom.resourceFieldRef;
-                obj.resourceFieldRef.push({ key: name, resource: containerName, resoueceKey: resource });
+                obj.resourceFieldRef.push({ key: envName, resource: containerName, resoueceKey: resource });
             }
             if (valueFrom.secretKeyRef) {
                 const { key, name } = valueFrom.secretKeyRef;
-                obj.secretKeyRef.push({ key: name, secret: key, secretKey: name });
+                obj.secretKeyRef.push({ key: envName, secret: name, secretKey: key });
             }
         }
     });
     return obj;
 }
 
-const refactEnv = envModel => {
+const refactEnv = envModel => { //环境变量处理
     return concat(
         envModel.value.filter(isFilledObject).map(o => ({
             name: o.key,
@@ -65,7 +67,7 @@ const refactEnv = envModel => {
             name: o.key,
             valueFrom: {
                 secretKeyRef: {
-                    key: o.secret, name: o.secretKey,
+                    key: o.secretKey, name: o.secret,
                 },
             },
         })),
@@ -73,7 +75,7 @@ const refactEnv = envModel => {
             name: o.key,
             valueFrom: {
                 configMapKeyRef: {
-                    key: o.configmap, name: o.configmapKey,
+                    key: o.configmapKey, name: o.configmap,
                 },
             },
         })),
@@ -96,7 +98,7 @@ const refactEnv = envModel => {
     );
 };
 
-const resolveLifeCycle = lifecycle => {
+const resolveLifeCycle = lifecycle => { // 生命周期执行脚本处理
 
     const obj = {
         enable: false,
@@ -110,7 +112,7 @@ const resolveLifeCycle = lifecycle => {
     if (!lifecycle) return obj;
     if (lifecycle.exec) {
         obj.enable = true;
-        obj.command = lifecycle.exec.command.join('\n');
+        obj.command = (lifecycle.exec.command || []).join('\n');
     } else if (lifecycle.httpGet) {
         obj.enable = true;
         obj.method = 'httpGet';
@@ -124,13 +126,13 @@ const resolveLifeCycle = lifecycle => {
     return obj;
 };
 
-const refactLifeCycle = lifecycleModel => {
+const refactLifeCycle = lifecycleModel => { // 生命周期执行脚本处理
     if (!lifecycleModel.enable) return null;
     switch (lifecycleModel.method) {
         case 'exec':
             return {
                 exec: {
-                    command: lifecycleModel.command.split('\n'),
+                    command: lifecycleModel.command.split('\n').filter(i => i).map(i => i.replaceAll('\r', '')),
                 },
             };
         case 'httpGet':
@@ -154,10 +156,10 @@ const refactLifeCycle = lifecycleModel => {
     }
 };
 
-const resolveProbe = probe => {
+const resolveProbe = probe => { // 探针处理
     const obj = {
         enable: false,
-        failureThreshold: 1,
+        failureThreshold: 3,
         successThreshold: 1,
         initialDelaySeconds: 0,
         periodSeconds: 10,
@@ -184,7 +186,7 @@ const resolveProbe = probe => {
     return obj;
 };
 
-const refactProbe = probeModel => {
+const refactProbe = probeModel => { // 探针处理
     if (!probeModel.enable) return null;
     const g = getFromModel(probeModel);
     return {
@@ -197,7 +199,7 @@ const refactProbe = probeModel => {
     };
 };
 
-const resolveContainerPorts = ports => {
+const resolveContainerPorts = ports => { // 容器端口处理
     const obj = {
         enable: false,
         configs: [],
@@ -214,13 +216,13 @@ const resolveContainerPorts = ports => {
     return obj;
 };
 
-const refactPorts = portsModel => {
+const refactPorts = portsModel => { // 容器端口处理
     if (!portsModel.enable) return null;
 
     return portsModel.configs.slice();
 };
 
-const resolveResource = resource => {
+const resolveResource = resource => { // 容器资源配置处理
     const obj = {
         type: 0,
         cpu: 0.1,
@@ -234,24 +236,24 @@ const resolveResource = resource => {
     const g = getFromModel(resource);
     obj.cpu = unitConvert(g('requests.cpu'), 'cpu');
     obj.memory = unitConvert(g('requests.memory'));
-    obj.gpu = g('limits["nvidia.com/gpu"]'); // TODO
+    obj.gpu = g('limits["nvidia.com/gpu"]', 0); // TODO 扩展其他gpu类型
     obj.type = RESOURCE_REQUEST_MAP.findIndex(item => item.cpu === obj.cpu && item.memory === obj.memory);
     obj.multiple = Math.round(unitConvert(g('limits.cpu'), 'cpu') / obj.cpu) || 1;
     return obj;
 };
 
-const refactResouce = resourceModel => {
+const refactResouce = resourceModel => { // 容器资源配置处理
     const cpu = toNumber(resourceModel.cpu);
     const memory = toNumber(resourceModel.memory);
-    // const gpu = toNumber(resourceModel.gpu);
+    const gpu = toNumber(resourceModel.gpu); // TODO 扩展其他gpu类型
     const multiple = toNumber(resourceModel.multiple);
     return {
-        limits: { cpu: `${cpu * multiple * 1000}m`, memory: `${memory * multiple}Mi` },
+        limits: { cpu: `${cpu * multiple * 1000}m`, memory: `${memory * multiple}Mi`, "nvidia.com/gpu": gpu },
         requests: { cpu: `${cpu * 1000}m`, memory: `${memory}Mi` },
     };
 };
 
-const resolveVolumes = (volumeMounts, volumes) => {
+const resolveVolumes = (volumeMounts, volumes) => { // 挂载数据卷处理
     const obj = {
         pvc: [],
         configmap: [],
@@ -259,7 +261,7 @@ const resolveVolumes = (volumeMounts, volumes) => {
         emptyDir: [],
         hostpath: [],
         vct: [],
-        // otherVolume: [],
+        otherVolume: [],
     };
     const mapping = {
         emptyDir: 'emptyDir',
@@ -270,8 +272,10 @@ const resolveVolumes = (volumeMounts, volumes) => {
         volumeClaimTemplate: 'vct',
     };
     const vnames = [];
+    const enablelxcfs = (get(store, 'state.feature.features.enableLxcfs') === true);
     if (volumeMounts.length && volumes.length) {
-        volumeMounts // .filter(i => i.name.startsWith('data-volume'))
+
+        volumeMounts.filter(i => (enablelxcfs ? i.name.startsWith('data-volume') : true))
             .forEach(i => {
                 const volume = volumes.find(v => v.name === i.name);
                 let key;
@@ -334,25 +338,31 @@ const resolveVolumes = (volumeMounts, volumes) => {
                     vnames.push(i.name);
                     obj.emptyDir.push({
                         resource: i.name,
-                        ...pick(i, [ 'mountPath', 'readOnly' ]),
+                        mountPath: i.mountPath,
+                        readOnly: !!i.readOnly,
+                        // ...pick(i, [ 'mountPath', 'readOnly' ]),
                     });
                 }
             });
         }
     }
-    // volumeMounts.forEach(v => {
-    //     if (!vnames.includes(v.name)) {
-    //         obj.otherVolume.push(v);
-    //     }
-    // });
+    volumeMounts.forEach(v => {
+        if (!vnames.includes(v.name)) {
+            const volume = volumes.find(i => v.name === i.name);
+            obj.otherVolume.push({
+                volumeMounts: v,
+                volume,
+            });
+        }
+    });
     return obj;
 };
 
 // Name字段统一格式String.format(data-volume-%s-%d, 容器名字, index.getAndIncrement());
 const volumeNameGenerator = containerName => {
     let i = 0;
-    // return () => `data-volume-${containerName}-${i++}`;
-    return () => `${containerName}-${i++}`;
+    return () => `data-volume-${containerName}-${i++}`;
+    // return () => `${containerName}-${i++}`;
 };
 
 const refactVolumes = (
@@ -363,21 +373,22 @@ const refactVolumes = (
 ) => {
     const {
         pvc, configmap, secret, emptyDir, hostpath, vct,
-        // otherVolume,
+        otherVolume,
     } = volumeMountsModel;
     const getVolumeName = volumeNameGenerator(containerName);
     const volumeMounts = [];
     pvc.filter(p => p.mountPath && p.resource).forEach(p => {
         const exsit = podVolumesYaml.persistentVolumeClaim.find(pvc => pvc.persistentVolumeClaim.claimName === p.resource);
         const name = exsit ? exsit.name : getVolumeName();
-
-        podVolumesYaml.persistentVolumeClaim.push({
-            name,
-            persistentVolumeClaim: {
-                claimName: p.resource,
-                readOnly: false,
-            },
-        });
+        if(!exsit) {
+            podVolumesYaml.persistentVolumeClaim.push({
+                name,
+                persistentVolumeClaim: {
+                    claimName: p.resource,
+                    readOnly: false,
+                },
+            });
+        }
         volumeMounts.push({
             name,
             readOnly: false,
@@ -402,7 +413,8 @@ const refactVolumes = (
                 key: p.key,
                 path: p.filePath,
             });
-            configMapVolumnsMap[key].subPath = '';
+            // 新星item支持subPath
+            // configMapVolumnsMap[key].subPath = '';
         }
     });
 
@@ -426,15 +438,18 @@ const refactVolumes = (
     });
 
     secret.filter(p => p.mountPath && p.resource).forEach(p => {
-        const name = getVolumeName();
-        podVolumesYaml.secret.push({
-            name,
-            secret: {
-                secretName: p.resource,
-                defaultMode: 420,
-                optional: false,
-            },
-        });
+        const exsit = podVolumesYaml.secret.find(item => item.secret.secretName === p.resource);
+        const name = exsit ? exsit.name : getVolumeName();
+        if (!exsit) {
+            podVolumesYaml.secret.push({
+                name,
+                secret: {
+                    secretName: p.resource,
+                    defaultMode: 420,
+                    optional: false,
+                },
+            });
+        }
         volumeMounts.push({
             name,
             readOnly: true,
@@ -448,13 +463,16 @@ const refactVolumes = (
     }).forEach(p => {
         const dir = podVolumes.emptyDir.find(dir => dir.name === p.resource);
         const name = dir.name;
-        podVolumesYaml.emptyDir.push({
-            name,
-            emptyDir: {
-                medium: dir.medium,
-                sizeLimit: dir.sizeLimit,
-            },
-        });
+        const exsit = podVolumesYaml.emptyDir.find(item => item.name === p.resource);
+        if (!exsit) {
+            podVolumesYaml.emptyDir.push({
+                name,
+                emptyDir: {
+                    medium: dir.medium,
+                    sizeLimit: dir.sizeLimit,
+                },
+            });
+        }
         volumeMounts.push({
             name,
             readOnly: p.readOnly,
@@ -463,14 +481,17 @@ const refactVolumes = (
     });
 
     hostpath.filter(p => p.path && p.mountPath).forEach(p => {
-        const name = getVolumeName();
-        podVolumesYaml.hostPath.push({
-            name,
-            hostPath: {
-                type: p.pathType,
-                path: p.path,
-            },
-        });
+        const exsit = podVolumesYaml.hostPath.find(item => item.hostPath.type === p.pathType && item.hostPath.path === p.path);
+        const name = exsit ? exsit.name : getVolumeName();
+        if (!exsit) {
+            podVolumesYaml.hostPath.push({
+                name,
+                hostPath: {
+                    type: p.pathType,
+                    path: p.path,
+                },
+            });
+        }
         volumeMounts.push({
             name,
             readOnly: false,
@@ -483,7 +504,12 @@ const refactVolumes = (
             mountPath: p.mountPath,
         });
     });
-    // volumeMounts = volumeMounts.concat(otherVolume);
+    otherVolume.forEach(p => {
+        volumeMounts.push(p.volumeMounts);
+        if (!podVolumesYaml.otherVolume.find(v => v.name === p.volume.name)) {
+            podVolumesYaml.otherVolume.push(p.volume);
+        }
+    });
     return volumeMounts;
 };
 
@@ -529,29 +555,29 @@ const refactVolumes = (
 //     return volumeMounts;
 // };
 
-export const resolveContainer = (c, type, volumes, workload) => {
+export const resolveContainer = (c, type, volumes, workload) => { //容器处理
     const cg = getFromModel(c);
     const container = {
-        type,
-        containerName: cg('name'),
-        args: cg('args', []).join('\n'),
+        type, //类型
+        containerName: cg('name'), //容器名称
+        args: cg('args', []).join('\n'), // 
         command: cg('command', []).join('\n'),
-        env: resolveEnv(cg('env', [])),
-        image: cg('image'),
-        imagePullPolicy: cg('imagePullPolicy'),
+        env: resolveEnv(cg('env', [])), // 容器环境变量
+        image: cg('image'), //容器镜像
+        imagePullPolicy: cg('imagePullPolicy'), //镜像拉取策略
         // log: resolveLogs(cg('volumeMounts', [])),
-        probe: {
+        probe: {  //探针
             postStart: resolveLifeCycle(cg('lifecycle.postStart')),
             preStop: resolveLifeCycle(cg('lifecycle.preStop')),
             liveness: resolveProbe(cg('livenessProbe', null)),
             readiness: resolveProbe(cg('readinessProbe', null)),
         },
-        ports: resolveContainerPorts(cg('ports', null)),
-        resources: resolveResource(cg('resources', null)),
-        volumes: resolveVolumes(cg('volumeMounts', []), volumes),
-        uniqueid: uniqueid++,
-        status: toStatusPlainObject(workload, cg('name')),
-        raw: cloneDeep(c),
+        ports: resolveContainerPorts(cg('ports', null)), //端口
+        resources: resolveResource(cg('resources', null)), //资源配额
+        volumes: resolveVolumes(cg('volumeMounts', []), volumes), // 数据卷
+        uniqueid: uniqueid++, // uid
+        status: toStatusPlainObject(workload, cg('name')), // 容器状态
+        raw: cloneDeep(c), // 原始的数据
     };
 
     container.showAdvanced =
@@ -566,15 +592,15 @@ export const resolveContainer = (c, type, volumes, workload) => {
 
 export const toPlainObject = (model, workload) => {
     const g = getFromModel(model);
-    const containers = g('containers', []);
-    const initContainers = g('initContainers', []);
+    const containers = g('containers', []); // 普通容器
+    const initContainers = g('initContainers', []); // init容器
     const volumes = g('volumes', []);
     const nc = containers.map(c => resolveContainer(c, 'normal', volumes, workload));
     const initc = initContainers.map(c => resolveContainer(c, 'init', volumes, workload));
     return nc.concat(initc);
 };
 
-export const refactContainer = (c, podVolumes, podVolumesYaml) => {
+export const refactContainer = (c, podVolumes, podVolumesYaml, cIndex) => {
     const cg = getFromModel(c);
     const container = zipObjectDeep([
         'name',
@@ -591,19 +617,20 @@ export const refactContainer = (c, podVolumes, podVolumesYaml) => {
         'resources',
         'volumeMounts',
     ], [
-        cg('containerName'),
-        cg('args').split('\n').filter(i => i),
-        cg('command').split('\n').filter(i => i),
-        refactEnv(cg('env')),
-        cg('image'),
-        cg('imagePullPolicy'),
-        refactLifeCycle(cg('probe.postStart')),
-        refactLifeCycle(cg('probe.preStop')),
-        refactProbe(cg('probe.liveness')),
-        refactProbe(cg('probe.readiness')),
-        refactPorts(cg('ports')),
-        refactResouce(cg('resources')),
-        refactVolumes(cg('volumes'), cg('containerName'), podVolumes, podVolumesYaml),
+        cg('containerName'), // 容器名称
+        cg('args').split('\n').filter(i => i).map(i => i.replaceAll('\r', '')), // 启动命令参数
+        cg('command').split('\n').filter(i => i).map(i => i.replaceAll('\r', '')), //启动命令
+        refactEnv(cg('env')), //环境变量
+        cg('image'), //镜像
+        cg('imagePullPolicy'), // 镜像拉取策略
+        refactLifeCycle(cg('probe.postStart')), // 生命周期-启动后配置
+        refactLifeCycle(cg('probe.preStop')), // 生命周期-停止前执行配置
+        refactProbe(cg('probe.liveness')), // 存活探针
+        refactProbe(cg('probe.readiness')), // 就绪探针
+        refactPorts(cg('ports')), // 端口
+        refactResouce(cg('resources')), //资源配置
+        // refactVolumes(cg('volumes'), cg('containerName'), podVolumes, podVolumesYaml),  
+        refactVolumes(cg('volumes'), cIndex, podVolumes, podVolumesYaml), //容器名过程名过长时挂载会有问题，使用index代替 // 数据卷
     ]);
     // const logVolumns = refactLogs(cg('log', []), cg('containerName'), podVolumesYaml);
     // if (logVolumns) container.volumeMounts = container.volumeMounts.concat(logVolumns);
@@ -622,13 +649,16 @@ export const toK8SObject = model => {
         secret: [],
         emptyDir: [],
         hostPath: [],
+        otherVolume: [],
     };
-    cg('containers', []).forEach(c => {
+    cg('containers', []).forEach((c, cIndex) => { // 区分init容器及普通容器
         if (c.type === 'normal') {
-            containers.push(refactContainer(c, podVolumes, podVolumesYaml));
+            containers.push(refactContainer(c, podVolumes, podVolumesYaml, cIndex));
         }
         if (c.type === 'init') {
-            initContainers.push(refactContainer(c, podVolumes, podVolumesYaml));
+            let temp = refactContainer(c, podVolumes, podVolumesYaml, cIndex)
+            temp = omit(temp, [ 'lifecycle', 'livenessProbe', 'readinessProbe' ])
+            initContainers.push(temp);
         }
     });
     return {
@@ -641,40 +671,40 @@ export const toK8SObject = model => {
 
 
 export const getDefaultContainer = () => ({
-    containerName: '',
-    type: 'normal',
-    image: '',
-    imagePullPolicy: 'Always',
-    resources: {
+    containerName: '', //容器名称
+    type: 'normal', // 容器类型
+    image: '', // 容器镜像
+    imagePullPolicy: 'Always', //镜像拉取策略
+    resources: { // 资源配置
         type: 0,
         cpu: 0.1,
         gpu: 0,
         memory: 128,
         multiple: 1,
     },
-    volumes: {
+    volumes: { //数据卷
         pvc: [],
         configmap: [],
         secret: [],
         emptyDir: [],
         hostpath: [],
         vct: [],
-        // otherVolume: [],
+        otherVolume: [],
     },
     log: [],
-    env: {
+    env: { // 环境变量
         value: [],
         secretKeyRef: [],
         configMapKeyRef: [],
         fieldRef: [],
         resourceFieldRef: [],
     },
-    command: '',
-    args: '',
-    probe: {
-        liveness: {
+    command: '', // 启动命令
+    args: '', // 启动命令参数
+    probe: { // 探针
+        liveness: { //存活探针
             enable: false,
-            failureThreshold: 1,
+            failureThreshold: 3,
             successThreshold: 1,
             initialDelaySeconds: 0,
             periodSeconds: 10,
@@ -686,9 +716,9 @@ export const getDefaultContainer = () => ({
             port: 1,
             httpHeaders: [],
         },
-        readiness: {
+        readiness: { // 就绪探针
             enable: false,
-            failureThreshold: 1,
+            failureThreshold: 3,
             successThreshold: 1,
             initialDelaySeconds: 0,
             periodSeconds: 10,
@@ -700,7 +730,7 @@ export const getDefaultContainer = () => ({
             port: 1,
             httpHeaders: [],
         },
-        preStop: {
+        preStop: { //生命周期-停止前
             enable: false,
             method: 'exec',
             command: '',
@@ -709,7 +739,7 @@ export const getDefaultContainer = () => ({
             port: 1,
             httpHeaders: [],
         },
-        postStart: {
+        postStart: { // 生命周期-启动后
             enable: false,
             method: 'exec',
             command: '',
@@ -719,7 +749,7 @@ export const getDefaultContainer = () => ({
             httpHeaders: [],
         },
     },
-    ports: {
+    ports: { // 端口
         enable: false,
         configs: [],
     },
