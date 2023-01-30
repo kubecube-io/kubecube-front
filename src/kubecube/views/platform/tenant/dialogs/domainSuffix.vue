@@ -1,77 +1,67 @@
 <template>
-  <u-modal
-    title="定制域名后缀"
-    ok-button=""
-    cancel-button=""
-    :visible.sync="show"
-    size="large"
-    @close="close"
-  >
-    <u-form>
-      <u-text>
+    <el-dialog
+      title="定制域名后缀"
+      :visible.sync="show"
+      width="800px"
+      :close-on-click-modal="false"
+    >
+      <div>
         该配置信息用于负载均衡（Ingress）转发规则所用的域名后缀
-      </u-text>
-      <u-form-table
-        style="width:100%"
-        @validate="valid = $event.valid"
-      >
-        <tbody>
-          <tr
-            is="u-form-table-tr"
-            v-for="(item, index) in model.domainSuffixList"
-            :key="index"
-            :rules="rules"
+      </div>
+      <el-form ref="form" :model="model">
+        <el-form-item label="">
+          <dynamicBlock
+            v-model="model.domainSuffixList"
+            :getDefaultItem="getDataTemplate"
+            :columns="[
+              {
+                title: '',
+                dataIndex: 'order',
+                width: '120px'
+              },
+              {
+                title: '',
+                dataIndex: 'name',
+              },
+            ]"
           >
-            <td
-              width="100px"
-              :class="$style.tableCell"
-            >
-              域名后缀{{ index + 1 }}:
-            </td>
-            <td width="360px">
-              <u-input
-                v-model="item.name"
-                name="domainSuffix"
-                size="huge"
-              />
-            </td>
-            <td width="40px">
-              <u-form-table-remove-button @click="removeDomainSuffixItem(index)" />
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4">
-              <u-form-table-add-button @click="addDomainSuffixItem">添加</u-form-table-add-button>
-            </td>
-          </tr>
-        </tbody>
-      </u-form-table>
-      <u-submit-button
-        :click="submit.bind(this)"
-        place="right"
-      >
-        <template slot-scope="scope">
-          <u-linear-layout>
-            <u-button
-              color="primary"
-              :disabled="!valid || scope.submitting"
-              :icon="scope.submitting ? 'loading' : ''"
-              @click="scope.submit"
-            >
-              确定
-            </u-button>
-            <u-button @click="close">
-              取消
-            </u-button>
-          </u-linear-layout>
-        </template>
-      </u-submit-button>
-    </u-form>
-  </u-modal>
+            <template v-slot:order="{index}">
+              <div style="text-align: right">
+                域名后缀{{ index + 1 }}:
+              </div>
+            </template>
+            <template v-slot:name="{record, index}">
+              <el-form-item 
+                label=""
+                :prop="`domainSuffixList.${index}.name`"
+                :rules="[
+                  validators.ingressSuffix(),
+                  validators.noRedundance(existSuffixs)
+                ]"
+              >
+                <el-input
+                  v-model="record.name"
+                />
+              </el-form-item>
+            </template>
+          </dynamicBlock>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="close">取 消</el-button>
+        <el-button type="primary" @click="submit" :loading="commitLoading">确 定</el-button>
+      </div>
+    </el-dialog>
 </template>
 <script>
 import k8sResourceService from 'kubecube/services/k8s-resource';
+import { get } from 'vuex-pathify';
+import dynamicBlock from 'kubecube/elComponent/dynamic-block/index.vue';
+import * as validators from 'kubecube/utils/validators';
 export default {
+    components: {
+        dynamicBlock
+    },
     data() {
         return {
             valid: true,
@@ -85,11 +75,28 @@ export default {
                     { type: 'string', required: true, trigger: 'input+blur', message: '' },
                     { type: 'string', pattern: /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, trigger: 'input', message: '' },
                     { type: 'string', pattern: /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, trigger: 'blur', message: '请输入合法的 ingress 后缀' },
+                    { type: 'string', trigger: 'input+blur', message: '域名后缀重复', validator: (rule, value, callback) => {
+                        let targets = this.model.domainSuffixList.filter(item => item.name).filter(item => item.name === value);
+                        if (targets.length > 1) { callback(new Error()); } else { callback(); }
+                    } },
                 ],
             },
+            validators,
+            commitLoading: false,
         };
     },
+    computed: {
+        // controlClusterList: get('scope/controlClusterList'),
+        existSuffixs() {
+          return this.model.domainSuffixList.map(item => item.name).filter(item => item);
+        }
+    },
     methods: {
+        getDataTemplate() {
+            return {
+                name: '',
+            };
+        },
         addDomainSuffixItem() {
             this.model.domainSuffixList.push({ name: '' });
         },
@@ -109,9 +116,17 @@ export default {
             this.show = false;
         },
         async submit() {
-            // '/{cluster}/apis/{group}/{version}/{plural}'
-            await k8sResourceService.patchClusterCRResourceInstance({
+            try {
+              await this.$refs.form.validate();
+            } catch (error) {
+              console.log(error);
+              return;
+            }
+            this.commitLoading = true;
+            try {
+              await k8sResourceService.patchClusterCRResourceInstance({
                 pathParams: {
+                    // cluster: this.controlClusterList[0].clusterName,
                     cluster: 'pivot-cluster',
                     group: 'tenant.kubecube.io',
                     version: 'v1',
@@ -121,14 +136,19 @@ export default {
                 data: [{
                     op: 'replace',
                     path: '/spec/ingressDomainSuffix',
-                    value: this.model.domainSuffixList.map(item => item.name),
+                    value: this.model.domainSuffixList.map(item => item.name).filter(item => item),
                 }],
                 headers: {
                     'Content-Type': 'application/json-patch+json',
                 },
-            });
-            this.show = false;
-            this.$emit('refresh');
+              });
+              this.show = false;
+              this.$emit('refresh');
+            } catch (error) {
+              console.log(error)
+            }
+            this.commitLoading = false;
+            
         },
     },
 };
