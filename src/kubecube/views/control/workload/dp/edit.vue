@@ -227,6 +227,15 @@ export default {
         async resolveData() {
 
             if (this.isEdit) {
+                const instance = await this.getService({
+                    pathParams: {
+                        cluster: this.cluster,
+                        namespace: this.namespace,
+                        resource: this.workload,
+                        name: this.model.metadata.name,
+                    },
+                });
+                this.model.puresource = instance;
                 const yaml = this.toModifiedObject(this.model);
                 // debugger
                 await this.modifyService({
