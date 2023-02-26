@@ -48,8 +48,8 @@ export default {
 .root{
     z-index: 1;
     max-height: 35%;
-    overflow-y: scroll;
-    line-height: 1em;
+    overflow-y: auto;
+    line-height: 1.1em;
 }
 .legend{
     white-space: nowrap;
