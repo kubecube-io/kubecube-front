@@ -23,7 +23,7 @@
       v-if="loading"
       :class="$style.loading"
     >
-      <u-loading />
+      <i class="el-icon-loading" style="font-size: 24px"/>
     </div>
   </div>
 </template>
@@ -44,6 +44,7 @@ import jChart, {
     LineIndicator,
     Legend,
 } from 'jchart';
+import moment from 'moment';
 import { get, flatten } from 'lodash';
 import monitorService from 'kubecube/services/monitor';
 import { getStep, getStepTime } from 'kubecube/utils/functional';
@@ -132,29 +133,43 @@ export default {
         });
     },
     methods: {
-        raceRefresh(useLoading) {
+        raceRefresh(useLoading, enhanceOption) {
             if (!this.flag) return;
             this.flag = false;
             requestAnimationFrame(() => {
                 this.flag = true;
-                this.currPromise = this.loadChart(useLoading);
+                this.currPromise = this.loadChart(enhanceOption);
             });
         },
 
-        loadChart() {
+        loadChart(enhanceOption) {
             this.loading = true;
+            if (this.chartContext) {
+                this.chartContext.destroy();
+                this.chartContext = null;
+            }
+
             if (!this.query || !this.query.length) {
                 this.nodata = true;
                 return;
             }
-            console.log(this.step);
+            let step = parseInt((this.et - this.st) / 30);
+            step = step >= 1 ? step : 1;
+            const params = {
+                start: this.st,
+                end: this.et,
+                step: `${step}s`,
+                ...(enhanceOption || {}),
+            }
             const promise = Promise.all(this.query.map(q =>
                 monitorService.queryRange({
                     params: {
                         query: q,
-                        start: this.st,
-                        end: this.et,
-                        step: this.step,
+                        ...params,
+                        // start: this.st,
+                        // end: this.et,
+                        // step: `${step}s`,
+                        // ...(enhanceOption || {}),
                     },
                 }))).then(response => {
                 if (this.currPromise !== promise) return;
@@ -172,19 +187,33 @@ export default {
                 }
                 const stackmode = this.meta.stack && 'stack';
 
-                let largest;
+                let largest = [];
                 let l = 0;
                 response.forEach(r => {
                     const results = get(r, 'data.result', []);
                     results.forEach(r => {
-                        const length = r.values.length;
-                        if (length > l) {
-                            l = length;
-                            largest = r.values.map(v => v[0]);
-                        }
+                        largest = [ ...largest, ...r.values.map(v => v[0]) ];
+                        // const length = r.values.length;
+                        // if (length > l) {
+                        //     l = length;
+                        //     largest = r.values.map(v => v[0]);
+                        // }
                     });
                 });
-
+                largest.sort((a, b) => (a < b ? -1 : 1));
+                // 补数据点
+                const min = largest[0];
+                const max = largest[largest.length - 1 ];
+                if (params.start < min - step) {
+                    largest.unshift(min - step);
+                }
+                largest.unshift(params.start);
+                if (params.end > max + step) {
+                    largest.push(max + step);
+                }
+                largest.push(params.end);
+                largest = [ ...(new Set(largest)) ];
+                l = largest.length;
                 const series = flatten(
                     response.map((r, idx) => get(r, 'data.result', []).map(r => {
                         const values = r.values.map(v => [ v[0] * 1000, +v[1] ]);
@@ -227,7 +256,8 @@ export default {
                         span: this.meta.span,
                         format(value) {
                             const datetime = new Date(value);
-                            return dataFormatter.format(datetime);
+                            return moment(datetime).format('MM/DD/YYYY, HH:mm:ss');
+                            // return dataFormatter.format(datetime);
                         },
                     },
                     yAxis: {

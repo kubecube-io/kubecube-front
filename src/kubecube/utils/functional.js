@@ -48,7 +48,7 @@ export const unitConvertCPU = value => {
 const memUnits = [ 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei' ];
 export const unitConvertMemory = (value, target = 'Mi') => {
     const valueNum = +(value.replace(/(K|M|G|T|P|E)i/g, ''));
-    if (`${valueNum}` === value) return value;
+    if (`${valueNum}` === value) return valueNum;
     let i = 0;
     const offset = memUnits.indexOf(target);
     while (!value.endsWith(memUnits[i]) && i < memUnits.length) { i++; }
@@ -85,6 +85,9 @@ export const flattenkeys = obj => {
 const timeKeys = [ 'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds' ];
 const timeUnit = [ 'd', 'h', 'm', 's', 'ms', 'μs', 'ns' ];
 export function niceTiming(second) {
+    if (second === 'NaN') {
+        return '0s';
+    }
     const parsed = parseMS(+second * 1000);
     const str = [];
     timeKeys.forEach((k, idx) => {
@@ -113,7 +116,7 @@ export const getPeriod = (startTime, endTime) => {
         }
     });
 
-    let usedValues = [];
+    let usedValues = '0秒';
     values.reverse().some((item, index, list) => {
         // 从更大的时间刻度开始，如果为0，则忽略对应的展示。第一个不为0的后续时间刻度都要展示
         if (item) {
@@ -243,3 +246,14 @@ export function urlSearchSerialize(obj) {
     });
     return str.slice(0, -1);
 }
+
+// 获取 nodes 的 cpu、memory、gpu 的数据之和
+export const getNodeInfo = (list = []) => {
+    list = Array.isArray(list) ? list : [];
+    return list.reduce((acc, item) => {
+        acc.cpu += Number(item.status.capacity.cpu);
+        acc.memory += Number(unitConvertMemory(item.status.capacity.memory, 'Gi').toFixed(2));
+        acc.gpu += (Number(item.status.capacity.gpu) || 0);
+        return acc;
+    }, { cpu: 0, memory: 0, gpu: 0 });
+};

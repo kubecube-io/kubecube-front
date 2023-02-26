@@ -57,6 +57,7 @@
 
 <script>
 import chartModal from './modal.vue';
+import { getStep } from 'kubecube/utils/functional';
 export default {
     components: {
         chartModal,
@@ -70,6 +71,8 @@ export default {
         meta: Object,
         startTime: Number,
         endTime: Number,
+        isQuickTime: Boolean,
+        quickTime: Number,
         formatTime: {
             type: Function,
             default: t => t / 1000,
@@ -101,6 +104,8 @@ export default {
         modalChartProps() {
             return Object.assign({}, this.chartProps, {
                 height: '400px',
+                isQuickTime: true,
+                quickTime: 30 * 60 * 1000,
             });
         },
         // modalSlotNode(){
@@ -109,7 +114,23 @@ export default {
     },
     methods: {
         refresh() {
-            this.$refs.chart.raceRefresh(true);
+            let enhanceOption = {};
+            if (this.isQuickTime) {
+                const end = new Date();
+                const start = new Date();
+                start.setTime(start.getTime() - this.quickTime);
+                const st = this.formatTime(start.getTime());
+                const et = this.formatTime(end.getTime());
+                // const step = getStep(start.getTime(), end.getTime());
+                let step = parseInt((et - st) / 30);
+                step = step >= 1 ? step : 1;
+                enhanceOption = {
+                    start: st,
+                    end: et,
+                    step: `${step}s`,
+                };
+            }
+            this.$refs.chart.raceRefresh(true, enhanceOption);
         },
         showModal() {
             this.$refs.chartmodal.open();
@@ -176,7 +197,7 @@ export default {
     left: 75px;
 }
 .refreshIcon::after {
-    icon-font: url('@necfe/cloud-ui-internal/src/assets/svg/chart-refresh.svg');
+    icon-font: url('kubecube/assets/chart-refresh.svg');
 }
 .zoomIcon::after {
     display: inline-block;
@@ -188,6 +209,6 @@ export default {
     background-position: center;
 }
 .zoomIcon::after {
-    icon-font: url('@necfe/cloud-ui-internal/src/assets/svg/chart-zoom.svg');
+    icon-font: url('kubecube/assets/chart-zoom.svg');
 }
 </style>
