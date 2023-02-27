@@ -1,41 +1,53 @@
 <template>
-    <section :class="$style.container">
+  <section :class="$style.container">
+    <template v-for="(item, index) in $slots.default">
+      <qz-link-simple
+        v-if="isPre(index) && item.context"
+        :key="index"
+        :link="item"
+        :has-more="hasMore()"
+      />
+    </template>
+    <el-dropdown
+      v-if="hasMore()"
+      :class="$style.more"
+    >
+      <el-button
+        v-if="isButton"
+        :size="buttonSize"
+        :type="moreType"
+      >
+        更多<i class="el-icon-arrow-down el-icon--right" />
+      </el-button>
+      <el-link
+        v-else
+        :type="moreType"
+        :underline="false"
+      >
+        更多<i class="el-icon-arrow-down el-icon--right" />
+      </el-link>
+      <el-dropdown-menu slot="dropdown">
         <template v-for="(item, index) in $slots.default">
-            <qz-link-simple
-                v-if="isPre(index) && item.context"
-                :key="index"
-                :link="item"
-                :hasMore="hasMore()"
-            ></qz-link-simple>
+          <qz-link-more
+            v-if="!isPre(index) && item.context"
+            :key="index"
+            :link="item"
+            :is-button="isButton"
+          />
         </template>
-        <el-dropdown
-            :class="$style.more"
-            v-if="hasMore()"
-        >
-            <el-button v-if="isButton" :size="buttonSize" :type="moreType">
-                更多<i class="el-icon-arrow-down el-icon--right"></i>
-            </el-button>
-            <el-link v-else :type="moreType" :underline="false">
-                更多<i class="el-icon-arrow-down el-icon--right"></i>
-            </el-link>
-            <el-dropdown-menu slot="dropdown">
-                <template v-for="(item, index) in $slots.default">
-                    <qz-link-more
-                        v-if="!isPre(index) && item.context"
-                        :key="index"
-                        :link="item"
-                        :isButton="isButton"
-                    ></qz-link-more>
-                </template>
-            </el-dropdown-menu>
-        </el-dropdown>
-    </section>
+      </el-dropdown-menu>
+    </el-dropdown>
+  </section>
 </template>
 <script>
 import QzLinkSimple from './qz-link-simple';
 import QzLinkMore from './qz-link-more';
 export default {
-    name: 'qz-link-group',
+    name: 'QzLinkGroup',
+    components: {
+        'qz-link-simple': QzLinkSimple,
+        'qz-link-more': QzLinkMore,
+    },
     props: {
         max: {
             type: [ Number, String ],
@@ -53,10 +65,6 @@ export default {
             type: String,
             default: 'primary',
         },
-    },
-    components: {
-        'qz-link-simple': QzLinkSimple,
-        'qz-link-more': QzLinkMore,
     },
     computed: {
         maxInner() {

@@ -12,7 +12,7 @@
     <router-view v-else-if="controlClusterList && controlClusterList.length" />
     <u-confirm ref="confirm" />
     <kube-yaml-dialog ref="kubeyaml" />
-    <global-error-modal ref="globalErrorModal"/>
+    <global-error-modal ref="globalErrorModal" />
   </div>
 </template>
 

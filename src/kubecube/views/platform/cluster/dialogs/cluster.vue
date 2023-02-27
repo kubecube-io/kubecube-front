@@ -72,7 +72,9 @@
               @before-send="onUpload($event)"
               @error="uploadError($event)"
             >
-              <el-link type="primary">选择文件</el-link>
+              <el-link type="primary">
+                选择文件
+              </el-link>
             </u-uploader>
           </div>
         </el-form-item>
@@ -103,13 +105,26 @@
                 :value="item.value"
               />
             </el-select>
-            <el-checkbox style="margin-left: 8px" v-model="otherNetworkType">其他</el-checkbox>
+            <el-checkbox
+              v-model="otherNetworkType"
+              style="margin-left: 8px"
+            >
+              其他
+            </el-checkbox>
           </div>
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="close">取 消</el-button>
-        <el-button type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
+        <el-button @click="close">
+          取 消
+        </el-button>
+        <el-button
+          type="primary"
+          :loading="submitLoading"
+          @click="submit"
+        >
+          确 定
+        </el-button>
       </div>
     </el-dialog>
     <!-- <u-modal

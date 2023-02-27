@@ -1,6 +1,6 @@
 <script>
 export default {
-    name: 'qz-link-more',
+    name: 'QzLinkMore',
     props: {
         link: Object,
         isButton: Boolean,
