@@ -39,5 +39,6 @@ export const toPlainObject = model => {
         title: g('spec.title'),
         variables: variables.map(resolveVariable),
         rows: rows.map(resolveRow),
+        selectshowable:  g('spec.selectshowable', ''), // 是否开启维度选择
     };
 };

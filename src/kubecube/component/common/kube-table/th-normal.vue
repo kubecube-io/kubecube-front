@@ -1,5 +1,10 @@
 <template>
-    <th :class="$style.root" :title="column.title">{{ column.title }}</th>
+  <th
+    :class="$style.root"
+    :title="column.title"
+  >
+    {{ column.title }}
+  </th>
 </template>
 
 <script>

@@ -35,7 +35,7 @@ export default {
             console.log(pageNum);
             this.pagenation.pageNum = pageNum;
         },
-        tableSortChange({ column, prop, order }) {
+        tableSortChange({ prop, order }) {
             const valueMap = { descending: 'desc', ascending: 'asc' };
             this.pagenation.sortName = `${prop}`;
             this.pagenation.sortOrder = valueMap[order];

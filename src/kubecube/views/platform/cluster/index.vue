@@ -1,82 +1,154 @@
 <template>
   <div>
-    <u-linear-layout direction="vertical">
-      <u-linear-layout direction="horizontal">
-        <u-button
-          icon="create"
-          color="primary"
-          @click="openCreateModal"
-        >
-          添加集群
-        </u-button>
-        <u-button
-          icon="refresh"
-          square
-          @click="refresh"
-        />
-      </u-linear-layout>
-
-      <x-request
-        ref="request"
-        :service="service"
-        :params="{}"
-        :processor="resolver"
+    <div style="margin-bottom: 12px">
+      <el-button
+        type="primary"
+        icon="el-icon-plus"
+        @click="openCreateModal"
       >
-        <template slot-scope="{ data, loading, error }">
-          <kube-table
-            table-width="100%"
-            :loading="loading"
-            :columns="columns"
-            :items="data ? data.list : []"
-            :error="error"
+        添加集群
+      </el-button>
+      <el-button
+        square
+        icon="el-icon-refresh-right"
+        @click="refresh"
+      />
+    </div>
+    <x-request
+      ref="request"
+      :service="service"
+      :params="requestParam"
+      :processor="resolver"
+    >
+      <template slot-scope="{ data, loading, error }">
+        <el-table
+          v-loading="loading"
+          :data="data ? data.list : []"
+          style="width: 100%"
+          border
+        >
+          <el-table-column
+            prop="clusterDisplayName"
+            label="集群名称"
+            :show-overflow-tooltip="true"
           >
-            <template #[`item.clusterName`]="{ item }">
-              <u-link :to="`/platform/cluster/${item.clusterName}`">
-                {{ item.clusterName }}
-              </u-link>
+            <template slot-scope="{ row }">
+              <el-link
+                v-toPath="{ path: `/platform/cluster/${row.clusterName}` }"
+                type="primary"
+                :title="row.annotations && row.annotations['cluster.kubecube.io/cn-name']"
+              >
+                {{ row.annotations && row.annotations['cluster.kubecube.io/cn-name'] }}
+              </el-link>
             </template>
-            <template #[`item.cpu`]="{ item }">
-              {{ item.usedCpu }} / {{ item.totalCpu }}
+          </el-table-column>
+          <el-table-column
+            prop="clusterName"
+            label="集群标识"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="clusterDescription"
+            label="描述"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{ row.clusterDescription || '-' }}
             </template>
-            <template #[`item.memory`]="{ item }">
-              {{ item.usedMem }} / {{ item.totalMem }}
+          </el-table-column>
+          <el-table-column
+            prop="isMemberCluster"
+            label="集群用途"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{row.isMemberCluster ? '业务集群' : '管控集群'}}
             </template>
-            <template #[`item.status`]="{ item }">
-              {{ item.status | statusFilter }}
+          </el-table-column>
+          <el-table-column
+            prop="cpu"
+            label="CPU (已用 / 总计)"
+            :show-overflow-tooltip="true"
+            width="120"
+          >
+            <template slot-scope="{ row }">
+              {{ row.usedCpu | clusterCpu }} / {{ row.totalCpu | clusterCpu }} Cores
             </template>
-            <template #[`item.operation`]="{item}">
-              <u-link-list>
-                <!-- <u-link-list-item @click="setItem(item)">
-                  设置
-                </u-link-list-item> -->
-                <u-link-list-item
-                  :disabled="item.clusterName === 'pivot-cluster' || item.status === 'deleting' || item.status === 'processing'"
-                  @click="removeItem(item)"
+          </el-table-column>
+          <el-table-column
+            prop="memory"
+            label="内存 (已用 / 总计)"
+            :show-overflow-tooltip="true"
+            width="120"
+          >
+            <template slot-scope="{ row }">
+              {{ row.usedMem | clusterMemory }} / {{ row.totalMem | clusterMemory }} Gi
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="nodeCount"
+            label="节点"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="namespaceCount"
+            label="空间"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="status"
+            label="状态"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status | statusFilter }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="operation"
+            label="操作"
+            :show-overflow-tooltip="true"
+            width="160"
+          >
+            <template slot-scope="{ row }">
+              <qz-link-group max="2">
+                <el-link
+                  type="primary"
+                  @click="setItem(row)"
+                >
+                  修改集群
+                </el-link>
+                <el-link
+                  type="primary"
+                  :disabled="row.clusterName === controlClusterList[0].clusterName || row.status === 'deleting' || row.status === 'processing'"
+                  @click="removeItem(row)"
                 >
                   删除配置
-                </u-link-list-item>
-                <u-link-list-item @click="editDomainSuffix(item)">
+                </el-link>
+                <el-link
+                  type="primary"
+                  @click="editDomainSuffix(row)"
+                >
                   定制域名后缀
-                </u-link-list-item>
-              </u-link-list>
+                </el-link>
+              </qz-link-group>
             </template>
-            <template #error>
-              获取数据失败，请
-              <u-link @click="refresh">
-                重试
-              </u-link>
-            </template>
-          </kube-table>
-          <u-page
-            v-if="data && calculatePages(data.total) > 1"
-            :count="data.total"
-            :page-size="pagenation.pageSize"
-            :total="calculatePages(data.total)"
-            @select="selectPage"
-          />
-        </template>
-      </x-request>
-    </u-linear-layout>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          style="float:right;margin-top:12px"
+          v-if="data && calculatePages(data.total) > 0"
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
+          :current-page="pagenation.pageNum"
+          :page-sizes="[10, 20, 30, 40, 50, 100]"
+          :page-size="pagenation.pageSize"
+          layout="total, sizes, prev, pager, next"
+          :total="data.total"
+          background
+        />
+      </template>
+    </x-request>
     <cluster-dialog
       ref="clusterDialog"
       @refresh="refresh"
@@ -89,12 +161,14 @@
 </template>
 
 <script>
-import { get } from 'lodash';
-import PageMixin from 'kubecube/mixins/pagenation';
+import { get as getFun } from 'lodash';
 import clusterService from 'kubecube/services/cluster';
 import clusterDialog from './dialogs/cluster.vue';
 import workloadService from 'kubecube/services/k8s-resource';
 import domainSuffixDialog from './dialogs/domainSuffix.vue';
+import { unitConvertMemory, unitConvertCPU } from 'kubecube/utils/functional';
+import { get } from 'vuex-pathify';
+import { pagenationMixin } from 'kubecube/mixins';
 // import {
 //     toPlainObject
 // } from 'kubecube/k8s-resources/scope/cluster';
@@ -103,6 +177,12 @@ export default {
         title: '集群管理 - kubecube',
     },
     filters: {
+        clusterCpu(cpu) {
+            return unitConvertCPU(`${cpu}m`); // m -> plain
+        },
+        clusterMemory(memory) {
+            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(3); // Mi --> Gi
+        },
         statusFilter(val) {
             switch (val) {
                 case 'normal':
@@ -122,7 +202,7 @@ export default {
         clusterDialog,
         domainSuffixDialog,
     },
-    mixins: [ PageMixin ],
+    mixins: [ pagenationMixin ],
     data() {
         return {
             service: clusterService.getClusters,
@@ -139,12 +219,22 @@ export default {
             ],
         };
     },
+    computed: {
+        controlClusterList: get('scope/controlClusterList'),
+        requestParam() {
+            return {
+                params: {
+                    ...this.pagenation, // has to be this
+                },
+            };
+        },
+    },
     methods: {
         resolver(result) {
             // console.log(result);
             const r = {
-                list: get(result, 'items', []),
-                total: get(result, 'total', 0),
+                list: getFun(result, 'items', []),
+                total: getFun(result, 'total', 0),
             };
             console.log(r);
             return r;
@@ -153,9 +243,9 @@ export default {
             this.$refs.request.request();
         },
         removeItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.clusterName} 吗？`,
+                message: `确认要删除 ${item.clusterName} 吗？`,
                 ok: async () => {
                     await workloadService.deleteClusterCRResource({
                         pathParams: {
@@ -178,9 +268,10 @@ export default {
         // },
         openCreateModal() {
             this.$refs.clusterDialog.open();
-            console.log(this.$refs.user);
         },
-
+        setItem(item) {
+            this.$refs.clusterDialog.open(item);
+        },
     },
 };
 </script>

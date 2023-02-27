@@ -1,51 +1,47 @@
 <template>
-  <u-modal
+  <el-dialog
     title="定制域名后缀"
-    ok-button=""
-    cancel-button=""
     :visible.sync="show"
-    size="large"
-    @close="close"
+    width="700px"
+    :close-on-click-modal="false"
   >
-    <u-form
-      :rules="rules"
-      @validate="valid = $event.valid"
+    <el-form
+      v-if="show"
+      ref="form"
+      :model="model"
+      label-position="right"
+      label-width="120px"
     >
-      <u-form-item
-        label="Ingress 后缀:"
-        name="domainSuffix"
+      <el-form-item
+        label="Ingress 后缀"
+        prop="domainSuffix"
+        :rules="[
+          validators.ingressSuffix(),
+        ]"
       >
-        <u-input
-          v-model="model.domainSuffix"
-          size="large"
-        />
-      </u-form-item>
-      <u-submit-button
-        :click="submit.bind(this)"
-        place="right"
+        <el-input v-model="model.domainSuffix" />
+      </el-form-item>
+    </el-form>
+    <div slot="footer">
+      <el-button @click="close">
+        取 消
+      </el-button>
+      <el-button
+        type="primary"
+        :loading="submitLoading"
+        @click="submit"
       >
-        <template slot-scope="scope">
-          <u-linear-layout>
-            <u-button
-              color="primary"
-              :disabled="!valid || scope.submitting"
-              :icon="scope.submitting ? 'loading' : ''"
-              @click="scope.submit"
-            >
-              确定
-            </u-button>
-            <u-button @click="close">
-              取消
-            </u-button>
-          </u-linear-layout>
-        </template>
-      </u-submit-button>
-    </u-form>
-  </u-modal>
+        确 定
+      </el-button>
+    </div>
+  </el-dialog>
 </template>
 <script>
 import k8sResourceService from 'kubecube/services/k8s-resource';
+import { get } from 'vuex-pathify';
+import { validatorsMixin } from 'kubecube/mixins';
 export default {
+    mixins: [ validatorsMixin ],
     data() {
         return {
             valid: true,
@@ -62,42 +58,54 @@ export default {
                     { type: 'string', pattern: /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, trigger: 'blur', message: '请输入合法的 ingress 后缀' },
                 ],
             },
+            submitLoading: false,
         };
+    },
+    computed: {
+        controlClusterList: get('scope/controlClusterList'),
     },
     methods: {
         open(clusterInfo) {
             this.clusterInfo = clusterInfo;
-            this.model.domainSuffix = clusterInfo.ingressDomainSuffix;
+            this.model.domainSuffix = clusterInfo.ingressDomainSuffix || '';
             this.show = true;
         },
         close() {
             this.show = false;
         },
         async submit() {
-            // '/{cluster}/apis/{group}/{version}/{plural}'
-            await k8sResourceService.patchClusterCRResourceInstance({
-                pathParams: {
-                    cluster: 'pivot-cluster',
-                    group: 'cluster.kubecube.io',
-                    version: 'v1',
-                    plural: 'clusters',
-                    name: this.clusterInfo.clusterName,
-                },
-                data: [{
-                    op: 'replace',
-                    path: '/spec/ingressDomainSuffix',
-                    value: this.model.domainSuffix,
-                }],
-                headers: {
-                    'Content-Type': 'application/json-patch+json',
-                },
-            });
-            this.show = false;
-            this.$emit('refresh');
+            // 触发校验
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                return;
+            }
+            this.submitLoading = true;
+            try {
+                await k8sResourceService.patchClusterCRResourceInstance({
+                    pathParams: {
+                        cluster: this.controlClusterList[0].clusterName,
+                        group: 'cluster.kubecube.io',
+                        version: 'v1',
+                        plural: 'clusters',
+                        name: this.clusterInfo.clusterName,
+                    },
+                    data: [{
+                        op: 'replace',
+                        path: '/spec/ingressDomainSuffix',
+                        value: this.model.domainSuffix,
+                    }],
+                    headers: {
+                        'Content-Type': 'application/json-patch+json',
+                    },
+                });
+                this.show = false;
+                this.$emit('refresh');
+            } catch (error) {
+                console.log(error);
+            }
+            this.submitLoading = false;
         },
     },
 };
 </script>
-<style>
-
-</style>

@@ -19,12 +19,14 @@
           :class="$style.value"
         >
           <template v-if="data[idx]">
-            <u-link
+            <el-link
               v-if="meta.linkUrl"
+              type="primary"
               :to="{path: meta.linkUrl(data[idx], scope)}"
+              style="font-size:inherit"
             >
               {{ data[idx].value || 0 }}
-            </u-link>
+            </el-link>
             <span v-else>
               {{ data[idx].value || 0 }}
               <sub v-if="data[idx].unit">{{ data[idx].unit }}</sub>

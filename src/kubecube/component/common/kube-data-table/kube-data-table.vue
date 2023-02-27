@@ -1,8 +1,8 @@
 <template>
   <div :class="$style.root">
-    <h1 :class="$style.title">
+    <div :class="$style.title">
       {{ meta.title }}
-    </h1>
+    </div>
     <kube-table
       table-width="100%"
       :loading="loading"
@@ -84,6 +84,7 @@ export default {
                 const columns = this.meta.styles.map(s => s.column);
                 this.columns = columns;
                 this.nodata = true;
+                this.items = [];
                 return;
             }
             console.log(this.query);
@@ -121,6 +122,7 @@ export default {
                     const columns = this.meta.styles.map(s => s.column(this.scope));
                     this.columns = columns;
                     this.nodata = true;
+                    this.items = [];
                     return;
                 }
                 const columns = this.meta.styles.map(s => s.column(this.scope));
@@ -137,7 +139,7 @@ export default {
                             let finded;
                             for (const k in items) {
                                 const keyMetric = items[k][METRIC_KEY];
-                                if (keyMetric.length > curMetric.length
+                                if (keyMetric.length >= curMetric.length
                                     && curMetric.every(m => keyMetric.includes(m))) {
                                     finded = k;
                                     break;
