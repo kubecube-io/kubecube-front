@@ -62,7 +62,7 @@
             :show-overflow-tooltip="true"
           >
             <template slot-scope="{ row }">
-              {{row.isMemberCluster ? '业务集群' : '管控集群'}}
+              {{ row.isMemberCluster ? '业务集群' : '管控集群' }}
             </template>
           </el-table-column>
           <el-table-column
@@ -136,16 +136,16 @@
           </el-table-column>
         </el-table>
         <el-pagination
-          style="float:right;margin-top:12px"
           v-if="data && calculatePages(data.total) > 0"
-          @size-change="pageSizeChange"
-          @current-change="pageNumChange"
+          style="float:right;margin-top:12px"
           :current-page="pagenation.pageNum"
           :page-sizes="[10, 20, 30, 40, 50, 100]"
           :page-size="pagenation.pageSize"
           layout="total, sizes, prev, pager, next"
           :total="data.total"
           background
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
         />
       </template>
     </x-request>
