@@ -8,6 +8,7 @@ const state = {
     project: null,
     cluster: null,
     namespace: null,
+    controlClusterList: [],
     loading: false,
     redirectMannul: false,
     clusterList: [],
@@ -30,6 +31,7 @@ const actions = {
         commit('SET_PROJECT', null);
         commit('SET_CLUSTER', null);
         commit('SET_NAMESPACE', null);
+        commit('SET_CONTROL_CLUSTER', []);
         commit('SET_LOADING', false);
     },
 };

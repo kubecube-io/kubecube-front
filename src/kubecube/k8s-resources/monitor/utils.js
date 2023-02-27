@@ -92,7 +92,7 @@ export function resolveFormatter(unit) {
         return d;
     };
     if (unit === 'percentunit') {
-        formatter = d => (d ? `${(+d * 100).toFixed(3)}%` : '-');
+        formatter = d => (d ? `${(+d * 100).toFixed(2)}%` : '-');
     }
 
     if (unit === 'bytes') {

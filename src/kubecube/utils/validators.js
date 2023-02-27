@@ -41,7 +41,7 @@ export const consistofNumberOrPercentage = required => {
                 return callback();
             }
             const message = '应为百分比或整数';
-            if (!/^[-+]?([0-9]+\.)?[0-9]+%$/.test(value) && !/^[-+]?[0-9]+$/.test(value)) {
+            if (!/^([0-9]+\.)?[0-9]+%$/.test(value) && !/^[0-9]+$/.test(value)) {
                 callback(new Error(message));
             } else {
                 callback();
@@ -50,14 +50,14 @@ export const consistofNumberOrPercentage = required => {
     };
 };
 
-export const consistofNumber = required => {
+export const consistofNumber = (required, message) => {
     return {
         trigger: [ 'blur', 'change' ],
         validator: (rule, value, callback) => {
             if (!required && !value) {
                 return callback();
             }
-            const message = '应为整数';
+            message = message || '应为整数';
             if (!/^[0-9]*$/.test(value)) {
                 callback(new Error(message));
             } else {
@@ -208,6 +208,7 @@ export const startsWithLetter = required => {
         },
     };
 };
+
 export const consistofLetterNumbersUnderscores = required => {
     return {
         trigger: [ 'blur', 'change' ],
@@ -217,6 +218,23 @@ export const consistofLetterNumbersUnderscores = required => {
             }
             const message = '仅包含字母、数字和下划线';
             if (!/^[a-zA-Z0-9_]*$/.test(value || '')) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};
+
+export const consistofLetterNumbers = required => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            const message = '仅包含大小写字母、数字';
+            if (!/^[a-zA-Z0-9]*$/.test(value || '')) {
                 callback(new Error(message));
             } else {
                 callback();
@@ -366,6 +384,22 @@ export const required = (message = '不能为空') => {
     };
 };
 
+export const trimRequired = (required, message = '不能为空') => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            if (!(value || '').trim()) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};
+
 export const labelValuePatten = required => {
     return {
         trigger: [ 'blur', 'change' ],
@@ -399,7 +433,6 @@ export const multipartLabelValuePatten = (spliter = /\s/, required, message) => 
                     return false;
                 }
                 return true;
-
             });
             if (result.some(r => !r)) {
                 callback(new Error(message));
@@ -759,3 +792,71 @@ export const urlpattern = required => {
         },
     };
 };
+
+export const startsWithHTTPProtocol = required => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            const message = '以http://或https://开头';
+            if (!/^https?:\/\//.test(value || '')) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};
+
+export const consistoLetterNumbersSplitterDot = required => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            const message = '仅包含字母、数字、中划线、下划线和点';
+            if (!/^[._a-z0-9-]*$/.test(value || '')) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};
+
+export const noEmptyChar = required => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            const message = '仅包含非空白字符';
+            if (!/^\S*$/.test(value || '')) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};
+export const requiredLetterNumbers = required => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            const message = '必须包含大小写字母和数字';
+            if (!/[0-9]/.test(value) || !/[a-z]/.test(value) || !/[A-Z]/.test(value)) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};
+

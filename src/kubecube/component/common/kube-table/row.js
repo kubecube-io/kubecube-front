@@ -58,9 +58,14 @@ export default {
                 }) ];
             } else if (c.type === 'link') {
                 const value = get(dataCopy, name, '-');
-                vnodes = [ h('u-link', {
+                vnodes = [ h('el-link', {
                     props: {
-                        to: c.formatter ? c.formatter(value) : value,
+                        to: { path: c.formatter ? c.formatter(value) : value },
+                    },
+                    attrs: {
+                        title: value,
+                        type: 'primary',
+                        style: 'display: inline-block; font-size: 12px',
                     },
                     class: {
                         'kube-textwrap': c.textwrap,
@@ -72,6 +77,9 @@ export default {
                     class: {
                         'kube-textwrap': c.textwrap,
                         'kube-texthidden': !c.textwrap,
+                    },
+                    attrs: {
+                        title: c.formatter ? c.formatter(get(dataCopy, name)) : get(dataCopy, name, '-'),
                     },
                 }, c.formatter ? c.formatter(get(dataCopy, name)) : get(dataCopy, name, '-')) ];
             }

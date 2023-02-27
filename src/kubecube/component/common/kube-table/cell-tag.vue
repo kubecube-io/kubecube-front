@@ -9,7 +9,7 @@
         v-for="(item, index) in briefList"
         v-else
         :key="index"
-        :class="[$style.item, isChip ? 'u-chip' : '']"
+        :class="[$style.item, isChip ? $style.customChip : '']"
         :title="typeof item === 'string' ? item : formatter(item)"
       >
         {{ typeof item === 'string' ? item : formatter(item) }}</span>
@@ -17,7 +17,10 @@
     <template v-if="showMoreButton">
       <u-tooltip v-if="!hasModal">
         <span style="display:inline-block;position:absolute;right:0;top:0;bottom:0;">
-          <u-link style="padding-left: 5px; vertical-align: text-top;">更多</u-link>
+          <el-link
+            type="primary"
+            style="padding-left: 5px; vertical-align: text-top; font-size:inherit;"
+          >更多</el-link>
         </span>
 
         <div slot="content">
@@ -31,26 +34,29 @@
       </u-tooltip>
       <template v-else>
         <span style="display:inline-block;position:absolute;right:0;top:0;bottom:0;">
-          <u-link
-            style="padding-left: 5px; vertical-align: text-top;"
+          <el-link
+            type="primary"
+            style="padding-left: 5px; vertical-align: text-top; font-size:inherit;"
             @click="viewMore = true"
-          >更多</u-link>
+          >更多</el-link>
         </span>
-        <u-modal
-          :visible.sync="viewMore"
+        <el-dialog
           title="查看更多"
-          size="huge"
+          :visible.sync="viewMore"
+          width="800px"
+          :close-on-click-modal="false"
         >
-          <div
-            v-for="(item, index) in list"
-            :key="index"
-            class="u-chip"
-            :title="item"
-          >
-            {{ typeof item === 'string' ? item : formatter(item) }}
+          <div style="display: flex; flex-wrap: wrap;">
+            <div
+              v-for="(item, index) in list"
+              :key="index"
+              :class="$style.customChip"
+              :title="item"
+            >
+              {{ typeof item === 'string' ? item : formatter(item) }}
+            </div>
           </div>
-          <div slot="foot" />
-        </u-modal>
+        </el-dialog>
       </template>
     </template>
   </div>
@@ -109,5 +115,23 @@ export default {
 
 .item[class] {
     max-width: 100%;
+}
+.customChip {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-block;
+  height: 24px;
+  line-height: 24px;
+  max-width: calc(100% - 30px);
+  margin: 5px 10px 5px 0;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #666;
+  vertical-align: middle;
+  background-color: #eef2f7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import router from 'kubecube/router';
 
 import kubeForm from 'kubecube/component/common/kube-form/kube-form.vue';
 import kubeFormItem from 'kubecube/component/common/kube-form/kube-form-item.vue';
@@ -24,6 +25,7 @@ import kubeDeploymentSelectorInput from 'kubecube/component/global/form-common/k
 import kubeLabelEditor from 'kubecube/component/global/k8s/label-editor';
 import kubePlainLabelEditor from 'kubecube/component/global/k8s/plain-label-editor.vue';
 import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue';
+import qzLinkGroup from 'kubecube/elComponent/qz-link-group';
 
 // elComponent
 import elInputSearch from 'kubecube/elComponent/inputSearch';
@@ -62,6 +64,7 @@ function addEllipsis(el, length) {
 
 Vue.use({
     install(_Vue) {
+        _Vue.component('QzLinkGroup', qzLinkGroup);
         _Vue.component('ElInputSearch', elInputSearch);
         _Vue.component('XRequest', xRequest);
         _Vue.component('XScope', xScope);
@@ -111,7 +114,9 @@ Vue.use({
             const p = value / Math.pow(1024, index);
             return `${p.toFixed(2)}${MAP_1024[index]}B`;
         });
-
+        _Vue.directive('toPath', function(el, binding) {
+            el.onclick = () => router.push(binding.value);
+        });
         _Vue.directive('skeleton', {
             inserted(el, binding) {
                 _Vue.nextTick(() => {

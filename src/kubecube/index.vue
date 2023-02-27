@@ -9,7 +9,7 @@
         size="huge"
       />
     </div>
-    <router-view v-else />
+    <router-view v-else-if="controlClusterList && controlClusterList.length" />
     <u-confirm ref="confirm" />
     <kube-yaml-dialog ref="kubeyaml" />
     <global-error-modal ref="globalErrorModal"/>
@@ -29,6 +29,7 @@ import ControlRoutes from 'kubecube/router/control';
 import OpenAPIRoutes from 'kubecube/router/user';
 import ControlNamespaceRoutes from 'kubecube/router/control-namespace';
 import globalErrorModal from 'kubecube/component/global/global-error-modal/index.vue';
+import clusterService from 'kubecube/services/cluster';
 import {
     ROLES,
 } from 'kubecube/utils/constance';
@@ -36,7 +37,7 @@ export default {
     components: {
         UAppHeader,
         kubeYamlDialog,
-        globalErrorModal
+        globalErrorModal,
     },
     extends: pipeMixin,
     metaInfo: {
@@ -50,6 +51,7 @@ export default {
         };
     },
     computed: {
+        controlClusterList: sync('scope/controlClusterList'),
         globalLoading: sync('scope/loading'),
         user: get('scope/user'),
         userRole: sync('scope/userRole'),
@@ -113,6 +115,7 @@ export default {
             this.roleLoading = false;
         }
         this.$store.dispatch('feature/loadFeature');
+        this.loadControlClusterInfo();
     },
     mounted() {
         this.$on('pipestatechange', val => {
@@ -123,6 +126,14 @@ export default {
         Vue.$globalErrorModal = Vue.prototype.$globalErrorModal = this.$refs.globalErrorModal.open.bind(this.$refs.globalErrorModal);
     },
     methods: {
+        async loadControlClusterInfo() {
+            const response = await clusterService.getClusters({
+                params: {
+                    prune: true,
+                },
+            });
+            this.controlClusterList = response.items.filter(item => !item.isMemberCluster);
+        },
         replaceToControlQuery() {
             const query = pick(this.$route.query, [
                 'tenant',

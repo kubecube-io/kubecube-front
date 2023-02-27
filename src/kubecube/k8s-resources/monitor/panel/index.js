@@ -70,6 +70,7 @@ const types = {
                 title: get(config, 'title'),
                 span: config.span || 6,
                 stack: config.stack,
+                showPanel: !get(config, 'hidden', false),
             };
         },
     },
@@ -85,6 +86,7 @@ const types = {
                 styles,
                 hiddenColumns: get(config, 'hiddenColumns') || [],
                 span: config.span || 12,
+                showPanel: !get(config, 'hidden', false),
             };
         },
     },
@@ -103,6 +105,7 @@ const types = {
                             ...scope,
                         })),
                 formatter: resolveFormatter(config.unit),
+                showPanel: !get(config, 'hidden', false),
             };
         },
     },

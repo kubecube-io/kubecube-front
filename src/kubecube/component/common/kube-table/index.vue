@@ -246,6 +246,7 @@ export default {
             console.log(val);
             if (val) {
                 this.startProgress();
+                this.resetSelection();
             } else {
                 this.doneProgress();
             }
@@ -269,6 +270,13 @@ export default {
 
     },
     methods: {
+        resetSelection() {
+            this.columnMeta.forEach(item => {
+                if (item.__tablemeta__.hasOwnProperty('states')) {
+                    item.__tablemeta__.states = [];
+                }
+            });
+        },
         initColumnWidth() {
             this.$set(this, 'columnWidth', this.columns.map(c => c.width || 'auto'));
             if (this.resizable) {
@@ -389,7 +397,7 @@ export default {
     width: 100%;
     font-size: 12px;
     border-collapse: collapse;
-    user-select: none;
+    /* user-select: none; */
 }
 
 .root > thead th {
