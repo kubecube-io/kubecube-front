@@ -249,7 +249,7 @@ export default {
                 ok: async () => {
                     await workloadService.deleteClusterCRResource({
                         pathParams: {
-                            cluster: 'pivot-cluster',
+                            cluster: this.controlClusterList[0].clusterName,
                             group: 'cluster.kubecube.io',
                             version: 'v1',
                             plural: 'clusters',

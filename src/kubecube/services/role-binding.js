@@ -1,9 +1,10 @@
 import Service from './service';
 import { userInterceptor } from './interceptor';
-const controlCluster = 'pivot-cluster';
+// const controlCluster = 'pivot-cluster';
+import store from 'kubecube/store';
 // const rbac = 'rbac.authorization.k8s.io';
 const service = Service({
-    baseURL: `/api/v1/cube/proxy/clusters/${controlCluster}`,
+    baseURL: `/api/v1/cube/proxy/clusters/${store.get('scope/controlClusterList')[0].clusterName}`,
     apis: {
         // getClusterRoleBindings: {
         //     template: '/apis/rbac.authorization.k8s.io/v1/clusterrolebindings',

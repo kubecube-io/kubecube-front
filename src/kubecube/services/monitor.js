@@ -21,11 +21,11 @@ const service = Service({
     apis: {
         getInnerDashboards: {
             method: 'get',
-            template: '/cube/proxy/clusters/pivot-cluster/apis/monitoring.kubecube.io/v1/namespaces/kube-public/dashboards/{resource}',
+            template: '/cube/proxy/clusters/{cluster}/apis/monitoring.kubecube.io/v1/namespaces/kube-public/dashboards/{resource}',
         },
         getInnerDashboardByQuery: {
             method: 'get',
-            url: '/cube/proxy/clusters/pivot-cluster/apis/monitoring.kubecube.io/v1/namespaces/kubecube-monitoring/dashboards',
+            url: '/cube/proxy/clusters/{cluster}/apis/monitoring.kubecube.io/v1/namespaces/kubecube-monitoring/dashboards',
         },
         // getPodDashboards: {
         //     method: 'get',
