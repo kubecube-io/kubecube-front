@@ -1,13 +1,13 @@
 <template>
   <div>
-    <u-notice
-      icon="warning"
-      color="info"
+    <el-alert
+      title="平台管理员可以通过 kubectl 客户端管理容器集群资源"
+      type="info"
+      description="可管理已授权资源"
+      show-icon
+      :closable="false"
     >
-      平台管理员可以通过 kubectl 客户端管理容器集群资源
-      <div>可管理的资源为Deployment、StatefulSet、Pod、RS、Service、Ingress、Endpoint、 Configmap、Secret、PVC、HPA、PV</div>
-    </u-notice>
-
+    </el-alert>
     <section :class="$style.section">
       <div :class="$style.title">
         1. 确认本地已安装 kubectl 客户端（适配 1.9 及以上版本）
@@ -18,12 +18,12 @@
         2. 下载所需的配置文件
       </div>
       <div :class="$style.content">
-        <u-button
-          color="primary"
+        <el-button
+          type="primary"
           @click="download"
         >
           下载配置文件
-        </u-button>
+        </el-button>
       </div>
     </section>
     <section :class="$style.section">

@@ -9,9 +9,6 @@ import { install, installFilters, installDirectives } from 'vusion-utils';
 // import { customRouter } from '../utils/router';
 import ILineAwesome from 'i-line-awesome.vue';
 // import docTitle from '@micro-app/common/mixins/docTitle';
-// 引入Element
-import ElementUI from 'element-ui';
-Vue.use(ElementUI, { size: 'medium' });
 Vue.component(ILineAwesome);
 // Vue.mixin(docTitle);
 install(Components, Vue);

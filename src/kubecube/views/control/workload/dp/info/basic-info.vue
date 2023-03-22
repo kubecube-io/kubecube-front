@@ -1,104 +1,54 @@
 <template>
-  <validation-observer
-    ref="observer"
-    v-slot="{ invalid }"
-  >
-    <kube-form>
-      <kube-form-item label="集群">
+  <div>
+    <el-form ref="form" :model="model" :rules="rules" label-position="right" label-width="160px">
+      <el-form-item label="集群">
         {{ cluster }}
-      </kube-form-item>
-      <kube-form-item label="空间">
+      </el-form-item>
+      <el-form-item label="空间">
         {{ namespace }}
-      </kube-form-item>
-      <kube-name-input
-        v-model="model.metadata.name"
-        :disabled="isEdit"
-      />
+      </el-form-item>
+      <el-form-item label="名称" prop="metadata.name">
+        <el-input v-model="model.metadata.name" :disabled="isEdit" placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"/>
+      </el-form-item>
       <template v-if="workload === 'daemonsets'">
-        <kube-form-item label="级别">
-          <u-radios
-            v-model="model.spec.level.ind"
-            :disabled="isEdit"
-          >
-            <u-radio label="platform">
-              平台级
-            </u-radio>
-            <u-radio label="tenant">
-              租户级
-            </u-radio>
-          </u-radios>
-        </kube-form-item>
-        <tenant-select
-          v-if="model.spec.level.ind === 'tenant'"
-          v-model="model.spec.level.tenant"
-          :disabled="isEdit"
-        />
+        <el-form-item label="级别">
+          <el-radio-group v-model="model.spec.level.ind" :disabled="isEdit">
+            <el-radio label="platform">平台级</el-radio>
+            <el-radio label="tenant">租户级</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="租户" v-if="model.spec.level.ind === 'tenant'" prop="spec.level.tenant">
+          <tenant-select v-model="model.spec.level.tenant" :disabled="isEdit"/>
+        </el-form-item>
       </template>
-      <kube-form-item
-        v-if="!['cronjobs', 'jobs', 'daemonsets'].includes(workload)"
-        label="副本数"
-      >
-        <u-number-input
-          v-model="model.spec.replicas"
-          style="width: 200px;"
-          :min="0"
-          size="huge normal"
-        /> 个
-      </kube-form-item>
+      <el-form-item label="副本数" v-if="!['cronjobs', 'jobs', 'daemonsets'].includes(workload)">
+        <el-input-number v-model="model.spec.replicas" controls-position="right" :min="0" style="width: 300px;"/>
+        <span style="margin-left:8px">个</span>
+      </el-form-item>
       <template v-if="workload === 'statefulsets'">
-        <validation-provider
-          v-slot="{ errors }"
-          name="serviceName"
-          :rules="{
-            required: true,
-            startsWithLowercaseLetter: true,
-            ConsistoLetterNumbersUnderscores: true,
-            endsWithLowercaseLetterOrNumber: true,
-          }"
-        >
-          <kube-form-item
-            label="服务名"
-            required
-            v-bind="$attrs"
-            :message="errors && errors[0]"
-          >
-            <slot />
-            <u-input
-              v-model="model.spec.serviceName"
-              :disabled="isEdit"
-              size="normal huge"
-              maxlength="63"
-              maxlength-message="不得超过 63 个字符"
-              :color="errors && errors[0] ? 'error' : ''"
-              placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"
-            />
-          </kube-form-item>
-        </validation-provider>
-
+        <el-form-item label="服务名" prop="spec.serviceName">
+          <el-input v-model="model.spec.serviceName" :disabled="isEdit" placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"/>
+        </el-form-item>
         <storage-config v-model="model.spec.volumeClaimTemplates" />
       </template>
-      <kube-form-item v-if="['deployments', 'daemonsets'].includes(workload)">
-        <u-link @click="advanced = !advanced">
-          {{ advanced ? '收起': '展开' }} 更多配置
-        </u-link>
-      </kube-form-item>
+      <el-form-item label="时区同步">
+        <el-switch v-model="model.timeSync"/>
+        <span style="margin-left:8px;color:#aaa">开启后容器与节点使用相同时区(时区同步功能依赖容器中挂载的本地磁盘，请勿修改删除)</span>
+      </el-form-item>
+      <el-form-item label="" v-if="['deployments', 'daemonsets'].includes(workload)">
+        <el-link type="primary" @click="advanced = !advanced">
+          {{ advanced ? '收起': '展开' }}更多配置
+        </el-link>
+      </el-form-item>
       <update-strategy
-        v-if="advanced"
+        v-if="['deployments', 'daemonsets'].includes(workload) && advanced"
         v-model="model.spec.strategy"
       />
-      <kube-form-item>
-        <u-linear-layout direction="horizontal">
-          <u-button
-            color="primary"
-            :disabled="invalid"
-            @click="$emit('go', 1)"
-          >
-            下一步
-          </u-button>
-        </u-linear-layout>
-      </kube-form-item>
-    </kube-form>
-  </validation-observer>
+      <el-form-item>
+        <el-button type="primary" @click="handleNextStep">下一步</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 
 <script>
@@ -109,6 +59,7 @@ import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 import updateStrategy from './update-strategy.vue';
 import storageConfig from './storage-config.vue';
 import tenantSelect from './tenant-select.vue';
+import * as validators from 'kubecube/utils/validators';
 
 export default {
     components: {
@@ -120,6 +71,29 @@ export default {
     data() {
         return {
             advanced: getFunc(this.value, 'spec.strategy.enable'),
+            rules: {
+                'metadata.name': [
+                    { required: true, message: '名称不能为空', trigger: 'blur' },
+                    validators.k8sResourceNameValidator(),
+                ],
+                'spec.serviceName': [
+                    { required: true, message: '服务名不能为空', trigger: 'blur' },
+                    validators.k8sResourceNameValidator(),
+                ],
+                'spec.level.tenant': [
+                    { required: true, message: '租户不能为空', trigger: 'blur' },
+                ],
+                'spec.strategy.minReadySeconds': [
+                    validators.consistofNumber(false),
+                    validators.numberBetween(5, 300, false),
+                ],
+                'spec.strategy.maxSurge': [
+                    validators.consistofNumberOrPercentage(false),
+                ],
+                'spec.strategy.maxUnavailable': [
+                    validators.consistofNumberOrPercentage(false),
+                ],
+            },
         };
     },
     computed: {
@@ -132,10 +106,29 @@ export default {
             return this.$route.meta.type === 'edit';
         },
     },
-
+    methods: {
+        handleValidate() {
+            this.$refs.observer.validate();
+        },
+        async handleNextStep() {
+            // 触发校验
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                return;
+            }
+            this.$emit('go', 1);
+        },
+    },
 };
 </script>
 
-<style>
+<style module>
+.question::after {
+    font-size: 16px;
+    color: #FF4D4F;
+    icon-font: url('kubecube/assets/question.svg');
+    cursor: pointer;
+}
 
 </style>

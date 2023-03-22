@@ -1,107 +1,113 @@
 <template>
-  <div>
-    <u-button
-      color="primary"
-      style="margin-bottom: 20px"
+  <div :class="$style.root">
+    <el-button
+      type="primary"
+      style="margin-bottom: 12px"
       @click="viewYAML"
     >
       查看详细信息
-    </u-button>
-    <u-info-list-group
-      title="基本信息"
-      column="1"
-      label-size="large"
-    >
-      <u-info-list-item label="Pod 名称">
+    </el-button>
+    <el-descriptions title="基本信息" :column="1">
+      <el-descriptions-item label="Pod 名称">
         {{ instance.metadata.name }}
-      </u-info-list-item>
-      <u-info-list-item label="集群名称">
+      </el-descriptions-item>
+      <el-descriptions-item label="集群名称">
         {{ cluster }}
-      </u-info-list-item>
-      <u-info-list-item label="空间">
+      </el-descriptions-item>
+      <el-descriptions-item label="空间">
         {{ namespace }}
-      </u-info-list-item>
-      <u-info-list-item label="创建时间">
+      </el-descriptions-item>
+      <el-descriptions-item label="创建时间">
         {{ instance.metadata.creationTimestamp | smartDateFormat }}
-      </u-info-list-item>
-      <u-info-list-item label="标签">
-        <span
-          v-for="label in instance.metadata.labels"
-          :key="label.key"
-          class="u-chip"
-          :title="label.key + ':' + label.value"
-        >{{ label.key }}: {{ label.value }}</span>
-      </u-info-list-item>
-      <!-- ??? -->
-      <u-info-list-item label="注释">
-        <span
-          v-for="label in instance.metadata.annotations"
-          :key="label.key"
-          class="u-chip"
-          :title="label.key + ':' + label.value"
-        >{{ label.key }}: {{ label.value }}</span>
-      </u-info-list-item>
-      <u-info-list-item label="所属节点">
+      </el-descriptions-item>
+      <el-descriptions-item label="标签">
+        <div :class="$style.tagWrap">
+          <el-tag type="info" v-for="label in instance.metadata.labels" :key="label.key" :title="label.key + ':' + label.value">{{ label.key }}: {{ label.value }}</el-tag>
+        </div>
+      </el-descriptions-item>
+      <el-descriptions-item label="注释">
+        <div :class="$style.tagWrap">
+          <el-tag type="info" v-for="label in instance.metadata.annotations" :key="label.key" :title="label.key + ':' + label.value">{{ label.key }}: {{ label.value }}</el-tag>
+        </div>
+      </el-descriptions-item>
+      <el-descriptions-item label="所属节点">
         {{ instance.spec.nodeName }}
-      </u-info-list-item>
-      <u-info-list-item label="终止宽限期">
+      </el-descriptions-item>
+      <el-descriptions-item label="终止宽限期">
         {{ instance.spec.terminationGracePeriodSeconds }}s
-      </u-info-list-item>
-      <u-info-list-item label="重启策略">
+      </el-descriptions-item>
+      <el-descriptions-item label="重启策略">
         {{ instance.spec.restartPolicy }}
-      </u-info-list-item>
-      <u-info-list-item label="条件">
+      </el-descriptions-item>
+      <el-descriptions-item label="条件">
         {{ instance.status.conditions | conditionFilter }}
-      </u-info-list-item>
-      <u-info-list-item label="控制器">
+      </el-descriptions-item>
+      <el-descriptions-item label="控制器">
         {{ ((instance.metadata.ownerReferences || [])[0] || {}).name }}
-      </u-info-list-item>
-    </u-info-list-group>
-    <u-info-list-group
-      title="容器"
-      column="1"
-      label-size="large"
+      </el-descriptions-item>
+    </el-descriptions>
+    <el-descriptions title="容器" :column="1"/>
+    <el-table
+      :data="instance.containers"
+      style="width: 100%"
     >
-      <kube-table
-        table-width="100%"
-        :columns="columns"
-        :items="instance.containers"
+      <el-table-column
+        prop="containerName"
+        label="容器名称"
+        :show-overflow-tooltip="true"
       >
-        <template #[`item.containerName`]="{ item }">
-          <u-linear-layout gap="small">
+        <template slot-scope="{ row }">
+          <el-tooltip effect="dark" :content="getContainerText(row.type)" placement="top" popper-class="ncs-el-tooltip-popper">
             <u-icons
-              v-tooltip.top="getContainerText(item.type)"
               style="color: #508de8;"
-              :name="item.type | getContainerIcon"
+              :name="row.type | getContainerIcon"
             />
-            {{ item.containerName }}
-          </u-linear-layout>
+          </el-tooltip>
+          {{ row.containerName }}
         </template>
-        <template #[`item.status`]="{ item }">
-          {{ Object.keys(item.status.state)[0] }}
+      </el-table-column>
+      <el-table-column
+        prop="image"
+        label="镜像"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
+        prop="status"
+        label="容器状态"
+        :show-overflow-tooltip="true"
+        width="100"
+      >
+        <template slot-scope="{ row }">
+          {{ Object.keys(row.status.state)[0] }}
         </template>
-        <template #[`item.operation`]="{ item }">
-          <u-linear-layout gap="small">
-            <u-link-list>
-              <u-link-list-item @click="$kubeterm({ pod: instance.metadata.name, container: item.containerName })">
-                console
-              </u-link-list-item>
-              <u-link-list-item @click="toLog(item)">
-                查看日志
-              </u-link-list-item>
-            </u-link-list>
-          </u-linear-layout>
+      </el-table-column>
+      <el-table-column
+        prop="status.restartCount"
+        label="重启次数"
+        :show-overflow-tooltip="true"
+        width="100"
+      />
+      <el-table-column
+        prop="operation"
+        label="操作"
+        width="160"
+      >
+        <template slot-scope="{ row }">
+          <el-link type="primary" @click="$termModal.open('container', { cluster, namespace, pod: instance.metadata.name, container: row.containerName })" style="marginRight:10px">
+            console
+          </el-link>
+          <el-link type="primary" @click="toLog(row)">
+            查看日志
+          </el-link>
         </template>
-      </kube-table>
-    </u-info-list-group>
-    <!-- <kube-term ref="kubeterm" /> -->
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
 <script>
 import { get } from 'vuex-pathify';
 import { CONTAINERTYPE } from 'kubecube/utils/constance';
-// import kubeTerm from 'kubecube/component/global/xterm/kube-terminal.vue';
 
 export default {
     filters: {
@@ -167,5 +173,21 @@ export default {
 .message {
     word-break: break-word;
     white-space: break-spaces;
+}
+/* .root :global(.el-tag+.el-tag){
+  margin-left: 10px;
+} */
+.tagWrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+.tagWrap :global(.el-tag) {
+  margin-right: 4px;
+  margin-bottom: 4px;
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 800px;
 }
 </style>

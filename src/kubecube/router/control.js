@@ -96,11 +96,12 @@ export default {
             redirect: { name: 'control.workload.list' },
             meta: {
                 breadCrumb(name) {
+                    console.log(name);
                     switch (name) {
                         case 'logconfigs':
                             return '日志任务管理';
-                        case 'Persistentvolumeclaims':
-                            return '存储';
+                        case 'persistentvolumeclaims':
+                            return 'PersistentVolumeClaims';
                         case 'AlertmanagerConfig':
                             return '告警策略组';
                         case 'PrometheusRule':
@@ -140,6 +141,14 @@ export default {
                         breadCrumb(name) { return name; },
                     },
                     children: [
+                        {
+                            path: 'updateImage',
+                            name: 'control.workload.updateImage',
+                            component: () => /* webpackChunkName: "kubecube-control" */ import('../views/control/workload/dp/updateImage.vue'),
+                            meta: {
+                                breadCrumb: '滚动更新',
+                            },
+                        },
                         {
                             path: 'edit',
                             name: 'control.workload.edit',

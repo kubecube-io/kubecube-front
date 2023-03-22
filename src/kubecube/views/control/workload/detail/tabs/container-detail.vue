@@ -1,52 +1,79 @@
 <template>
   <div>
-    <u-head-card :title="containerName" />
-    <u-tabs :value="0">
-      <u-tab
-        :value="0"
-        title="详情"
+    <headCard
+      :title="containerName"
+    />
+     <el-tabs value="0" page="main">
+      <el-tab-pane
+        label="详情"
+        :name="0"
       />
-    </u-tabs>
+    </el-tabs>
     <div v-if="message">
       {{ message }}
     </div>
     <div v-else>
-      <u-button
-        color="primary"
-        :class="$style.button"
+      <el-button
+        type="primary"
+        style="margin-bottom: 20px;"
         @click="viewYAML"
       >
         查看详细信息
-      </u-button>
-      <u-info-list-group
-        title="基本信息"
-        column="1"
-        label-size="large"
-      >
-        <u-info-list-item label="名称">
+      </el-button>
+      <el-descriptions title="基本信息" :column="1">
+        <el-descriptions-item label="名称">
           {{ container.containerName }}
-        </u-info-list-item>
-        <u-info-list-item label="镜像">
+        </el-descriptions-item>
+        <el-descriptions-item label="镜像">
           {{ container.image }}
-        </u-info-list-item>
-        <u-info-list-item label="镜像拉取策略">
+        </el-descriptions-item>
+        <el-descriptions-item label="镜像拉取策略">
           {{ container.imagePullPolicy }}
-        </u-info-list-item>
-        <u-info-list-item label="资源限制">
-          <kube-table
-            table-width="100%"
-            :columns="[{ title: '', name: 'type' },{ title: 'CPU', name: 'cpu' },{ title: 'MEMORY', name: 'memory' }]"
-            :items="resourceData"
-          />
-        </u-info-list-item>
-        <u-info-list-item label="挂载数据卷">
-          <kube-table
-            table-width="100%"
-            :columns="[{ title: '存储声明', name: 'name' },{ title: '挂载点', name: 'mountPath' }]"
-            :items="volumns"
-          />
-        </u-info-list-item>
-      </u-info-list-group>
+        </el-descriptions-item>
+        <el-descriptions-item label="资源限制" contentStyle="display:block" labelStyle="align-self: flex-start;">
+          <div>
+            <el-table
+              :data="resourceData"
+              style="width: 100%;"
+            >
+              <el-table-column
+                prop="type"
+                label=""
+                :show-overflow-tooltip="true"
+              ></el-table-column>
+              <el-table-column
+                prop="cpu"
+                label="CPU"
+                :show-overflow-tooltip="true"
+              ></el-table-column>
+              <el-table-column
+                prop="memory"
+                label="MEMORY"
+                :show-overflow-tooltip="true"
+              ></el-table-column>
+            </el-table>
+          </div>
+        </el-descriptions-item>
+        <el-descriptions-item label="挂载数据卷" contentStyle="display:block" labelStyle="align-self: flex-start;">
+          <div>
+            <el-table
+              :data="volumns"
+              style="width: 100%;"
+            >
+              <el-table-column
+                prop="name"
+                label="存储声明"
+                :show-overflow-tooltip="true"
+              ></el-table-column>
+              <el-table-column
+                prop="mountPath"
+                label="挂载点"
+                :show-overflow-tooltip="true"
+              ></el-table-column>
+            </el-table>
+          </div>
+        </el-descriptions-item>
+      </el-descriptions>
     </div>
   </div>
 </template>

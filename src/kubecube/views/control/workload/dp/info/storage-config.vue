@@ -1,13 +1,10 @@
 <template>
-  <kube-form-item
-    layout="block"
+  <el-form-item
     label="存储"
   >
-    <u-switch
+    <el-switch
       v-model="model.enable"
-      width="wide"
       :disabled="isEdit"
-      :with-text="true"
     />
     <template v-if="model.enable">
       <x-request
@@ -18,81 +15,82 @@
         :processor="storageResolver"
       >
         <template slot-scope="{ data, loading }">
-          <u-loading v-if="loading" />
-          <kube-dynamic-block
-            v-else
-            v-model="model.templates"
-            style="width: 578px"
-            :layout-comp="blockLayout"
-            :row-comp="blockRowLayout"
-            :column-comp="null"
-            :data-template="getDataTemplate"
-            :disabled="isEdit"
-            button-name="添加声明模板"
-          >
-            <template slot-scope="{ model: vctModel, index: vctIndex }">
-              <kube-form style="width: 480px">
-                <validation-provider
-                  v-slot="{ errors }"
-                  :name="`storage-${vctIndex}-storageClassName`"
-                  rules="required"
+          <i v-if="loading" class="el-icon-loading" style="font-size:24px"/>
+          <template v-else>
+            <dynamicCard
+              v-model="model.templates"
+              validateFile="spec.volumeClaimTemplates.templates"
+              :getDefaultItem="getDataTemplate"
+              :initialAdd="true"
+              :minCount="1"
+              addButtonText="添加声明模板"
+              :disabled="isEdit"
+              :miniFormatter="(item, index) => {
+                return `配置 - ${index + 1}`
+              }"
+            >
+              <template slot-scope="{item, index}">
+                <el-form-item
+                  label="存储类别"
+                  :prop="`spec.volumeClaimTemplates.templates.${index}.storageClassName`"
+                  :rules="[
+                    { required: true, message: '存储类别不能为空'},
+                  ]"
+                  style="margin-bottom: 22px;"
                 >
-                  <kube-form-item
-                    :message="errors && errors[0]"
-                    label="存储类别"
+                  <el-select
+                    v-model="item.storageClassName"
+                    :disabled="isEdit"
                   >
-                    <u-select
-                      v-if="data.length"
-                      key="list"
-                      v-model="vctModel.storageClassName"
-                      :disabled="isEdit"
-                      size="huge"
-                      :data="data"
-                    />
-                    <u-select
-                      v-else
-                      key="none"
-                      disabled
-                      size="huge"
-                      :color="errors && errors[0] ? 'error' : ''"
-                      :data="[{ text: '暂无存储类别'}]"
-                    />
-                  </kube-form-item>
-                </validation-provider>
-
-                <kube-name-input
-                  v-model="vctModel.name"
-                  :name="`storage-${vctIndex}-Name`"
-                  :disabled="isEdit"
-                />
-                <kube-form-item
+                    <el-option
+                      v-for="optionItem in data"
+                      :key="optionItem.value"
+                      :label="optionItem.text"
+                      :value="optionItem.value">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item
+                  label="名称"
+                  :prop="`spec.volumeClaimTemplates.templates.${index}.name`"
+                  :rules="[
+                    { required: true, message: '名称不能为空'},
+                    validators.k8sResourceNameValidator(),
+                  ]"
+                  style="margin-bottom: 22px;"
+                >
+                  <el-input v-model="item.name" :disabled="isEdit" placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"/>
+                </el-form-item>
+                <el-form-item
                   label="容量"
-                  name="storage"
+                  style="margin-bottom: 22px;"
                 >
-                  <u-number-input
-                    v-model="vctModel.storage"
-                    :min="1"
-                    size="normal"
-                    :disabled="isEdit"
-                  /> GiB
-                </kube-form-item>
-                <kube-form-item
+                  <el-input-number v-model="item.storage" :min="1" controls-position="right" style="width: 300px;" :disabled="isEdit"/>
+                  <span style="margin-left:8px">GiB</span>
+                </el-form-item>
+                <el-form-item
                   label="模式"
+                  style="margin-bottom: 22px;"
                 >
-                  <u-select
-                    v-model="model.accessModes"
+                  <el-select
+                    v-model="item.accessModes"
                     :disabled="isEdit"
-                    size="huge"
-                    :data="PVC_MODES"
-                  />
-                </kube-form-item>
-              </kube-form>
-            </template>
-          </kube-dynamic-block>
+                  >
+                    <el-option
+                      v-for="optionItem in PVC_MODES"
+                      :key="optionItem.value"
+                      :label="optionItem.text"
+                      :value="optionItem.value">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </template>
+            </dynamicCard>
+          </template>
         </template>
       </x-request>
     </template>
-  </kube-form-item>
+  </el-form-item>
 </template>
 
 <script>
@@ -100,24 +98,21 @@ import { get as getFunc } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
-import blockLayout from 'kubecube/component/common/kube-dynamic-block-layout/index.vue';
-import blockRowLayout from 'kubecube/component/common/kube-dynamic-block-layout/row.vue';
 import {
     setValueIfListNotPresent,
 } from 'kubecube/utils/functional';
 import { PVC_MODE_MAP } from 'kubecube/utils/constance';
-
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin ],
     data() {
         return {
+            validators,
             storageService: workloadService.getStorage,
             PVC_MODES: Object.keys(PVC_MODE_MAP).map(key => ({
                 text: PVC_MODE_MAP[key],
                 value: key,
             })),
-            blockLayout,
-            blockRowLayout,
             defaultStorage: null,
         };
     },

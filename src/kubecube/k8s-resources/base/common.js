@@ -19,7 +19,7 @@ export function toPlainObject(model) {
             kind: g('kind'), // 资源类型
             spec: toSpecPlainObject(model), // spec转换
             metadata: toMetadataPlainObject(model), // metadata转换
-            status: toStatusPlainObject(model), //status转换
+            status: toStatusPlainObject(model), // status转换
             puresource: Object.freeze(cloneDeep(model)), // 原始数据
         };
         return obj;

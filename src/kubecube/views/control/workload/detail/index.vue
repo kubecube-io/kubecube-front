@@ -4,7 +4,7 @@
       v-if="needTransparent"
     />
     <template v-else>
-      <u-head-card
+      <headCard
         v-if="workload !== 'pods' && !withInstanceTransparent"
         :title="name"
       >
@@ -12,39 +12,47 @@
           {{ (name || '').substring(0, 2).toUpperCase() }}
         </div>
         <div slot="act">
-          <u-detail-operate>
-            <template v-if="['deployments', 'statefullsets'].includes(workload)">
-              <u-detail-operate-item @click="toResize">
-                调整副本数
-              </u-detail-operate-item>
+          <operateList>
+            <template v-if="workload !== 'jobs'">
+              <template v-if="['deployments', 'statefulsets'].includes(workload)">
+                <operateButtonOption @click="toResize" :disabled="isReview">
+                  调整副本数
+                </operateButtonOption>
+              </template>
+              <operateButtonOption
+                v-if="[ 'deployments' ].includes(workload)"
+                @click="toUpdateImage(name)"
+              >
+                滚动更新
+              </operateButtonOption>
+              <template v-if="['deployments', 'statefulsets'].includes(workload)">
+                <operateButtonOption @click="restart" :disabled="isReview">
+                  重建
+                </operateButtonOption>
+              </template>
+              <operateButtonOption @click="deleteItem" :disabled="isReview">
+                删除
+              </operateButtonOption>
+              <operateButtonOption v-if="['deployments', 'statefulsets', 'daemonsets', 'cronjobs', 'configmaps', 'secrets', 'services', 'ingresses'].includes(workload)" @click="editItem" :disabled="isReview">
+                设置
+              </operateButtonOption>
+              <template v-if="workload === 'persistentvolumeclaims'">
+                <operateButtonOption @click="editYAML" :disabled="isReview || (instanceInfo && instanceInfo.status.phase !== 'Bound')">
+                  YAML 设置
+                </operateButtonOption>
+              </template>
+              <operateButtonOption v-else @click="editYAML" :disabled="isReview">
+                YAML 设置
+              </operateButtonOption>
             </template>
-            <!-- <u-detail-operate-item
-              v-if="moduleName === 'deployment'"
-              :to="{name: 'deployment.updateImage', query: { name, nsName } }"
-            >
-              滚动更新
-            </u-detail-operate-item> -->
-            <u-detail-operate-item @click="deleteItem">
-              删除
-            </u-detail-operate-item>
-            <u-detail-operate-item @click="editItem">
-              设置
-            </u-detail-operate-item>
-            <u-detail-operate-item
-              v-if="workload !== 'logconfigs'"
-              @click="editYAML"
-            >
-              YAML 设置
-            </u-detail-operate-item>
-          <!-- </template>
-          <template v-else>
-            <u-detail-operate-item @click="deleteItem">
-              删除
-            </u-detail-operate-item>
-          </template> -->
-          </u-detail-operate>
+            <template v-else>
+              <operateButtonOption @click="deleteItem" :disabled="isReview">
+                删除
+              </operateButtonOption>
+            </template>
+          </operateList>
         </div>
-      </u-head-card>
+      </headCard>
       <x-request
         ref="request"
         :service="service"
@@ -52,7 +60,7 @@
         :processor="resolver"
       >
         <template slot-scope="{ data, loading, error }">
-          <u-loading v-if="loading" />
+          <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
           <div v-else-if="error">
             加载出错！
           </div>
@@ -60,7 +68,15 @@
             <router-view :instance="data" />
           </template>
           <template v-else>
-            <u-tabs router>
+            <el-tabs :value="routeName" page="main" @tab-click="(pane) => handleTabClick(pane, getTabs(data))">
+              <el-tab-pane
+                v-for="(item, index) in getTabs(data)"
+                :key="index"
+                :label="item.title"
+                :name="item.route.name"
+              />
+            </el-tabs>
+            <!-- <u-tabs router>
               <u-tab
                 v-for="(item, index) in getTabs(data)"
                 :key="index"
@@ -68,7 +84,7 @@
                 :title="item.title"
                 :to="item.route"
               />
-            </u-tabs>
+            </u-tabs> -->
             <router-view :instance="data" />
 
             <modify-replicas-dialog
@@ -143,6 +159,25 @@ export default {
         namespace: get('scope/namespace@value'),
         projectNamespace: get('scope/project@spec.namespace'),
         cluster: get('scope/cluster@value'),
+        userRole: get('scope/userRole'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
+        isReview() {
+            const keyMap = {
+                deployments: 'deployments',
+                statefulsets: 'statefulsets',
+                daemonsets: 'daemonsets',
+                jobs: 'jobs',
+                cronjobs: 'cronjobs',
+                pods: 'pods',
+                services: 'services',
+                ingresses: 'ingresses',
+                loadbalancer: 'loadbalancers',
+                persistentvolumeclaims: 'persistentvolumeclaims',
+                secrets: 'secrets',
+                configmaps: 'configmaps',
+            };
+            return !this.userResourcesPermission[keyMap[this.workload]];
+        },
         name() {
             return this.$route.params.instance;
         },
@@ -247,10 +282,46 @@ export default {
             return this.$route.name === 'control.workload.containerdetail';
         },
         withInstanceTransparent() {
-            return this.$route.name === 'control.workload.edit';
+            return this.$route.name === 'control.workload.edit' || this.$route.name === 'control.workload.updateImage';
+        },
+        routeName() {
+            return this.$route.name;
         },
     },
     methods: {
+        handleTabClick(pane, tabs) {
+            const target = tabs.find(item => item.route.name === pane.name);
+            this.$router.push(target.route);
+        },
+        toUpdateImage(name) {
+            this.$router.push({
+                path: `/control/${this.workload}/${name}/updateImage`,
+            });
+        },
+        async restart() {
+            await workloadService.patchWorkload({
+                pathParams: {
+                    ...this.requestParam.pathParams,
+                    name: this.name,
+                },
+                data: {
+                    spec: {
+                        template: {
+                            metadata: {
+                                annotations: {
+                                    'kubectl.kubernetes.io/restartedAt': `${new Date().toLocaleString()}`,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            this.$message({
+                message: '已触发重建',
+                type: 'success',
+            });
+            this.refresh();
+        },
         resolver(response) {
             console.log(response);
             switch (this.workload) {
@@ -378,9 +449,9 @@ export default {
             });
         },
         deleteItem() {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${this.name} 吗？`,
+                message: `确认要删除 ${this.name} 吗？`,
                 ok: async () => {
                     const reqParam = {
                         pathParams: {

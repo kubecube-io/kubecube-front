@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-form ref="form" :model="model" label-position="right" label-width="120px" style="width:80%">
-      <el-form-item 
-        label="名称" 
+      <el-form-item
+        label="名称"
         prop="metadata.name"
         :rules="[
           validators.required(),
@@ -11,15 +11,15 @@
       >
         <el-input v-model="model.metadata.name" :disabled="isEdit" placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"/>
       </el-form-item>
-      <el-form-item 
-        label="端口" 
+      <el-form-item
+        label="端口"
         prop="spec.port"
         :rules="[
           validators.required(),
         ]"
       >
         <el-select
-          v-model="model.spec.port" 
+          v-model="model.spec.port"
           filterable
           placeholder="请选择"
         >
@@ -32,15 +32,15 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item 
-        label="调度算法" 
+      <el-form-item
+        label="调度算法"
         prop="spec.annotations.dispatch"
         :rules="[
           validators.required(),
         ]"
       >
         <el-select
-          v-model="model.spec.annotations.dispatch" 
+          v-model="model.spec.annotations.dispatch"
           filterable
           placeholder="请选择"
         >
@@ -68,8 +68,8 @@
           />
         </template>
       </secret-select>
-      <el-form-item 
-        label="转发规则" 
+      <el-form-item
+        label="转发规则"
         prop="spec.rulesConfig"
         :rules="[
           validators.required(),
@@ -82,7 +82,7 @@
           prefixProp="spec.rulesConfig"
         />
       </el-form-item>
-      <el-form-item 
+      <el-form-item
         label="会话保持"
       >
         <el-switch
@@ -117,13 +117,12 @@
 </template>
 
 <script>
-import { get as getFunc, set, cloneDeep } from 'lodash';
+import { get as getFunc, cloneDeep } from 'lodash';
 import { get } from 'vuex-pathify';
 import {
     toPlainObject as toIngressPlainObject,
     toK8SObject as toIngressK8SObject,
-    patchK8SObject as toPatchIngressObject,
-    toModifyK8SObject as toModifyIngressK8SObject
+    toModifyK8SObject as toModifyIngressK8SObject,
 } from 'kubecube/k8s-resources/ingress';
 import workloadService from 'kubecube/services/k8s-resource';
 import secretSelect from './component/secret-select.vue';
@@ -158,22 +157,22 @@ export default {
         },
     },
     watch: {
-      ['model.spec.port'](val) {
-        if(val === 80) {
-          this.model.spec.singleTLS.enable = false
+        ['model.spec.port'](val) {
+            if(val === 80) {
+                this.model.spec.singleTLS.enable = false
+            }
+        },
+        ['model.spec.annotations.enableSession'](val) {
+            this.model.spec.annotations.cookieName = ''
         }
-      },
-      ['model.spec.annotations.enableSession'](val) {
-        this.model.spec.annotations.cookieName = ''
-      }
     },
     created() {
-      this.$watch('model', (newVal, oldVal) => {
-          this.$emit('inputChange', true);
-      },
-      {
-          deep: true
-      });
+        this.$watch('model', (newVal, oldVal) => {
+            this.$emit('inputChange', true);
+        },
+        {
+            deep: true,
+        });
     },
     methods: {
         async submit() {
@@ -187,12 +186,12 @@ export default {
             try {
                 if (this.isEdit) {
                     const instance = await workloadService.getNetworkingInstance({
-                      pathParams: {
-                          cluster: this.cluster,
-                          namespace: this.namespace,
-                          resource: 'ingresses',
-                          name: this.instance.metadata.name,
-                      },
+                        pathParams: {
+                            cluster: this.cluster,
+                            namespace: this.namespace,
+                            resource: 'ingresses',
+                            name: this.instance.metadata.name,
+                        },
                     });
                     this.model.puresource = instance;
                     const yaml = toModifyIngressK8SObject(this.model);
@@ -222,13 +221,13 @@ export default {
                 this.$emit('inputChange', false);
                 this.$router.push({ path: '/control/ingresses/list' });
             } catch (err) {
-                console.log(err)
+                console.log(err);
                 this.$globalErrorModal(getFunc(err, 'details.causes[0]') || err);
             }
             this.submitLoading = false;
         },
         handleValidate() {
-          this.$refs.observer.validate();
+            this.$refs.observer.validate();
         }
     },
 };

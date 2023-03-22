@@ -1,45 +1,55 @@
 <template>
   <div>
-    <u-info-list-group
-      title="基本信息"
-      column="1"
-      label-size="large"
-    >
-      <u-info-list-item :label="`${workloadLiteral}名称`">
+    <el-descriptions title="基本信息" :column="1">
+      <el-descriptions-item :label="`${workloadLiteral}名称`">
         {{ instance.metadata.name }}
-      </u-info-list-item>
-      <u-info-list-item label="集群名称">
+      </el-descriptions-item>
+      <el-descriptions-item label="集群名称">
         {{ cluster }}
-      </u-info-list-item>
-      <u-info-list-item label="空间">
+      </el-descriptions-item>
+      <el-descriptions-item label="空间">
         {{ namespace }}
-      </u-info-list-item>
-      <u-info-list-item label="创建时间">
-        {{ instance.metadata.creationTimestamp | formatLocaleTime }}
-      </u-info-list-item>
-      <u-info-list-item
+      </el-descriptions-item>
+      <el-descriptions-item label="创建时间">
+        {{ instance.metadata.creationTimestamp | smartDateFormat }}
+      </el-descriptions-item>
+      <el-descriptions-item
         v-if="workload === 'secrets'"
         label="类型"
       >
         {{ instance.type || '-' }}
-      </u-info-list-item>
-    </u-info-list-group>
-
-    <u-info-list-group
-      title="数据"
-      column="1"
-      label-size="large"
+      </el-descriptions-item>
+    </el-descriptions>
+    <el-descriptions title="数据" :column="1" />
+    <el-table
+      :data="instance.data || []"
+      style="width: 100%"
     >
-      <kube-table
-        table-width="100%"
-        :columns="column"
-        :items="instance.data || []"
+      <el-table-column
+        prop="key"
+        label="key"
+        width="120"
+      ></el-table-column>
+      <el-table-column
+        prop="value"
+        label="value"
       >
-        <template #noData>
-          暂无数据
+        <template slot-scope="{ row }">
+          <enhanceQzEditor
+            v-if="workload === 'configmaps'"
+            style="border: 1px solid #E1E8ED"
+            height="100"
+            v-model="row.value"
+            theme="vs"
+            language="yaml"
+            :options="{ minimap: {enabled: false}, readOnly: true }"
+          />
+          <template v-else>
+            {{row.value}}
+          </template>
         </template>
-      </kube-table>
-    </u-info-list-group>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 

@@ -100,7 +100,7 @@
             ConfigMap
           </u-sidebar-item>
         </u-sidebar-group>
-        <u-sidebar-item @click="() => $refs.yamlDialog.open()">
+        <u-sidebar-item @click="() => $yamlDialog.open()">
           <u-icons name="yaml" />YAML 编排
         </u-sidebar-item>
         <u-sidebar-item :to="{ path: '/control/crd' }">
@@ -155,7 +155,7 @@
         </u-sidebar-group>
       </u-sidebar>
     </div>
-    <yaml-dialog ref="yamlDialog" />
+    <!-- <yaml-dialog ref="yamlDialog" /> -->
   </aside>
 </template>
 
@@ -163,12 +163,10 @@
 import { get, sync } from 'vuex-pathify';
 import uAppClusterSelect from './header/u-app-cluster-select.vue';
 import uAppNamespaceSelect from './header/u-app-namespace-select.vue';
-import yamlDialog from 'kubecube/views/control/yaml/yaml.vue';
 export default {
     components: {
         uAppClusterSelect,
         uAppNamespaceSelect,
-        yamlDialog,
     },
     computed: {
         namespace: sync('scope/namespace'),

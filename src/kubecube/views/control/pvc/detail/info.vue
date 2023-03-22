@@ -1,68 +1,95 @@
 <template>
   <div>
-    <u-button
-      color="primary"
-      style="margin-bottom: 20px"
+    <el-button
+      type="primary"
+      style="margin-bottom: 12px"
       @click="viewYAML"
     >
       查看详细信息
-    </u-button>
-    <u-info-list-group
-      title="基本信息"
-      column="1"
-      label-size="large"
-    >
-      <u-info-list-item label="存储声明名称">
+    </el-button>
+    <el-descriptions title="基本信息" :column="1">
+      <el-descriptions-item label="存储声明名称">
         {{ instance.metadata.name }}
-      </u-info-list-item>
-      <u-info-list-item label="状态">
+      </el-descriptions-item>
+      <el-descriptions-item label="状态">
         {{ instance.status.phase }}
-      </u-info-list-item>
-      <u-info-list-item label="持久存储">
+      </el-descriptions-item>
+      <el-descriptions-item label="持久存储">
         {{ instance.spec.volumeName || '-' }}
-      </u-info-list-item>
-      <u-info-list-item label="存储类别">
+      </el-descriptions-item>
+      <el-descriptions-item label="存储类别">
         {{ instance.spec.storageClassName || '-' }}
-      </u-info-list-item>
-      <u-info-list-item label="容量">
+      </el-descriptions-item>
+      <el-descriptions-item label="容量">
         {{ instance.spec.resources.requests.storage || '-' }}
-      </u-info-list-item>
-      <u-info-list-item label="模式">
+      </el-descriptions-item>
+      <el-descriptions-item label="模式">
         {{ instance.spec.accessMode | accessModeFilter }}
-      </u-info-list-item>
-    </u-info-list-group>
-
-    <u-info-list-group
-      title="关联的副本"
-      column="1"
-      label-size="large"
+      </el-descriptions-item>
+    </el-descriptions>
+    <el-descriptions title="关联的副本" :column="1" />
+    <x-request
+      ref="request"
+      :service="podService"
+      :params="params"
+      :processor="podResolver"
     >
-      <x-request
-        ref="request"
-        :service="podService"
-        :params="params"
-        :processor="podResolver"
-      >
-        <template slot-scope="{ data, loading, error }">
-          <kube-table
-            table-width="100%"
-            :columns="podColumn"
-            :loading="loading"
-            :error="error"
-            :items="data || []"
+      <template slot-scope="{ data, loading, error }">
+        <el-table
+          v-loading="loading"
+          :data="data || []"
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="metadata.name"
+            label="副本名称"
+            :show-overflow-tooltip="true"
           >
-            <template #[`item.metadata.name`]="{ item }">
-              <u-link :to="{path: `/control/pods/${item.metadata.name}/info`}">
-                {{ item.metadata.name }}
-              </u-link>
+            <template slot-scope="{ row }">
+              <el-link type="primary" :to="{path: `/control/pods/${row.metadata.name}/info`, query: $route.query}">
+                {{ row.metadata.name }}
+              </el-link>
             </template>
-            <template #noData>
-              暂无数据
+          </el-table-column>
+          <el-table-column
+            prop="status.phase"
+            label="副本状态"
+            width="80"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            prop="status.podIP"
+            label="IP"
+            width="100"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{row.status.podIP || '-'}}
             </template>
-          </kube-table>
-        </template>
-      </x-request>
-    </u-info-list-group>
+          </el-table-column>
+          <el-table-column
+            prop="status.hostIP"
+            label="所在节点IP"
+            :show-overflow-tooltip="true"
+            width="100"
+          >
+            <template slot-scope="{ row }">
+              {{row.status.hostIP || '-'}}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="creationTimestamp"
+            label="创建时间"
+            width="180"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{ row.metadata.creationTimestamp | formatLocaleTime }}
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
+    </x-request>
   </div>
 </template>
 

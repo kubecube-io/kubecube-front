@@ -14,7 +14,7 @@ function combineLabels(label, expression) {
     return [ ...lexp, ...expression ];
 }
 
-function resolveLabelSelector(selector) {
+export function resolveLabelSelector(selector) {
     const g = getFromModel(selector);
     const exps = (g('matchExpressions') || []).map(exp => ({
         ...exp,
@@ -23,7 +23,7 @@ function resolveLabelSelector(selector) {
     const labels = g('matchLabels') || [];
     return combineLabels(labels, exps);
 }
-function refactLabelSelector(selector) {
+export function refactLabelSelector(selector) {
     const label = {};
     const exps = [];
     selector.forEach(s => {

@@ -5,8 +5,9 @@ import {
 export const toPlainObject = model => {
     const cg = getFromModel(model);
     return {
-        desired: cg('spec.currentReplicas', 0),
-        total: cg('spec.replicas', 0),
+        desired: cg('spec.replicas', 0),
+        total: cg('status.replicas', 0),
+        readyReplicas: cg('status.readyReplicas', 0),
         conditions: cg('status.conditions', []),
     };
 };

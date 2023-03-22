@@ -1,15 +1,15 @@
 import { pickBy, isObjectLike, flatten, uniq, groupBy, zipObjectDeep, omit } from 'lodash';
 import { getFromModel } from '../base/utils';
 
-let DISAPTCH_KEY = 'nginx.ingress.kubernetes.io/load-balance';
+const DISAPTCH_KEY = 'nginx.ingress.kubernetes.io/load-balance';
 
-let COOKIE_KEY = 'nginx.ingress.kubernetes.io/session-cookie-name';
-let HASH_KEY = 'nginx.ingress.kubernetes.io/session-cookie-hash';
+const COOKIE_KEY = 'nginx.ingress.kubernetes.io/session-cookie-name';
+const HASH_KEY = 'nginx.ingress.kubernetes.io/session-cookie-hash';
 const HASH_VALUE = 'md5';
-let AFFINITY_KEY = 'nginx.ingress.kubernetes.io/affinity';
+const AFFINITY_KEY = 'nginx.ingress.kubernetes.io/affinity';
 const AFFINITY_VALUE = 'cookie';
 
-let REWRITE_KEY = 'nginx.ingress.kubernetes.io/rewrite-target';
+const REWRITE_KEY = 'nginx.ingress.kubernetes.io/rewrite-target';
 
 export const toPlainObject = model => {
     const g = getFromModel(model);

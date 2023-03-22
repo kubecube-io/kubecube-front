@@ -1,27 +1,33 @@
 <template>
-  <kube-form-item
-    label="仓库密钥"
-    layout="block"
-  >
-    <u-multi-select
-      v-model="model"
-      :data="repoSecrets"
-      size="large full"
-      style="width: 750px;"
-    />
-    <div class="text-subtitle-2 mt-2">
-      如需新的Secret，可
-      <u-link
-        @click="openNewWindow({ path: '/control/secrets/list', query: $route.query })"
-      >
-        创建Secret
-      </u-link>
-      <u-refresh
-        :loading="loading"
-        @click="update"
-      />
-    </div>
-  </kube-form-item>
+  <div>
+    <el-form-item
+      label="仓库密钥"
+      layout="block"
+    >
+      <el-select v-model="model" multiple placeholder="请选择">
+        <el-option
+          v-for="item in repoSecrets"
+          :key="item.value"
+          :label="item.text"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <div>
+        如需新的Secret，可
+        <el-link
+          type="primary"
+          @click="openNewWindow({ path: '/control/secrets/list', query: $route.query })"
+        >
+          创建Secret
+        </el-link>
+        <i
+          style="font-size:16px; margin-left: 8px"
+          :class="loading ? 'el-icon-loading' : 'el-icon-refresh-right'"
+          @click="update"
+        />
+      </div>
+    </el-form-item>
+  </div>
 </template>
 
 <script>

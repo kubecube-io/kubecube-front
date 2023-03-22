@@ -11,7 +11,58 @@
       :processor="resolver"
     >
       <template slot-scope="{ data, loading, error }">
-        <kube-table
+        <el-table
+          v-loading="loading"
+          :data="data ? data.list : []"
+          style="width: 100%"
+          border
+        >
+          <el-table-column
+            prop="metadata.name"
+            label="名称"
+            :show-overflow-tooltip="true"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="group"
+            label="组"
+            :show-overflow-tooltip="true"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="versions"
+            label="版本"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              <el-link
+                v-for="version in row.versions"
+                :key="version"
+                type="primary"
+                :to="{ path: `/control/crd/${level}/${row.metadata.name}/${version}`, query: $route.query }"
+                style="margin-right: 8px"
+              >
+                {{version}}
+              </el-link>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          v-if="data && calculatePages(data.total) > 0"
+          style="float:right;margin-top:12px"
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
+          :current-page="pagenation.pageNum"
+          :page-sizes="[10, 20, 30, 40, 50, 100]"
+          :page-size="pagenation.pageSize"
+          layout="total, sizes, prev, pager, next"
+          :total="data.total"
+          background
+        />
+
+
+
+        <!-- <kube-table
           table-width="100%"
           :loading="loading"
           :columns="columns"
@@ -45,13 +96,13 @@
           </template>
         </kube-table>
         <u-page
-          v-if="data && calculatePages(data.total) > 1"
+          v-if="data && calculatePages(data.total) > 0"
           :page="pagenation.pageNum"
           :count="data.total"
           :page-size="pagenation.pageSize"
           :total="calculatePages(data.total)"
           @select="selectPage"
-        />
+        /> -->
       </template>
     </x-request>
   </div>

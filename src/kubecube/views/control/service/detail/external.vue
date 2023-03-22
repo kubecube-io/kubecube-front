@@ -1,22 +1,23 @@
 <template>
   <div>
-    <u-linear-layout direction="vertical">
-      <u-notice
-        icon="warning"
-        color="info"
+    <div>
+      <el-alert
+        description="服务（Service）可通过负载均衡控制器暴露给容器云外的应用访问，启用外部访问需指定从负载均衡控制器上对外暴露的端口，端口不可使用80和443，<协议, 端口>组合不可重复，端口不可被其他业务占用。可以通过负载均衡控制器的IP：port进行访问。负载均衡控制器有多个实例，可以通过DNS关联，实现高可用。服务端口名称修改会导致端口设置失效。"
+        type="warning"
+        show-icon
+        :closable="false"
       >
-        服务（Service）可通过负载均衡控制器暴露给容器云外的应用访问，启用外部访问需指定从负载均衡控制器上对外暴露的端口，端口不可使用80和443，<协议, 端口>组合不可重复，端口不可被其他业务占用。可以通过负载均衡控制器的IP：port进行访问。负载均衡控制器有多个实例，可以通过DNS关联，实现高可用。服务端口修改会导致端口设置失效，失效设置在下一次提交设置时将被自动清理。
-      </u-notice>
-      <u-linear-layout>
-        <u-button
-          color="primary"
+      </el-alert>
+      <div style="margin-top: 12px">
+        <el-button
+          type="primary"
           @click="$refs.externalDialog.open()"
         >
           设置
-        </u-button>
+        </el-button>
         <x-request
           ref="request"
-          :class="[$style.textWrap, 'f-toe']"
+          :class="[$style.textWrap]"
           :service="externalService"
           :params="requestParam"
           :processor="resolverAddress"
@@ -27,29 +28,52 @@
             </span>
           </template>
         </x-request>
-      </u-linear-layout>
-    </u-linear-layout>
-
+      </div>
+    </div>
     <x-request
       ref="request"
-      style="margin-top: 20px;"
+      style="margin-top: 12px"
       :service="externalAddressService"
       :params="requestParam"
       :processor="resolver"
     >
-      <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :columns="columns"
-          :loading="loading"
-          :error="error"
-          :items="data || []"
-        />
+      <template slot-scope="{ data, loading }">
+        <el-table
+          v-loading="loading"
+          :data="data || []"
+          style="width: 100%"
+        >
+          <el-table-column
+            prop="ex"
+            label="对外服务端口"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{ row.ex || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="protocol"
+            label="类型"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            prop="servicePort"
+            label="服务端口"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+          <el-table-column
+            prop="servicePortName"
+            label="服务端口名称"
+            :show-overflow-tooltip="true"
+          ></el-table-column>
+        </el-table>
       </template>
     </x-request>
     <external-dialog
       ref="externalDialog"
       :instance="instance"
+      @refresh="refresh"
     />
   </div>
 </template>
@@ -101,10 +125,12 @@ export default {
         resolver(response) {
             return (response || []).map(t => ({
                 ...t,
-                ex: getFunc(t, 'externalPorts[0]'),
+                ex: getFunc(t, 'externalPort'),
             }));
         },
-
+        refresh() {
+            this.$refs.request.request();
+        },
     },
 };
 </script>
@@ -118,5 +144,9 @@ export default {
     margin-left: 100px;
     max-width: 500px;
     vertical-align: middle;
+    overflow: hidden;
+    word-wrap: normal;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 </style>

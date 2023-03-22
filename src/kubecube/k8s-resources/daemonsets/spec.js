@@ -11,10 +11,10 @@ import {
 
 export const toPlainObject = model => {
     const g = getFromModel(model);
-    const minReadySeconds = g('spec.minReadySeconds');
-    const maxSurge = g('spec.updateStrategy.rollingUpdate.maxSurge');
-    const maxUnavailable = g('spec.updateStrategy.rollingUpdate.maxUnavailable');
-    const strategy = {
+    const minReadySeconds = g('spec.minReadySeconds'); // 最短就绪时间
+    const maxSurge = g('spec.updateStrategy.rollingUpdate.maxSurge'); // 最大超预期副本数
+    const maxUnavailable = g('spec.updateStrategy.rollingUpdate.maxUnavailable'); // 最大不可用副本数
+    const strategy = { // Pod 的更新策略
         type: g('spec.updateStrategy.type'),
         enable: !!(minReadySeconds || maxSurge || maxUnavailable),
         minReadySeconds,
@@ -25,7 +25,7 @@ export const toPlainObject = model => {
     return {
         ...toSelectorPlainObject(g('spec')),
         strategy,
-        level: {
+        level: { // 级别
             ind: tenant === 'netease.share' ? 'platform' : 'tenant',
             tenant,
         },
@@ -35,9 +35,9 @@ export const toPlainObject = model => {
 export const toK8SObject = model => {
     const g = getFromModel(model);
     const obj = {};
-    const minReadySeconds = toNumber(g('spec.strategy.minReadySeconds'));
-    const maxSurge = toNumber(g('spec.strategy.maxSurge'));
-    const maxUnavailable = toNumber(g('spec.strategy.maxUnavailable'));
+    const minReadySeconds = toNumber(g('spec.strategy.minReadySeconds'));  // 最短就绪时间
+    const maxSurge = toNumber(g('spec.strategy.maxSurge')); // 最大超预期副本数
+    const maxUnavailable = toNumber(g('spec.strategy.maxUnavailable')); // 最大不可用副本数
     if (minReadySeconds || minReadySeconds === 0 || maxSurge || maxUnavailable) {
         obj.updateStrategy = {
             rollingUpdate: {

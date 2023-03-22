@@ -8,14 +8,14 @@ export const toPlainObject = model => {
         metadata: toMetadataPlainObject(model),
         ...pick(model, [
             'count',
-            'message',
-            'reason',
-            'firstTimestamp',
-            'lastTimestamp',
-            'involvedObject.fieldPath',
+            'message', // 消息
+            'reason', // 原因
+            'firstTimestamp', // 首次出现时间
+            'lastTimestamp', // 上次出现时间
+            'involvedObject.fieldPath', // 事件对象filePath
         ]),
 
     };
-    console.log(obj);
+    // console.log(obj);
     return obj;
 };

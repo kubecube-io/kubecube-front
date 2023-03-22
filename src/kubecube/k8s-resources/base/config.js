@@ -5,6 +5,7 @@ import {
     toPlainObject as toMetadataPlainObject,
     toK8SObject as toMetadataK8SObject,
     toPatchObject as toPatchMetadataObject,
+    toModifyObject as toModifyMetadataK8SObject,
 } from '../metadata';
 
 export function toPlainObject(model) {
@@ -38,4 +39,19 @@ export function toPatchObject(model) {
         metadata,
     };
     return obj;
+}
+
+export function toModifyObject(model) {
+    return ({
+        apiVersion,
+        kind,
+    }) => {
+        const metadata = toModifyMetadataK8SObject(model);
+        const obj = {
+            apiVersion,
+            kind,
+            metadata,
+        };
+        return obj;
+    };
 }

@@ -4,33 +4,29 @@
       <router-view />
     </template>
     <template v-else>
-      <u-linear-layout style="margin-bottom: 20px;">
-        <u-button
-          icon="create"
-          color="primary"
+      <div style="margin-bottom: 12px;">
+        <el-button
+          type="primary"
           @click="createCRD"
+          icon="el-icon-plus"
+          :disabled="isReview"
         >
           创建自定义资源
-        </u-button>
-        <u-button
-          icon="refresh"
-          square
-          @click="doRefresh"
-        />
-        <kube-input-search
-          :align-right="true"
-          placeholder="请输入名称搜索"
-          @search="onSearch"
-        />
-      </u-linear-layout>
-      <u-tabs router>
+        </el-button>
+        <el-button @click="doRefresh" square icon="el-icon-refresh-right"></el-button>
+        <inputSearch placeholder="请输入名称搜索" position="right" @search="onSearch"/>
+      </div>
+      <el-tabs :value="activeTab" page="main" @tab-click="habdleTabClick">
+        <el-tab-pane v-for="item in tabs" :key="item.value" :label="item.title" :name="item.value"/>
+      </el-tabs>
+      <!-- <u-tabs router>
         <u-tab
           v-for="item in tabs"
           :key="item.title"
           :title="item.title"
           :to="item.route"
         />
-      </u-tabs>
+      </u-tabs> -->
       <div>
         <router-view
           :refresh-key="refreshKey"
@@ -43,7 +39,11 @@
 <script>
 import workloadService from 'kubecube/services/k8s-resource';
 import { get } from 'vuex-pathify';
+import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
 export default {
+    components: {
+        inputSearch,
+    },
     metaInfo() {
         return {
             title: 'CRD - kubecube',
@@ -52,8 +52,8 @@ export default {
     data() {
         return {
             tabs: [
-                { title: '集群级别', route: { path: '/control/crd/Cluster' } },
-                { title: '空间级别', route: { path: '/control/crd/Namespaced' } },
+                { title: '集群级别', value: 'Cluster', route: { path: '/control/crd/Cluster' } },
+                { title: '空间级别', value: 'Namespaced', route: { path: '/control/crd/Namespaced' } },
             ],
             selector: '',
             refreshKey: +new Date(),
@@ -62,6 +62,10 @@ export default {
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
+        isReview() {
+            return !this.userResourcesPermission['customresourcedefinitions'];
+        },
         reqParam() {
             return {
                 pathParams: {
@@ -76,13 +80,32 @@ export default {
         isInSubRoute() {
             return this.$route.name === 'crd.detail';
         },
+        activeTab() {
+            return this.$route.params.level;
+        },
+    },
+    watch: {
+        isInSubRoute() {
+            this.selector = '';
+        },
     },
     methods: {
+        habdleTabClick(tab) {
+            console.log(this.$route);
+            const target = this.tabs.find(item => item.value === tab.name);
+            if (target) {
+                this.$router.push({ ...target.route, query: this.$route.query });
+            }
+        },
         doRefresh() {
             this.refreshKey = +new Date();
         },
         onSearch(content) {
-            this.selector = content ? `metadata.name~${content}` : undefined;
+            const temp = content ? `metadata.name~${content}` : undefined;
+            if (this.selector === temp) {
+                this.doRefresh();
+            }
+            this.selector = temp;
         },
         createCRD() {
             this.$editResource({
@@ -102,8 +125,9 @@ export default {
                     await workloadService.createCRD({
                         ...this.reqParam,
                         data: content,
+                        noAlert: true,
                     });
-                    this.refresh();
+                    this.doRefresh();
                 },
             });
         },

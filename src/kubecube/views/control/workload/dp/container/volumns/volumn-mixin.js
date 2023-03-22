@@ -41,7 +41,9 @@ export default {
         },
         openNewWindow(link) {
             const routeData = this.$router.resolve(link);
-            window.open(routeData.href, '_blank');
+            const { origin, pathname } = window.location;
+            const url = `${origin}${pathname}${(routeData.href || '').match(/#\S*/)[0]}`;
+            window.open(url, '_blank');
         },
     },
 };

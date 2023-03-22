@@ -1,57 +1,66 @@
 <template>
-  <kube-dynamic-block
-    v-model="model"
-    style="width: 580px"
-    :data-template="getDataTemplate"
-  >
-    <template slot="column">
-      <th>Key</th>
-      <th>Value</th>
-    </template>
-    <template slot-scope="{ model: item, index }">
-      <td>
-        <validation-provider
-          v-slot="{ errors }"
-          :name="`${errorprefix}key-${index}`"
-          rules="startsWithLetter|ConsistofLetterNumbersUnderscores"
+  <div>
+    <dynamicBlock
+      v-model="model"
+      :getDefaultItem="getDataTemplate"
+      :columns="[
+          {
+              title: 'Key',
+              dataIndex: 'key',
+          },
+          {
+              title: 'Value',
+              dataIndex: 'field',
+          },
+      ]"
+    >
+      <template v-slot:key="{record, index}">
+        <el-form-item
+          label=""
+          :prop="`${prefixKey}.${index}.key`"
+          :rules="[
+            validators.startsWithLetter(false),
+            validators.consistofLetterNumbersUnderscores(false),
+            validators.noRedundance(existKeys, false),
+            validators.lengthBetween(1, 64, false),
+          ]"
         >
-          <kube-form-item
-            muted="no"
-            style="width: 100%;"
-            field-size="full"
-            layout="none"
-            :message="errors && errors[0]"
-            placement="bottom"
-          >
-            <u-input
-              v-model="item.key"
-              size="huge"
-              maxlength="63"
-              placeholder="1-63位字母、数字或下划线组成，以字母开头"
-              :color="errors && errors[0] ? 'error' : ''"
-            />
-          </kube-form-item>
-        </validation-provider>
-      </td>
-      <td>
-        <u-select
-          v-model="item.field"
-          size="huge"
-          :data="FIELD_DATA"
-        />
-      </td>
-    </template>
-  </kube-dynamic-block>
+          <el-input
+            v-model="record.key"
+            placeholder="1-64位字母、数字或下划线组成，以字母开头"
+          />
+        </el-form-item>
+      </template>
+      <template v-slot:field="{record}">
+        <el-select v-model="record.field" placeholder="请选择" filterable>
+          <el-option
+            v-for="item in FIELD_DATA"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </template>
+    </dynamicBlock>
+  </div>
 </template>
 
 <script>
 import { FIELD_DATA } from 'kubecube/utils/constance';
 import envMixin from './env.mixin';
+import * as validators from 'kubecube/utils/validators';
 
 export default {
     mixins: [ envMixin ],
+    props: {
+        existKeys: {
+            type: Array,
+            default: () => [],
+        },
+    },
     data() {
         return {
+            validators,
             FIELD_DATA: FIELD_DATA.map(k => ({ text: k, value: k })),
         };
     },

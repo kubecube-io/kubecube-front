@@ -61,3 +61,76 @@ export function toK8SObject(model) {
         ]),
     };
 }
+
+export function toCephfsK8SObject(model) {
+    const g = getFromModel(model);
+    const obj = {
+        allowVolumeExpansion: true,
+        apiVersion: 'storage.k8s.io/v1',
+        kind: 'StorageClass',
+        metadata: {
+            name: g('name'),
+        },
+        parameters: {
+            adminId: g('cephInfo.spec.adminId'),
+            adminSecretName: g('cephInfo.spec.adminSecretName'),
+            adminSecretNamespace: g('cephInfo.spec.adminSecretNamespace'),
+            claimRoot: `/${g('clusterName')}/${g('name')}`, // 集群名称，避免重复
+            monitors: g('cephInfo.spec.monitors'),
+        },
+        provisioner: 'ceph.com/cephfs',
+        reclaimPolicy: g('reclaimPolicy'),
+        volumeBindingMode: 'Immediate',
+    };
+    return obj;
+}
+
+
+export function toCephK8SObject(model) {
+    const g = getFromModel(model);
+    const obj = {
+        allowVolumeExpansion: true,
+        apiVersion: 'storage.k8s.io/v1',
+        kind: 'StorageClass',
+        metadata: {
+            name: g('name'),
+        },
+        parameters: {
+            adminId: g('cephInfo.spec.adminId'),
+            adminSecretName: g('cephInfo.spec.adminSecretName'),
+            adminSecretNamespace: g('cephInfo.spec.adminSecretNamespace'),
+            fsType: g('fsType'),
+            imageFeatures: g('cephInfo.spec.imageFeatures'),
+            imageFormat: g('cephInfo.spec.imageFormat'),
+            pool: g('cephPool'),
+            monitors: g('cephInfo.spec.monitors'),
+            userId: g('cephInfo.spec.adminId'),
+            userSecretName: g('cephInfo.spec.adminSecretName'),
+            userSecretNamespace: g('cephInfo.spec.adminSecretNamespace'),
+        },
+        provisioner: 'ceph.com/rbd',
+        reclaimPolicy: g('reclaimPolicy'),
+        volumeBindingMode: 'Immediate',
+    };
+    return obj;
+}
+
+export function toNfsK8SObject(model) {
+    const g = getFromModel(model);
+    const provisionerInfo = g('provisionerInfo');
+    const obj = {
+        allowVolumeExpansion: true,
+        apiVersion: 'storage.k8s.io/v1',
+        kind: 'StorageClass',
+        mountOptions: [
+            `vers=${provisionerInfo.metadata.labels['system/nfsVersion']}`,
+        ],
+        metadata: {
+            name: g('name'),
+        },
+        provisioner: g('nfsProvisionerName'),
+        reclaimPolicy: g('reclaimPolicy'),
+        volumeBindingMode: 'Immediate',
+    };
+    return obj;
+}

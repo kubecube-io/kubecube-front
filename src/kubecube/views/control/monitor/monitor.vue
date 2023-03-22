@@ -1,26 +1,25 @@
 <template>
   <div>
     <!-- <u-info-list-group :title="`${title} 监控`" /> -->
-    <u-linear-layout
-      direction="vertical"
-      style="margin-bottom: 20px;"
-    >
-      <u-loading v-if="loading" />
+    <div style="margin-bottom: 20px">
+      <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
       <div v-else-if="rows.length === 0">
         暂无监控项
       </div>
       <template v-else>
-        <u-linear-layout>
-          <!-- <u-text>时间</u-text> -->
-          <u-date-custom-picker
-            ref="dataPicker"
-            style="margin-left: 10px"
-            :date="{startTime, endTime}"
-            :time-range="periodList"
-            :no-interval="true"
-            @update="updateTime"
-          />
-        </u-linear-layout>
+        <div style="display:flex;">
+          <div style="margin-right:8px;display:flex;">
+            <span style="margin-right:8px;line-height:32px">时间:</span>
+            <dateCustomPicker
+              :date="{ startTime, endTime}"
+              @update="updateTime"
+            />
+          </div>
+          <div v-if="selectshowable" style="margin-right:8px;display:flex;">
+            <span style="margin-right:8px;line-height:32px">监控维度:</span>
+            <dimensionSelect :value="rows" @change="handleAsyncPanelShow"/>
+          </div>
+        </div>
         <kube-pipe
           v-if="variables.length > 0"
           ref="pipeVariables"
@@ -33,7 +32,7 @@
             :key="v.name"
             :class="$style.variable"
           >
-            <u-text>{{ v.displayName }}</u-text>
+            <span style="margin-right:8px;line-height:32px">{{ v.displayName }}</span>
             <kube-valve
               component="span"
               :name="v.name"
@@ -44,81 +43,92 @@
                 <template v-if="sources[v.name].length > 0">
                   <div>
                     <span :class="$style.occupation">{{ findLongest(sources[v.name]) }}</span>
-                    <u-select
-                      v-model="variableSelected[v.name]"
-                      size="large"
-                      style="width: 100%"
-                      :class="$style.selector"
-                      :data="sources[v.name]"
-                    />
+                    <el-select 
+                        v-model="variableSelected[v.name]" 
+                        placeholder="请选择"
+                        style="width: 100%"
+                        :class="$style.selector"
+                    >
+                        <el-option
+                            v-for="item in sources[v.name]"
+                            :key="item.value"
+                            :label="item.text"
+                            :value="item.value"
+                        />
+                    </el-select>
                   </div>
                 </template>
-                <u-select
+                <el-select
                   v-else
-                  size="large"
+                  value=""
                   disabled
                   style="width: auto"
-                  :data="[{ text: `暂无${v.name}`}]"
+                  :placeholder="`暂无${v.name}`"
                 />
               </template>
             </kube-valve>
           </div>
         </kube-pipe>
       </template>
-    </u-linear-layout>
+    </div>
     <template v-if="!pipeLoading">
-      <u-info-list-group
-
-        v-for="row in rows"
-        :key="row.name"
-        :title="row.name"
-        column="1"
-        label-size="large"
-      >
-        <div :class="$style.container">
-          <div
-            v-for="panel in row.panels"
-            :key="panel.name"
-            :is-table="panel.type === 'table'"
-            :class="[$style.block, $style[`block-${panel.span}`]]"
-          >
-            <kube-chart
-              v-if="panel.type === 'graph'"
-              :title="panel.title"
-              :meta="panel"
-              :scope="scope"
-              :query="panel.targets.map(t => t.query({...variableSelected, ...scope}))"
-              :legend-template="panel.targets.map(t => t.legendTemplate)"
-              :start-time="startTime"
-              :end-time="endTime"
-              :period-list="periodList"
-              height="270px"
-            />
-            <kube-data-table
-              v-if="panel.type === 'table'"
-              :query="panel.targets.map(t => ({
-                ...t,
-                query: t.query({...variableSelected, ...scope})
-              }))"
-              :scope="scope"
-              :meta="panel"
-              :start-time="startTime"
-              :end-time="endTime"
-            />
-            <kube-data-board
-              v-if="panel.type === 'singleStat'"
-              :query="panel.targets.map(t => ({
-                ...t,
-                query: t.query({...variableSelected, ...scope})
-              }))"
-              :meta="panel"
-              :scope="scope"
-              :start-time="startTime"
-              :end-time="endTime"
-            />
-          </div>
+      <template v-for="row in rows">
+        <div
+            v-if="selectshowable ? row.panels.find(panel => panel.showPanel) : true"
+            :key="row.name"
+        >
+            <div :class="$style.rowTitle">
+                <span>{{row.name}}</span>
+            </div>
+            <div :class="$style.container">
+                <template v-for="panel in row.panels">
+                    <div
+                        v-if="selectshowable ? panel.showPanel : true"
+                        :key="panel.name"
+                        :is-table="panel.type === 'table'"
+                        :class="[$style.block, $style[`block-${panel.span}`]]"
+                    >
+                        <kube-chart
+                            v-if="panel.type === 'graph'"
+                            :title="panel.title"
+                            :meta="panel"
+                            :scope="scope"
+                            :query="panel.targets.map(t => t.query({...variableSelected, ...scope}))"
+                            :legend-template="panel.targets.map(t => t.legendTemplate)"
+                            :start-time="startTime"
+                            :end-time="endTime"
+                            :isQuickTime="timeType === 'quick'"
+                            :quickTime="quickValue"
+                            :period-list="periodList"
+                            height="270px"
+                        />
+                        <kube-data-table
+                            v-if="panel.type === 'table'"
+                            :query="panel.targets.map(t => ({
+                                ...t,
+                                query: t.query({...variableSelected, ...scope})
+                            }))"
+                            :scope="scope"
+                            :meta="panel"
+                            :start-time="startTime"
+                            :end-time="endTime"
+                        />
+                        <kube-data-board
+                            v-if="panel.type === 'singleStat'"
+                            :query="panel.targets.map(t => ({
+                                ...t,
+                                query: t.query({...variableSelected, ...scope})
+                            }))"
+                            :meta="panel"
+                            :scope="scope"
+                            :start-time="startTime"
+                            :end-time="endTime"
+                        />
+                    </div>
+                </template>
+            </div>
         </div>
-      </u-info-list-group>
+      </template>
     </template>
   </div>
 </template>
@@ -136,13 +146,16 @@ import {
     getStepTime,
 } from 'kubecube/utils/functional';
 import kubeDataBoard from 'kubecube/component/common/kube-data-board/kube-data-board.vue';
-
+import dateCustomPicker from 'kubecube/elComponent/date-custom-picker.vue';
+import dimensionSelect from './dimensionSelect.vue';
 export default {
     metaInfo: {
         title: '监控 - kubecube',
     },
     components: {
         kubeDataBoard,
+        dateCustomPicker,
+        dimensionSelect,
     },
     props: {
         instance: Object,
@@ -160,6 +173,8 @@ export default {
             ],
             startTime: (now - 30 * 60 * 1000),
             endTime: now,
+            timeType: 'quick',
+            quickValue: 30 * 60 * 1000,
             title: '',
 
             loading: false,
@@ -171,11 +186,13 @@ export default {
             rows: [],
 
             pipeLoading: true,
+            selectshowable: false,
         };
     },
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        controlClusterList: get('scope/controlClusterList'),
         workload() {
             return this.$route.params.workload;
         },
@@ -238,11 +255,19 @@ export default {
         });
     },
     methods: {
+        handleAsyncPanelShow(data) {
+            this.rows.forEach((row, rowIndex) => {
+                row.panels.forEach((panel, panelIndex) => {
+                    panel.showPanel = data[rowIndex].panels[panelIndex].showPanel;
+                })
+            })
+        },
         async load() {
             this.loading = true;
             const response = await monitorService.getInnerDashboards({
                 pathParams: {
                     resource: this.resource,
+                    cluster: this.controlClusterList[0].clusterName,
                 },
             });
 
@@ -250,6 +275,7 @@ export default {
             this.title = resolved.spec.title;
             this.variables = resolved.spec.variables || [];
             this.rows = resolved.spec.rows || [];
+            this.selectshowable = resolved.spec.selectshowable
             this.pipeSeq = this.variables.map(v => v.name).join(' > ');
             if (this.variables.length === 0) {
                 this.pipeLoading = false;
@@ -276,9 +302,12 @@ export default {
         resolver(response) {
             console.log(response);
         },
-        updateTime({ startTime, endTime }) {
+        updateTime(val) {
+            const { startTime, endTime, type, quickValue } = val;
             this.startTime = startTime;
             this.endTime = endTime;
+            this.timeType = type;
+            this.quickValue = quickValue;
         },
         findLongest(sources) {
             let l = 0;
@@ -297,6 +326,16 @@ export default {
 </script>
 
 <style module>
+.rowTitle {
+    box-sizing: content-box;
+    padding: 6px 20px;
+    margin: 0;
+    height: 30px;
+    line-height: 30px;
+    color: #333;
+    background-color: #f5f7fa;
+    border-bottom: 1px solid #e1e8ed;
+}
 .variableWrapper {
     display: flex;
     flex-wrap: wrap;
@@ -401,6 +440,6 @@ export default {
 }
 
 .container > .chart {
-    height: ;
+    /* height: ; */
 }
 </style>

@@ -1,47 +1,76 @@
 <template>
   <div>
-    <u-linear-layout style="margin-bottom: 20px">
+    <div :class="$style.line_layout" style="margin-bottom: 12px">
       <template v-if="workload !== 'pods'">
-        <u-select
+        <el-select
           v-model="kind"
-          :data="kinds"
-        />
-
+          style="width:200px"
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in kinds"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value"
+            :title="item.text"
+          />
+        </el-select>
         <template v-if="kind === 'pod'">
           <template v-if="workload === 'deployments'">
-            <u-select
+            <el-select
               v-model="type"
-              :data="types"
-            />
-            <u-select
+              style="width:200px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in types"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
               v-if="podList.length"
-              key="podList"
               v-model="pod"
-              :data="podList"
-              size="large"
-            />
-            <u-select
+              style="width:400px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in podList"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
               v-else
-              key="nopodList"
-              :data="[{ text: '暂无 Pod 事件', value: '' }]"
-              size="large"
-              disabled
+              style="width:400px"
+              placeholder="暂无 Pod"
+              :disabled="true"
             />
           </template>
           <template v-else>
-            <u-select
+            <el-select
               v-if="currentVersionPods.length"
-              key="podList2"
               v-model="pod"
-              :data="currentVersionPods"
-              size="large"
-            />
-            <u-select
+              style="width:400px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in currentVersionPods"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
               v-else
-              key="nopodList2"
-              :data="[{ text: '暂无 Pod 事件', value: '' }]"
-              size="large"
-              disabled
+              style="width:400px"
+              placeholder="暂无 Pod"
+              :disabled="true"
             />
           </template>
         </template>
@@ -49,23 +78,47 @@
       <u-checkbox v-model="autoRefresh">
         自动刷新
       </u-checkbox>
-    </u-linear-layout>
-    <kube-table
-      table-width="100%"
-      :columns="columns"
-      :loading="loading"
-      :items="(workload === 'deployments' && kind === 'pod') ? (getCondition(conditionsGrouped[pod]) || []) : conditions"
+    </div>
+    <el-table
+      v-loading="loading"
+      :data="(workload === 'deployments' && kind === 'pod') ? (getCondition(conditionsGrouped[pod]) || []) : conditions"
+      style="width: 100%"
     >
-      <template #[`item.lastTransitionTime`]="{ item }">
-        {{ item.lastTransitionTime | formatLocaleTime }}
-      </template>
-      <template #[`item.lastUpdateTime`]="{ item }">
-        {{ item.lastUpdateTime | formatLocaleTime }}
-      </template>
-      <template #noData>
-        暂无数据
-      </template>
-    </kube-table>
+      <el-table-column
+        prop="type"
+        label="类型"
+        width="160"
+      />
+      <el-table-column
+        prop="reason"
+        label="条件"
+        width="200"
+      />
+      <el-table-column
+        prop="message"
+        label="消息"
+      />
+      <el-table-column
+        prop="lastUpdateTime"
+        label="上次检测时间"
+        width="160"
+        :show-overflow-tooltip="true"
+      >
+        <template slot-scope="{ row }">
+          {{ row.lastUpdateTime | formatLocaleTime }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="lastTimestamp"
+        label="上次转换时间"
+        width="160"
+        :show-overflow-tooltip="true"
+      >
+        <template slot-scope="{ row }">
+          {{ row.lastTransitionTime | formatLocaleTime }}
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -114,6 +167,7 @@ export default {
         return {
             replicaService: workloadService.getWorkloads,
             columns: [
+                { title: '类型', name: 'type', width: '160px', textwrap: true },
                 { title: '条件', name: 'reason', width: '200px', textwrap: true },
                 { title: '消息', name: 'message', textwrap: true },
                 { title: '上次检测时间', name: 'lastUpdateTime', width: '160px' },
@@ -162,8 +216,8 @@ export default {
                     resource: 'pods',
                 },
                 params: {
-                    // labelSelector: this.instance.spec.matchLabels.map(l => `${l.key}=${l.value}`).join(','),
-                    selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
+                    labelSelector: this.instance.spec.matchLabels.map(l => `${l.key}=${l.value}`).join(','),
+                    // selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
                 },
             };
         },
@@ -264,7 +318,7 @@ export default {
                 const currentVersionPods = [];
                 const historyVersionPods = [];
 
-                podRes.items.forEach(i => {
+                (podRes.items || []).forEach(i => {
                     const replicaname = getFunc(i, 'metadata.ownerReferences[0].name');
                     const name = getFunc(i, 'metadata.name');
                     if (replicaname === rpnamesCurr) {
@@ -322,6 +376,8 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.line_layout > * {
+    margin-right: 12px;
+}
 </style>

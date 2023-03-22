@@ -1,97 +1,69 @@
 <template>
-  <kube-form-item
-    layout="block"
-    label="容器端口"
-  >
-    <u-switch
-      v-model="model.enable"
-      width="wide"
-      :with-text="true"
-    />
-    <template v-if="model.enable">
-      <kube-dynamic-block
-        v-model="model.configs"
-        style="width: 580px"
-        :data-template="getDataTemplate"
-      >
-        <template slot="column">
-          <th>端口</th>
-          <th>名称</th>
-          <th>协议</th>
-        </template>
-        <template slot-scope="{ model, index }">
-          <td>
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`${prefixKey}Port-${index}`"
-              :rules="{
-                NumberBetween: {min: 1, max: 65536},
-                ConsistofNumber: true,
-              }"
+  <div>
+    <el-form-item
+      label="容器端口"
+    >
+      <el-switch
+        v-model="model.enable"
+      />
+      <template v-if="model.enable">
+        <dynamicBlock
+          v-model="model.configs"
+          :getDefaultItem="getDataTemplate"
+          :columns="[
+              {
+                  title: '端口',
+                  dataIndex: 'containerPort',
+              },
+              {
+                  title: '名称',
+                  dataIndex: 'name',
+              },
+              {
+                  title: '协议',
+                  dataIndex: 'protocol',
+              },
+          ]"
+        >
+          <template v-slot:containerPort="{record}">
+            <el-input-number v-model="record.containerPort" :min="1" :max="65535" controls-position="right"/>
+          </template>
+          <template v-slot:name="{record, index}">
+            <el-form-item
+              label=""
+              :prop="`${prefixKey}.configs.${index}.name`"
+              :rules="[
+                validators.startsWithLowercaseLetter(false),
+                validators.consistoLetterNumbersUnderscores(false),
+                validators.noRedundance(allNames, false),
+                validators.lengthBetween(1, 15, false),
+              ]"
             >
-              <kube-form-item
-                muted="no"
-                style="width: 100%;"
-                field-size="full"
-                layout="none"
-                :message="errors && errors[0]"
-                placement="bottom"
-              >
-                <u-number-input
-                  v-model="model.containerPort"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  size="huge"
-                  :min="1"
-                  :max="65535"
-                />
-              </kube-form-item>
-            </validation-provider>
-          </td>
-          <td>
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`${prefixKey}Name-${index}`"
-              :rules="{
-                startsWithLowercaseLetter: true,
-                ConsistoLetterNumbersUnderscores: true,
-                lengthBetween: {min: 0, max: 15},
-                noRedundance: { list: allNames }
-              }"
-            >
-              <kube-form-item
-                muted="no"
-                style="width: 100%;"
-                field-size="full"
-                layout="none"
-                :message="errors && errors[0]"
-                placement="bottom"
-              >
-                <u-input
-                  v-model="model.name"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  size="huge"
-                  maxlength="15"
-                  maxlength-message="不得超过15个字符"
-                  placeholder="1-15位小写字母、数字或中划线组成，以字母开头，字母或数字结尾"
-                />
-              </kube-form-item>
-            </validation-provider>
-          </td>
-          <td>
-            <u-select
-              v-model="model.protocol"
-              size="huge"
-              :data="protocols"
-            />
-          </td>
-        </template>
-      </kube-dynamic-block>
-    </template>
-  </kube-form-item>
+              <el-input
+                v-model="record.name"
+                placeholder="1-15位小写字母、数字或中划线组成，以字母开头，字母或数字结尾"
+              />
+            </el-form-item>
+          </template>
+          <template v-slot:protocol="{record}">
+            <el-select v-model="record.protocol" placeholder="请选择" filterable>
+              <el-option
+                v-for="item in protocols"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </template>
+        </dynamicBlock>
+      </template>
+    </el-form-item>
+  </div>
 </template>
 
 <script>
 import { makeVModelMixin } from 'kubecube/mixins/functional';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin ],
     props: {
@@ -102,6 +74,7 @@ export default {
     },
     data() {
         return {
+            validators,
             protocols: [
                 { text: 'TCP', value: 'TCP' },
                 { text: 'UDP', value: 'UDP' },

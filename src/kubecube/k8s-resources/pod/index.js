@@ -1,46 +1,4 @@
 import { get } from 'lodash';
-// import {
-//     toPlainObject as toBasePlainObject,
-//     getFromModel,
-// } from '../base';
-// import {
-//     toPlainObject as toMetadataPlainObject,
-// } from '../metadata';
-
-// import {
-//     toPlainObject as toPodSpecPlainObject,
-// } from './pod-spec';
-
-// import {
-//     toPlainObject as toContainerPlainObject,
-// } from '../container';
-
-// // import {
-// //     toPlainObject as toStatusPlainObject,
-// // } from './status';
-
-// export const toPlainObject = model => {
-//     const g = getFromModel(model);
-//     const podSpec = toPodSpecPlainObject(g('spec'));
-//     const containers = toContainerPlainObject(g('spec'), model);
-//     console.log(containers);
-//     const status = g('status');
-//     const obj = {
-//         ...toBasePlainObject(model),
-//         metadata: toMetadataPlainObject(model),
-//         spec: podSpec,
-//         containers,
-//         // containers: toContainerPlainObject(model),
-//         status: {
-//             ...status,
-//             restartCount: (g('status.containerStatuses') || []).reduce((a, i) => a + i.restartCount, 0),
-//             cpuUsage: containers.reduce((a, i) => a + get(i, 'resources.cpu', 0), 0),
-//             memoryUsage: containers.reduce((a, i) => a + get(i, 'resources.memory', 0), 0),
-//         },
-//     };
-//     console.log(obj);
-//     return obj;
-// };
 
 import {
     toPlainObject as toWorkloadPlainObject,
@@ -63,11 +21,27 @@ export function toPlainObject(model) {
         toStatusPlainObject(m, containers) {
             const g = getFromModel(m);
             const status = g('status');
+            let cpuUsage = 0;
+            let memoryUsage = 0;
+            const tempContainers = containers.filter(item => item.type === 'normal')
+            const tempInitContainers = containers.filter(item => item.type === 'init')
+            tempContainers.forEach(i => {
+                cpuUsage += get(i, 'resources.cpu', 0);
+                memoryUsage += get(i, 'resources.memory', 0);
+            });
+            tempInitContainers.forEach(i => {
+                const tempCpu = get(i, 'resources.cpu', 0);
+                const tempmemory = get(i, 'resources.memory', 0);
+                cpuUsage = tempCpu > cpuUsage ? tempCpu : cpuUsage;
+                memoryUsage = tempmemory > memoryUsage ? tempmemory : memoryUsage;
+            });
             return {
                 ...status,
                 restartCount: (g('status.containerStatuses') || []).reduce((a, i) => a + i.restartCount, 0),
-                cpuUsage: containers.reduce((a, i) => a + get(i, 'resources.cpu', 0), 0),
-                memoryUsage: containers.reduce((a, i) => a + get(i, 'resources.memory', 0), 0),
+                cpuUsage,
+                memoryUsage,
+                // cpuUsage: containers.reduce((a, i) => a + get(i, 'resources.cpu', 0), 0),
+                // memoryUsage: containers.reduce((a, i) => a + get(i, 'resources.memory', 0), 0),
             };
         },
     });

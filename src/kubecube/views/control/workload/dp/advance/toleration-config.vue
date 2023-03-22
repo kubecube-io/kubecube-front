@@ -1,96 +1,114 @@
 <template>
-  <kube-form-item
-    layout="list"
-    label="容忍"
-  >
-    <kube-dynamic-block
-      v-model="model"
-      style="width: 750px"
-      :data-template="getDataTemplate"
-      :init-required="false"
+  <div>
+   <el-form-item
+      label="容忍"
+      :class="$style.columnFormItem"
     >
-      <template slot="column">
-        <th>Key</th>
-        <th>Operator</th>
-        <th>Value</th>
-        <th>Effect <u-note>effect可取值 NoSchedule | PreferNoSchedule | NoExecute | 空， effect 为空表示匹配所有 effect。</u-note></th>
-        <th>TolerationSeconds<u-note>缺省不进行设置，表示永久生效。</u-note></th>
-      </template>
-      <template slot-scope="{ model: tolerationModel, index }">
-        <td>
-          <validation-provider
-            v-slot="{ errors }"
-            :name="`toleration-Key-${index}`"
-            :rules="{
-              startsWithLetter: true,
-              KeyPattern: true,
-              noRedundance: { list: exsitKeys }
-            }"
+      <dynamicBlock
+        v-model="model"
+        :initialAdd="false"
+        :minCount="0"
+        :getDefaultItem="getDataTemplate"
+        :columns="[
+            {
+                title: 'Key',
+                dataIndex: 'key',
+            },
+            {
+                title: 'Operator',
+                dataIndex: 'operator',
+            },
+            {
+                title: 'Value',
+                dataIndex: 'value',
+            },
+            {
+                title: 'Effect',
+                dataIndex: 'effect',
+            },
+            {
+                title: 'TolerationSeconds',
+                dataIndex: 'tolerationSeconds',
+            }
+        ]"
+      >
+        <template slot="th-effect">
+          Effect
+          <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+            <template slot="content">
+              effect可取值 NoSchedule | PreferNoSchedule | NoExecute | 空， effect 为空表示匹配所有 effect。
+            </template>
+            <i class="el-icon-question"/>
+          </el-tooltip>
+        </template>
+        <template slot="th-tolerationSeconds">
+          TolerationSeconds
+          <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+            <template slot="content">
+              缺省不进行设置，表示永久生效。
+            </template>
+            <i class="el-icon-question"/>
+          </el-tooltip>
+        </template>
+        <template v-slot:key="{record: tolerationModel, index}">
+          <el-form-item 
+            label=""
+            :prop="`${prefixProp}.${index}.key`"
+            :rules="[
+              validators.startsWithLetter(false),
+              validators.keyPattern(false),
+              validators.noRedundance(exsitKeys, false),
+            ]"
           >
-            <kube-form-item
-              muted="no"
-              style="width: 100%;"
-              field-size="full"
-              layout="none"
-              :message="errors && errors[0]"
-              placement="bottom"
-            >
-              <u-input
-                v-model="tolerationModel.key"
-                size="normal huge"
-                :color="errors && errors[0] ? 'error' : ''"
-              />
-            </kube-form-item>
-          </validation-provider>
-        </td>
-        <td>
-          <u-select
-            v-model="tolerationModel.operator"
-            size="huge"
-            :data="operators"
-          />
-        </td>
-        <td>
-          <validation-provider
-            v-if="tolerationModel.operator !== 'Exists'"
-            v-slot="{ errors }"
-            :name="`toleration-Value-${index}`"
-            rules="LabelValuePatten"
+            <el-input v-model="tolerationModel.key"/>
+          </el-form-item>
+        </template>
+        <template v-slot:operator="{record: tolerationModel}">
+          <el-select v-model="tolerationModel.operator" placeholder="请选择">
+            <el-option
+              v-for="item in operators"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+        <template v-slot:value="{record: tolerationModel, index}">
+          <el-form-item 
+            label=""
+            :prop="`${prefixProp}.${index}.value`"
+            :rules="[
+              validators.labelValuePatten(false),
+            ]"
           >
-            <kube-form-item
-              muted="no"
-              style="width: 100%;"
-              field-size="full"
-              layout="none"
-              :message="errors && errors[0]"
-              placement="bottom"
-            >
-              <u-input
-                v-model="tolerationModel.value"
-                size="huge"
-                :color="errors && errors[0] ? 'error' : ''"
-              />
-            </kube-form-item>
-          </validation-provider>
-        </td>
-        <td>
-          <u-select
-            v-model="tolerationModel.effect"
-            size="huge"
-            :data="effects"
-          />
-        </td>
-        <td>
-          <u-number-input
+            <el-input
+              v-model="tolerationModel.value"
+            />
+          </el-form-item>
+        </template>
+        <template v-slot:effect="{record: tolerationModel}">
+          <el-select v-model="tolerationModel.effect" placeholder="请选择">
+            <el-option
+              v-for="item in effects"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+        <template v-slot:tolerationSeconds="{record: tolerationModel}">
+
+          <el-input-number
             v-if="tolerationModel.effect === 'NoExecute'"
             v-model="tolerationModel.tolerationSeconds"
-            size="huge"
+            controls-position="right"
             :min="0"
           />
-        </td>
-      </template>
-    </kube-dynamic-block>
-  </kube-form-item>
+          <span v-else>-</span>
+        </template>
+      </dynamicBlock>
+    </el-form-item>
+  </div>
 </template>
 
 <script>
@@ -98,10 +116,18 @@ import { makeVModelMixin } from 'kubecube/mixins/functional';
 import {
     operators, effects, getDefaultToleration,
 } from 'kubecube/k8s-resources/pod/toleration.js';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin ],
+    props: {
+        prefixProp: {
+            type: String,
+            default: '',
+        },
+    },
     data() {
         return {
+            validators,
             operators: operators.map(t => ({ text: t, value: t })),
             effects: effects.map(t => ({ text: t, value: t })),
         };
@@ -117,6 +143,17 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.columnFormItem {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 22px !important;
+}
+.columnFormItem>:global(.el-form-item__content) {
+  margin-left: 0 !important;
+}
+.columnFormItem>:global(.el-form-item__label) {
+  align-self: start;
+  width: auto !important;
+}
 </style>

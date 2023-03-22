@@ -45,7 +45,7 @@ export default {
             sunMessage: '',
             commitLoading: false,
             cancleLoading: false,
-            width: '460',
+            width: '460px',
             ok() {
 
             },
