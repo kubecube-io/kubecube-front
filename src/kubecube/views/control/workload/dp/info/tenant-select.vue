@@ -4,20 +4,24 @@
     :service="service"
     :params="{
       params: {
-        user,
       },
     }"
     :processor="resolver"
   >
     <template slot-scope="{ data, loading }">
-      <u-loading v-if="loading" />
-      <kube-form-item label="租户">
-        <u-select
-          v-model="model"
-          :disabled="disabled"
-          :data="data"
-        />
-      </kube-form-item>
+      <i v-if="loading" class="el-icon-loading" style="font-size:24px"/>
+      <el-select
+        v-else
+        v-model="model"
+        :disabled="disabled"
+      >
+        <el-option
+          v-for="item in data"
+          :key="item.value"
+          :label="item.text"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </template>
   </x-request>
 </template>

@@ -1,6 +1,5 @@
 import { zipObjectDeep } from 'lodash';
 import { getFromModel, toObjectArray } from '../base/utils';
-// import { unitConvert } from 'kubecube/utils/functional';
 
 export const toPlainObject = model => {
     const g = getFromModel(model);

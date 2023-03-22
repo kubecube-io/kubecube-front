@@ -1,95 +1,91 @@
 <template>
-  <u-linear-layout direction="vertical">
-    <u-linear-layout direction="horizontal">
-      <u-button
-        icon="create"
-        color="primary"
-        @click="toCreate"
-      >
-        创建 {{ workloadLiteral }}
-      </u-button>
-      <u-button
-        icon="refresh"
-        square
-        @click="refresh"
-      />
-      <kube-input-search
-        :align-right="true"
-        placeholder="请输入名称搜索"
-        @search="onSearch"
-      />
-    </u-linear-layout>
-
+  <div>
+    <div style="margin-bottom:12px">
+      <el-button
+          type="primary"
+          :disabled="isReview"
+          @click="toCreate"
+          icon="el-icon-plus"
+        >
+          创建 {{ workloadLiteral }}
+        </el-button>
+      <el-button @click="refresh" square icon="el-icon-refresh-right"></el-button>
+      <inputSearch v-model="filterName" placeholder="请输入名称搜索" position="right" @search="onSearch"/>
+    </div>
     <x-request
       ref="request"
       :service="service"
       :params="requestParam"
       :processor="resolver"
     >
-      <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :loading="loading"
-          :columns="columns"
-          :items="data ? data.list : []"
-          :error="error"
-          @sort="onSort"
+      <template slot-scope="{ data, loading }">
+        <el-table
+          :key="workload"
+          v-loading="loading"
+          :data="data ? data.list : []"
+          style="width: 100%"
+          border
+          :default-sort="defaultSort"
+          @sort-change="tableSortChange"
         >
-          <template #[`item.metadata.name`]="{ item }">
-            <u-link :to="{path: `/control/${workload}/${item.metadata.name}`}">
-              {{ item.metadata.name }}
-            </u-link>
-          </template>
-
-          <template #[`item.metadata.creationTimestamp`]="{ item }">
-            {{ item.metadata.creationTimestamp | formatLocaleTime }}
-          </template>
-          <template #[`item.operation`]="{ item }">
-            <u-linear-layout gap="small">
-              <u-link-list :key="workload">
-                <u-link-list-item
-                  :disabled="!SECRET_TYPES.includes(item.type)"
-                  @click="editItem(item)"
-                >
-                  设置
-                </u-link-list-item>
-                <u-link-list-item @click="deleteItem(item)">
-                  删除
-                </u-link-list-item>
-                <u-link-list-item @click="editYAML(item)">
-                  YAML 设置
-                </u-link-list-item>
-              </u-link-list>
-            </u-linear-layout>
-          </template>
-          <template #noData>
-            <template v-if="pagenation.selector">
-              没有搜索到相关内容，可调整关键词重新搜索
+          <el-table-column
+            prop="metadata.name"
+            label="名称"
+            :show-overflow-tooltip="true"
+            sortable
+          >
+            <template slot-scope="{ row }">
+              <el-link type="primary" :to="{ path: `/control/${workload}/${row.metadata.name}`, query: $route.query }">
+                {{row.metadata.name}}
+              </el-link>
             </template>
-            <template v-else>
-              还没有任何 {{ workloadLiteral }} 现在就 <u-link @click="toCreate">
-                立即创建
-              </u-link>
-              一个吧
+          </el-table-column>
+          <el-table-column
+            v-if="workload === 'secrets'"
+            prop="type"
+            label="类型"
+            :show-overflow-tooltip="true"
+            width="240"
+          ></el-table-column>
+          <el-table-column
+            prop="metadata.creationTimestamp"
+            label="创建时间"
+            width="170"
+            sortable
+          >
+            <template slot-scope="{ row }">
+            {{ row.metadata.creationTimestamp | formatLocaleTime }}
             </template>
-          </template>
-          <template #error>
-            获取数据失败，请
-            <u-link @click="refresh">
-              重试
-            </u-link>
-          </template>
-        </kube-table>
-        <u-page
-          v-if="data && calculatePages(data.total) > 1"
-          :count="data.total"
+          </el-table-column>
+          <el-table-column
+            prop="action"
+            label="操作"
+            width="180"
+          >
+            <template slot-scope="{ row }">
+              <qz-link-group max="3">
+                <el-link type="primary" :disabled="!SECRET_TYPES.includes(row.type) || isReview" @click="editItem(row)">设置</el-link>
+                <el-link type="primary" :disabled="isReview || (row.metadata.pureLabels || {})['system/defaultImagePullSecret'] === 'true'" @click="deleteItem(row)">删除</el-link>
+                <el-link type="primary" :disabled="isReview" @click="editYAML(row)">YAML 设置</el-link>
+              </qz-link-group>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          style="float:right;margin-top:12px"
+          v-if="data && calculatePages(data.total) > 0"
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
+          :current-page="pagenation.pageNum"
+          :page-sizes="[10, 20, 30, 40, 50, 100]"
           :page-size="pagenation.pageSize"
-          :total="calculatePages(data.total)"
-          @select="selectPage"
+          layout="total, sizes, prev, pager, next"
+          :total="data.total"
+          background
         />
       </template>
     </x-request>
-  </u-linear-layout>
+  </div>
 </template>
 
 <script>
@@ -100,7 +96,11 @@ import PageMixin from 'kubecube/mixins/pagenation';
 import { toPlainObject as toConfigmapPlainObject } from 'kubecube/k8s-resources/configmap';
 import { toPlainObject as toSecretPlainObject } from 'kubecube/k8s-resources/secret';
 import { SECRET_TYPES } from 'kubecube/utils/constance';
+import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
 export default {
+    components: {
+        inputSearch,
+    },
     metaInfo() {
         return {
             title: `${this.workload} - kubecube`,
@@ -108,11 +108,22 @@ export default {
     },
     mixins: [ PageMixin ],
     data() {
-        return { SECRET_TYPES: SECRET_TYPES.map(s => s.value) };
+        return {
+            SECRET_TYPES: SECRET_TYPES.map(s => s.value),
+            filterName: '',
+        };
     },
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
+        isReview() {
+            const keyMap = {
+                configmaps: 'configmaps',
+                secrets: 'secrets',
+            };
+            return !this.userResourcesPermission[keyMap[this.workload]];
+        },
         service() {
             return workloadService.getAPIV1;
         },
@@ -183,15 +194,23 @@ export default {
         },
     },
     watch: {
-        columns() {
-            this.$refs.request.resetData();
+        workload() {
+            this.pagenation.selector = '';
+            this.filterName = '';
         },
+    },
+    created() {
+        this.pagenation.sortName = 'metadata.creationTimestamp';
+        this.pagenation.sortOrder = 'desc';
+        this.pagenation.sortFunc = 'time';
+        this.pagenation.selector = '';
     },
     methods: {
         resolver(response) {
-            console.log(response);
+            if ((response.items || []).length === 0 && response.total > 0 && this.pagenation.pageNum > 1) {
+                this.pagenation.pageNum = this.pagenation.pageNum - 1;
+            }
             const list = (response.items || []).map(this.toPlainObject);
-            console.log(list);
             return {
                 list,
                 total: response.total,
@@ -203,10 +222,14 @@ export default {
         onSort({ order, name }) {
             this.pagenation.sortOrder = order;
             this.pagenation.sortName = `${name}`;
-            this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
+            this.pagenation.sortFunc = name === 'metadata.creationTimestamp' ? 'time' : 'string';
         },
         onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+            const temp = content ? `metadata.name~${content}` : undefined;
+            if (this.pagenation.selector === temp) {
+                this.refresh();
+            }
+            this.pagenation.selector = temp;
         },
         toCreate() {
             this.$router.push({ name: 'control.workload.create', params: this.$route.params });
@@ -243,9 +266,9 @@ export default {
             });
         },
         deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
                     const reqParam = {
                         pathParams: {

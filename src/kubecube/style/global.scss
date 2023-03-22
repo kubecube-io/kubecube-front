@@ -37,3 +37,10 @@ $--color-primary: #37f !default;
 .kube-el-tooltip-popper {
     max-width: 400px !important;
 }
+.el-dialog {
+    min-width: 400px
+}
+
+.ncs-el-tooltip-popper{
+    max-width: 400px !important;
+}

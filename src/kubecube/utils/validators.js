@@ -843,6 +843,7 @@ export const noEmptyChar = required => {
         },
     };
 };
+
 export const requiredLetterNumbers = required => {
     return {
         trigger: [ 'blur', 'change' ],

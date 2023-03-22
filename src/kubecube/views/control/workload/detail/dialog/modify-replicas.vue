@@ -1,56 +1,34 @@
 <template>
-  <u-modal
+  <el-dialog
     title="调整副本数"
-    ok-button=""
-    cancel-button=""
     :visible.sync="show"
-    size="normal"
+    width="500px"
+    :custom-class="$style.dialog"
+    :close-on-click-modal="false"
     @close="close"
   >
-    <u-form>
-      <u-form-item
+    <el-form>
+      <el-form-item
         label="副本数"
-        label-size="small"
-        :class="$style.formItem"
+        label-position="right"
+        label-width="120px"
       >
-        <u-number-input
+        <el-input-number
           ref="replicas"
           v-model="replicas"
-          style="width: 200px;"
           :min="0"
-          size="huge normal"
-        /> 个
-      </u-form-item>
-      <!-- <u-form-item label="" label-size="small" v-if="type === 'statefulsets' && minify">
-                <u-text>被缩容的实例 IP 将默认保留，以便后续扩容继续使用。请勾选需要被释放的 IP。</u-text>
-                <u-checkboxes v-model="ips">
-                    <div style="display: flex; flex-direction: column;">
-                        <u-checkbox v-for="ip in uselessPodStickys" :label="ip.name">{{ip.value}}</u-checkbox>
-                    </div>
-                </u-checkboxes>
-            </u-form-item> -->
-      <u-submit-button
-        :click="submit.bind(this)"
-        place="right"
-      >
-        <template slot-scope="scope">
-          <u-linear-layout>
-            <u-button
-              color="primary"
-              :disabled="!canSubmit || scope.submitting"
-              :icon="scope.submitting ? 'loading' : ''"
-              @click="scope.submit"
-            >
-              确定
-            </u-button>
-            <u-button @click="close">
-              取消
-            </u-button>
-          </u-linear-layout>
-        </template>
-      </u-submit-button>
-    </u-form>
-  </u-modal>
+          controls-position="right"
+          step-strictly
+          style="width:300px"
+        />
+        <span style="margin-left:8px">个</span>
+      </el-form-item>
+    </el-form>
+    <div slot="footer">
+      <el-button @click="close">取 消</el-button>
+      <el-button :disabled="!canSubmit" type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
+    </div>
+  </el-dialog>
 </template>
 <script>
 import { get as getFunc, set } from 'lodash';
@@ -70,6 +48,7 @@ export default {
             available: Infinity,
             ips: [],
             stickyIPs: [],
+            submitLoading: false,
         };
     },
     computed: {
@@ -93,29 +72,35 @@ export default {
     methods: {
         open(instance) {
             this.data = instance || this.instance;
-            console.log(this.instance)
+            console.log(this.instance);
             this.replicas = getFunc(this.data, 'spec.replicas', 0);
             this.show = true;
         },
         async submit() {
             const data = {};
             set(data, 'spec.replicas', this.replicas);
+            this.submitLoading = true;
             const name = this.data.metadata.name;
-            await workloadService.patchWorkload({
-                pathParams: {
-                    cluster: this.cluster,
-                    namespace: this.namespace,
-                    resource: this.type,
-                    name,
-                },
-                data,
-            }).then(() => {
-                this.$emit('refresh');
-                if (!this.$route.path.endsWith('/event')) {
-                    this.$router.push({ path: `/control/${this.type}/${name}/event` });
-                }
-                this.close();
-            });
+            try {
+                await workloadService.patchWorkload({
+                    pathParams: {
+                        cluster: this.cluster,
+                        namespace: this.namespace,
+                        resource: this.type,
+                        name,
+                    },
+                    data,
+                }).then(() => {
+                    this.$emit('refresh');
+                    if (!this.$route.path.endsWith('/event')) {
+                        this.$router.push({ path: `/control/${this.type}/${name}/event` });
+                    }
+                    this.close();
+                });
+            } catch (error) {
+                console.log(error);
+            }
+            this.submitLoading = false;
         },
     },
 };

@@ -1,18 +1,20 @@
 import { get } from 'lodash';
 import { make } from 'vuex-pathify';
 import { getItem } from 'kubecube/utils/persistant';
+
 const state = {
     user: getItem('user') ? JSON.parse(getItem('user')) : null,
     userRole: null,
     tenant: null,
     project: null,
     cluster: null,
-    namespace: null,
     controlClusterList: [],
+    namespace: null,
     loading: false,
     redirectMannul: false,
     clusterList: [],
     namespaceList: [],
+    userResourcesPermission: {},
 };
 let pageIdentifierCache = '';
 const getters = {
@@ -30,9 +32,10 @@ const actions = {
         commit('SET_TENANT', null);
         commit('SET_PROJECT', null);
         commit('SET_CLUSTER', null);
-        commit('SET_NAMESPACE', null);
         commit('SET_CONTROL_CLUSTER', []);
+        commit('SET_NAMESPACE', null);
         commit('SET_LOADING', false);
+        commit('SET_USER_RESOURCES_PERMISSION', {});
     },
 };
 const mutations = {

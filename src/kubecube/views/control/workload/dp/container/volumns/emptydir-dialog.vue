@@ -1,112 +1,85 @@
 <template>
-  <u-modal
+  <el-dialog
     title="配置 EmptyDir"
-    ok-button=""
-    cancel-button=""
     :visible.sync="show"
-    size="huge"
+    width="800px"
     @close="close"
+    :close-on-click-modal="false"
   >
-    <validation-observer
-      ref="observer"
-      v-slot="{ invalid }"
-    >
-      <u-notice icon="warning">
-        请设置合理大小的EmptyDir，避免影响同一个node上的其他工作负载
-      </u-notice>
-      <kube-form>
-        <kube-form-item
-          label="EmptyDir"
-          layout="block"
-          description="适用于共享运行时产生的数据、数据临时存储等场景，负载的重启、删除等操作会导致临时路径被删除"
+    <el-alert title="请设置合理大小的EmptyDir，避免影响同一个node上的其他工作负载" type="warning" show-icon :closable="false"/>
+    <el-form ref="form" :model="model" label-position="right" label-width="120px">
+      <el-form-item label="EmptyDir">
+        <div style="color: #999;">适用于共享运行时产生的数据、数据临时存储等场景，负载的重启、删除等操作会导致临时路径被删除</div>
+        <dynamicBlock
+          v-model="model.emptyDirs"
+          :getDefaultItem="getDataTemplate"
+          :columns="[
+              {
+                  title: 'EmptyDir 名称',
+                  dataIndex: 'name',
+              },
+              {
+                  title: '介质',
+                  dataIndex: 'medium'
+              },
+              {
+                  title: '大小',
+                  dataIndex: 'sizeLimit'
+              },
+              {
+                  title: '',
+                  dataIndex: 'unit',
+                  width: '60px'
+              }
+          ]"
         >
-          <kube-dynamic-block
-            v-model="emptyDirs"
-            style="width: 580px"
-            :data-template="getDataTemplate"
-          >
-            <template slot="column">
-              <th>EmptyDir 名称</th>
-              <th>介质</th>
-              <th>大小</th>
-            </template>
-            <template slot-scope="{ model: item, index }">
-              <td>
-                <validation-provider
-                  v-slot="{ errors }"
-                  :name="`EmptyDir-name-${index}`"
-                  :rules="{
-                    startsWithLowercaseLetterOrNumber: true,
-                    ConsistofLowercaseLetterNumbersUnderscores: true,
-                    endsWithLowercaseLetterOrNumber: true,
-                    noRedundance: { list: allName }
-                  }"
-                >
-                  <kube-form-item
-                    muted="no"
-                    style="width: 100%;"
-                    field-size="full"
-                    layout="none"
-                    :message="errors && errors[0]"
-                    placement="bottom"
-                  >
-                    <u-input
-                      v-model="item.name"
-                      size="huge"
-                      :color="errors && errors[0] ? 'error' : ''"
-                    />
-                  </kube-form-item>
-                </validation-provider>
-              </td>
-              <td>
-                <u-select
-                  v-model="item.medium"
-                  size="huge"
-                  :data="mediums"
-                />
-              </td>
-              <td>
-                <u-number-input
-                  v-model="item.sizeLimit"
-                  style="width: 90px;"
-                  size="huge"
-                  :min="1"
-                /> MiB
-              </td>
-            </template>
-          </kube-dynamic-block>
-        </kube-form-item>
-
-        <kube-form-item>
-          <u-submit-button
-            :click="submit.bind(this)"
-          >
-            <template slot-scope="scope">
-              <u-linear-layout>
-                <u-button
-                  color="primary"
-                  :disabled="invalid || scope.submitting"
-                  :icon="scope.submitting ? 'loading' : ''"
-                  @click="scope.submit"
-                >
-                  确定
-                </u-button>
-                <u-button
-                  @click="show = false"
-                >
-                  取消
-                </u-button>
-              </u-linear-layout>
-            </template>
-          </u-submit-button>
-        </kube-form-item>
-      </kube-form>
-    </validation-observer>
-  </u-modal>
+          <template v-slot:name="{record, index}">
+            <el-form-item 
+              label=""
+              :prop="`emptyDirs.${index}.name`"
+              :rules="[
+                validators.startsWithLowercaseLetterOrNumber(false),
+                validators.consistofLowercaseLetterNumbersUnderscores(false),
+                validators.endsWithLowercaseLetterOrNumber(false),
+                validators.noRedundance(allName, false)
+              ]"
+            >
+              <el-input
+                v-model="record.name"
+              />
+            </el-form-item>
+          </template>
+          <template v-slot:medium="{record}">
+            <el-select v-model="record.medium" placeholder="请选择" filterable>
+              <el-option
+                v-for="item in mediums"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </template>
+          <template v-slot:sizeLimit="{record}">
+            <div style="display: flex">
+              <el-input-number v-model="record.sizeLimit" controls-position="right" :min="1"/>
+            </div>
+          </template>
+          <template slot="unit">
+            MiB
+          </template>
+        </dynamicBlock>
+      </el-form-item>
+    </el-form>
+    <div slot="footer">
+      <el-button @click="close">取消</el-button>
+      <el-button type="primary" @click="submit">确定</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script>
 import { cloneDeep } from 'lodash';
+import * as validators from 'kubecube/utils/validators';
 export default {
     // mixins: [ makeVModelMixin ],
     props: {
@@ -119,12 +92,15 @@ export default {
                 { text: '内存', value: 'Memory' },
                 { text: '磁盘', value: '' },
             ],
-            emptyDirs: cloneDeep(this.podVolumes.emptyDir),
+            validators,
+            model: {
+                emptyDirs: cloneDeep(this.podVolumes.emptyDir),
+            },
         };
     },
     computed: {
         allName() {
-            return this.emptyDirs.map(m => m.name);
+            return this.model.emptyDirs.map(m => m.name);
         },
     },
     methods: {
@@ -142,11 +118,15 @@ export default {
                 sizeLimit: 300,
             };
         },
-        submit() {
-            this.$emit('change', cloneDeep(this.emptyDirs.filter(dir => dir.name)));
-            return Promise.resolve().then(() => {
-                this.show = false;
-            });
+        async submit() {
+            // 触发校验
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                return;
+            }
+            this.$emit('change', cloneDeep(this.model.emptyDirs.filter(dir => dir.name)));
+            this.close();
         },
     },
 };

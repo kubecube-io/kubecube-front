@@ -33,6 +33,9 @@ export default {
     color: var(--color-text-regular);
     text-align: center;
 }
+.more a:hover:after {
+    border-bottom: none !important;
+}
 .moreLink a {
     padding: 0 24px;
 }

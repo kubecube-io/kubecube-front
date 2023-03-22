@@ -1,109 +1,79 @@
 <template>
-  <u-modal
-    title="外部访问设置"
-    ok-button=""
-    cancel-button=""
-    :visible.sync="show"
-    size="large"
-    @close="close"
-  >
-    <validation-observer
-      ref="observer"
-      v-slot="{ invalid }"
+  <div>
+    <el-dialog
+      title="外部访问设置"
+      :visible.sync="show"
+      width="640px"
+      @close="close"
+      :close-on-click-modal="false"
     >
-      <u-form>
-        <u-loading v-if="loading" />
-        <kube-dynamic-block
-          v-else
-          v-model="data"
-          style="width: 100%;"
-          hide-close
-          :data-template="getDataTemplate"
-          :show-button="false"
-        >
-          <template slot="column">
-            <th width="100px">
-              服务端口
-            </th>
-            <th width="100px">
-              协议
-            </th>
-            <th>对外服务端口</th>
-          </template>
-          <template slot-scope="{ model, index }">
-            <td>
-              {{ model.servicePort }}
-            </td>
-            <td>
-              {{ model.protocol }}
-            </td>
-            <td>
-              <u-linear-layout>
-                <u-switch
-                  v-model="model.enable"
-                  :with-text="true"
+      <el-form ref="form" :model="data">
+        <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
+        <el-form-item v-else>
+          <dynamicBlock
+            v-model="data"
+            :getDefaultItem="getDataTemplate"
+            :showDeleteBtn="false"
+            :showAddBtn="false"
+            :columns="[
+                {
+                    title: '服务端口',
+                    dataIndex: 'servicePort',
+                },
+                {
+                    title: '协议',
+                    dataIndex: 'protocol',
+                },
+                {
+                    title: '对外服务端口',
+                    dataIndex: 'ex',
+                    width: '250px'
+                },
+                {
+                    title: '服务端口名称',
+                    dataIndex: 'servicePortName',
+                },
+            ]"
+          >
+            <template v-slot:ex="{record: dataModel, index: dataIndex}">
+              <div style="display:flex;align-items:center">
+                <el-switch
+                  v-model="dataModel.enable"
+                  style="margin-right:8px"
+                  @change="dataModel.ex = ''"
                 />
-                <validation-provider
-                  v-slot="{ errors }"
-                  :name="`external-port-${index}`"
-                  :rules="{
-                    required: model.enable,
-                    ConsistofNumber: true,
-                    NumberBetween: { min: 1, max: 65535 },
-                  }"
-                  style="flex: 1"
+                <el-form-item 
+                  label=""
+                  :prop="`${dataIndex}.ex`"
+                  :rules="[
+                    validators.consistofNumber(false),
+                    validators.numberBetween(1, 65535, false),
+                  ]"
                 >
-                  <kube-form-item
-                    muted="no"
-                    style="max-width: 100%;margin-top: 5px"
-                    field-size="full"
-                    layout="none"
-                    :message="errors && errors[0]"
-                    placement="bottom"
-                  >
-                    <u-input
-                      v-model="model.ex"
-                      size="normal huge"
-                      :disabled="!model.enable"
-                      :color="errors && errors[0] ? 'error' : ''"
-                      placeholder="1-65535内的整数"
-                    />
-                  </kube-form-item>
-                </validation-provider>
-              </u-linear-layout>
-            </td>
-          </template>
-        </kube-dynamic-block>
-        <u-submit-button
-          :click="submit.bind(this)"
-          place="right"
-        >
-          <template slot-scope="scope">
-            <u-linear-layout>
-              <u-button
-                color="primary"
-                :disabled="invalid || scope.submitting"
-                :icon="scope.submitting ? 'loading' : ''"
-                @click="scope.submit"
-              >
-                确定
-              </u-button>
-              <u-button @click="close">
-                取消
-              </u-button>
-            </u-linear-layout>
-          </template>
-        </u-submit-button>
-      </u-form>
-    </validation-observer>
-  </u-modal>
+                  <el-input
+                    v-model="dataModel.ex"
+                    placeholder="1-65535内的整数"
+                    :disabled="!dataModel.enable"
+                  />
+                </el-form-item>
+              </div>
+            </template>
+          </dynamicBlock>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="close">取 消</el-button>
+        <el-button type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
 <script>
 import { get as getFunc } from 'lodash';
 import { get } from 'vuex-pathify';
 import { Modal } from '@micro-app/common/mixins';
 import extendWorkloadService from 'kubecube/services/k8s-extend-resource';
-
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ Modal ],
     props: {
@@ -111,8 +81,10 @@ export default {
     },
     data() {
         return {
+            validators,
             data: [],
             loading: false,
+            submitLoading: false,
         };
     },
     computed: {
@@ -145,27 +117,40 @@ export default {
         resolver(response) {
             return (response || []).map(i => ({
                 ...i,
-                ex: getFunc(i, 'externalPorts[0]', ''),
-                enable: (i.externalPorts || []).length > 0,
+                ex: getFunc(i, 'externalPort', ''),
+                enable: !!i.externalPort,
             }));
         },
         getDataTemplate() {
             return {};
         },
         async submit() {
-            const data = this.data.map(i => (i.enable ? {
-                protocol: i.protocol,
-                servicePort: i.servicePort,
-                externalPorts: [ parseInt(i.ex) ],
-            } : {
-                protocol: i.protocol,
-                servicePort: i.servicePort,
-            }));
-            await extendWorkloadService.setExternalAddressInService({
-                ...this.requestParam,
-                data,
-            });
-            this.close();
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                console.log(error);
+                return;
+            }
+            this.submitLoading = true;
+            try {
+                const data = this.data.map(i => (i.enable ? {
+                    protocol: i.protocol,
+                    servicePort: i.servicePort,
+                    externalPort: parseInt(i.ex),
+                } : {
+                    protocol: i.protocol,
+                    servicePort: i.servicePort,
+                }));
+                await extendWorkloadService.setExternalAddressInService({
+                    ...this.requestParam,
+                    data,
+                });
+                this.$emit('refresh');
+                this.close();
+            } catch (error) {
+                console.log(error);
+            }
+            this.submitLoading = false;
         },
     },
 };

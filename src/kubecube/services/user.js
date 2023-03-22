@@ -106,6 +106,10 @@ const userService = Service({
             method: 'get',
             url: 'extend/feature-config',
         },
+        getUserResourcesPermission: {
+            method: 'post',
+            url: '/authorization/resources',
+        },
     },
 });
 

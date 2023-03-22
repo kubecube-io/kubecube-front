@@ -10,7 +10,7 @@ import {
     flatten,
     get,
     cloneDeep,
-    omit
+    omit,
 } from 'lodash';
 import { unitConvert } from 'kubecube/utils/functional';
 import { RESOURCE_REQUEST_MAP } from 'kubecube/utils/constance';
@@ -505,9 +505,13 @@ const refactVolumes = (
         });
     });
     otherVolume.forEach(p => {
-        volumeMounts.push(p.volumeMounts);
+        if (!volumeMounts.find(item => item.name === p.volumeMounts.name)) {
+            volumeMounts.push(p.volumeMounts);
+        }
         if (!podVolumesYaml.otherVolume.find(v => v.name === p.volume.name)) {
-            podVolumesYaml.otherVolume.push(p.volume);
+            if (p.volume) {
+                podVolumesYaml.otherVolume.push(p.volume);
+            }
         }
     });
     return volumeMounts;
@@ -713,7 +717,7 @@ export const getDefaultContainer = () => ({
             command: '',
             host: '',
             path: '',
-            port: 1,
+            port: 8080,
             httpHeaders: [],
         },
         readiness: { // 就绪探针
@@ -727,7 +731,7 @@ export const getDefaultContainer = () => ({
             command: '',
             host: '',
             path: '',
-            port: 1,
+            port: 8080,
             httpHeaders: [],
         },
         preStop: { //生命周期-停止前
@@ -736,7 +740,7 @@ export const getDefaultContainer = () => ({
             command: '',
             host: '',
             path: '',
-            port: 1,
+            port: 8080,
             httpHeaders: [],
         },
         postStart: { // 生命周期-启动后
@@ -745,7 +749,7 @@ export const getDefaultContainer = () => ({
             command: '',
             host: '',
             path: '',
-            port: 1,
+            port: 8080,
             httpHeaders: [],
         },
     },

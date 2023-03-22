@@ -1,12 +1,24 @@
 <template>
   <div>
-    <u-linear-layout style="margin-bottom: 20px;">
-      <u-select
+    <div style="margin-bottom: 12px;">
+      <el-select
+        v-model="currentStatus"
+        style="width: 200px"
+      >
+        <el-option
+            v-for="item in statusList"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value"
+            :title="item.text"
+        />
+      </el-select>
+      <!-- <u-select
         v-model="currentStatus"
         size="large normal"
         :data="statusList"
-      />
-    </u-linear-layout>
+      /> -->
+    </div>
     <x-request
       ref="request"
       :service="jobService"
@@ -14,30 +26,56 @@
       :processor="resolver"
     >
       <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :columns="columns"
-          :loading="loading"
-          :error="error"
-          :items="data || []"
+        <el-table
+          v-loading="loading"
+          :data="data || []"
+          style="width: 100%"
+          border
         >
-          <template #[`item.status.runningStatus`]="{ item }">
-            {{ item.status.runningStatus | getJobStatusText }}
-          </template>
-          <template #[`item.jobstatus`]="{ item }">
-            {{ item.status.succeeded }} / {{ item.spec && item.spec.completions }}
-          </template>
-          <template #[`item.period`]="{ item }">
-            {{ getJobPeriod(item) }}
-          </template>
-          <template #[`item.operation`]="{ item }">
-            <u-link-list>
-              <u-link-list-item @click="deleteItem(item)">
+          <el-table-column
+            prop="metadata.name"
+            label="名称"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="status.runningStatus"
+            label="状态"
+            width="160"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status.runningStatus | getJobStatusText }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="jobstatus"
+            label="执行情况（完成/全部）"
+            width="200"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status.succeeded || 0 }} / {{ row.spec && row.spec.completions || 0 }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="period"
+            label="运行时长"
+            width="200"
+          >
+            <template slot-scope="{ row }">
+              {{ getJobPeriod(row) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="operation"
+            label="操作"
+            width="100"
+          >
+            <template slot-scope="{ row }">
+              <el-link type="primary" @click="deleteItem(row)">
                 删除
-              </u-link-list-item>
-            </u-link-list>
-          </template>
-        </kube-table>
+              </el-link>
+            </template>
+          </el-table-column>
+        </el-table>
       </template>
     </x-request>
   </div>
@@ -76,13 +114,6 @@ export default {
             jobService: extendWorkloadService.getInstance,
             currentStatus: statusList[0].value,
             statusList,
-            columns: [
-                { title: '名称', name: 'metadata.name', sortable: true },
-                { title: '状态', name: 'status.runningStatus', width: '160px' },
-                { title: '执行情况（完成/全部）', name: 'jobstatus', width: '200px', sortable: true },
-                { title: '运行时长', name: 'period', width: '160px', sortable: true },
-                { title: '操作', name: 'operation', sortable: false, width: '100px' },
-            ],
         };
     },
     computed: {
@@ -127,9 +158,10 @@ export default {
 
         },
         deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确定删除 ${item.metadata.name} 吗？`,
+                width: '460px',
                 ok: async () => {
                     const reqParam = {
                         pathParams: {
@@ -142,7 +174,7 @@ export default {
                     await workloadService.deleteBatchInstance(reqParam);
                     this.$refs.request.request();
                 },
-            });
+            })
         },
     },
 };

@@ -1,117 +1,97 @@
 <template>
-  <kube-form-item
-    layout="block"
-    label="挂载数据卷"
-    description="RWO类型存储声明，不支持多副本挂载，请设置副本数为1"
-  >
-    <kube-tab
-      :list="tabs"
-      title-key="title"
-      tab-key="tab"
-      :error-prefix="errorPrefix"
-      disabled
-    >
-      <template #[`pvc.tab`]>
-        <span
-          v-if="pvcLength"
-          :class="$style.indicator"
-        >
-          {{ pvcLength }}
-        </span>
-      </template>
-      <template #pvc="{ errorPrefix: prefix }">
-        <pvc-config
-          v-model="model.pvc"
-          :prefix-key="prefix"
-          :volume="model"
-        />
-      </template>
-      <template #[`configmap.tab`]>
-        <span
-          v-if="configmapLength"
-          :class="$style.indicator"
-        >
-          {{ configmapLength }}
-        </span>
-      </template>
-      <template #configmap="{ errorPrefix: prefix }">
-        <configmap-config
-          v-model="model.configmap"
-          :prefix-key="prefix"
-          :volume="model"
-        />
-      </template>
-      <template #[`secret.tab`]>
-        <span
-          v-if="secretLength"
-          :class="$style.indicator"
-        >
-          {{ secretLength }}
-        </span>
-      </template>
-      <template #secret="{ errorPrefix: prefix }">
-        <secret-config
-          v-model="model.secret"
-          :prefix-key="prefix"
-          :volume="model"
-        />
-      </template>
-      <template #[`emptyDir.tab`]>
-        <span
-          v-if="emptyDirLength"
-          :class="$style.indicator"
-        >
-          {{ emptyDirLength }}
-        </span>
-      </template>
-      <template #emptyDir="{ errorPrefix: prefix }">
-        <empty-dir-config
-          v-model="model.emptyDir"
-          :prefix-key="prefix"
-          :volume="model"
-          :pod-volumes="podVolumes"
-          :open-dialog="openDialog"
-        />
-      </template>
-      <template #[`hostpath.tab`]>
-        <span
-          v-if="hostpathLength"
-          :class="$style.indicator"
-        >
-          {{ hostpathLength }}
-        </span>
-      </template>
-      <template #hostpath="{ errorPrefix: prefix }">
-        <host-path-config
-          v-model="model.hostpath"
-          :prefix-key="prefix"
-          :volume="model"
-        />
-      </template>
-      <template #[`vct.tab`]>
-        <span
-          v-if="vctLength"
-          :class="$style.indicator"
-        >
-          {{ vctLength }}
-        </span>
-      </template>
-      <template #vct="{ errorPrefix: prefix }">
-        <vct-config
-          v-model="model.vct"
-          :prefix-key="prefix"
-          :storage="storage"
-          :volume="model"
-        />
-        <!-- <host-path-config
-          v-model="model.vct"
-          :prefix-key="prefix"
-          :volume="model"
-          :storage="storage"
-        /> -->
-      </template>
-    </kube-tab>
-  </kube-form-item>
+  <div>
+    <el-form-item label="挂载数据卷">
+      <div style="color: #999;">RWO类型存储声明，不支持多副本挂载，请设置副本数为1</div>
+      <dynamicTab
+        :value="tabs"
+        :showAddBtn="false"
+        :showDeleteBtn="false"
+      >
+        <template v-slot:tabNav="{item}">
+          {{item.title}}
+          <span
+            v-if="item.tab === 'pvc' && pvcLength"
+            :class="$style.indicator"
+          >
+            {{ pvcLength }}
+          </span>
+          <span
+            v-if="item.tab === 'configmap' && configmapLength"
+            :class="$style.indicator"
+          >
+            {{ configmapLength }}
+          </span>
+          <span
+            v-if="item.tab === 'secret' && secretLength"
+            :class="$style.indicator"
+          >
+            {{ secretLength }}
+          </span>
+          <span
+            v-if="item.tab === 'emptyDir' && emptyDirLength"
+            :class="$style.indicator"
+          >
+            {{ emptyDirLength }}
+          </span>
+          <span
+            v-if="item.tab === 'hostpath' && hostpathLength"
+            :class="$style.indicator"
+          >
+            {{ hostpathLength }}
+          </span>
+          <span
+            v-if="item.tab === 'vct' && vctLength"
+            :class="$style.indicator"
+          >
+            {{ vctLength }}
+          </span>
+          <i v-if="hasError(item.tab, validateStatus)" :class="['el-icon-warning', $style.errorIcon]"/>
+        </template>
+        <template slot-scope="{item}">
+          <pvc-config
+            v-if="item.tab === 'pvc'"
+            v-model="model.pvc"
+            :volume="model"
+            :prefixKey="`${errorPrefix}.${item.tab}`"
+          />
+          <configmap-config
+            v-if="item.tab === 'configmap'"
+            v-model="model.configmap"
+            :prefixKey="`${errorPrefix}.${item.tab}`"
+            :volume="model"
+            :image="image"
+          />
+          <secret-config
+            v-if="item.tab === 'secret'"
+            v-model="model.secret"
+            :prefixKey="`${errorPrefix}.${item.tab}`"
+            :volume="model"
+          />
+          <empty-dir-config
+            v-if="item.tab === 'emptyDir'"
+            v-model="model.emptyDir"
+            :prefixKey="`${errorPrefix}.${item.tab}`"
+            :volume="model"
+            :pod-volumes="podVolumes"
+            :open-dialog="openDialog"
+          />
+          <host-path-config
+            v-if="item.tab === 'hostpath'"
+            v-model="model.hostpath"
+            :prefixKey="`${errorPrefix}.${item.tab}`"
+            :volume="model"
+          />
+          <vct-config
+            v-if="item.tab === 'vct'"
+            v-model="model.vct"
+            :prefixKey="`${errorPrefix}.${item.tab}`"
+            :storage="storage"
+            :volume="model"
+          />
+        </template>
+      </dynamicTab>
+    </el-form-item>
+  </div>
 </template>
 
 <script>
@@ -140,11 +120,25 @@ export default {
         vctConfig,
     },
     mixins: [ makeVModelMixin ],
+    inject: [ 'elForm' ],
     props: {
         storage: Array,
         errorPrefix: String,
         podVolumes: Object,
         openDialog: Function,
+        image: String,
+    },
+    data() {
+        return {
+            validateStatus: {},
+        };
+    },
+    watch: {
+        model: {
+            handler() {
+                this.validateStatus = {};
+            },
+        },
     },
     computed: {
         tabs() {
@@ -180,22 +174,55 @@ export default {
             return this.model.vct.filter(p => p.mountPath && p.name).length;
         },
     },
+    mounted() {
+        this.elForm && this.elForm.$on('validate', this.validateListener);
+    },
+    destroyed() {
+        this.elForm && this.elForm.$off('validate', this.validateListener);
+    },
+    methods: {
+        validateListener(prop, valid, message) {
+            if (this.errorPrefix && prop.startsWith(`${this.errorPrefix}.`)) {
+                const key = prop.slice(`${this.errorPrefix}`.length).split('.')[1];
+                if (this.validateStatus[key]) {
+                    this.validateStatus[key][prop] = { valid, message };
+                } else {
+                    this.validateStatus[key] = {};
+                    this.validateStatus[key][prop] = { valid, message };
+                }
+                this.validateStatus = { ...this.validateStatus };
+            }
+        },
+        hasError(index, validateStatus) {
+            const status = validateStatus[index];
+            const keys = status ? Object.keys(status) : [];
+            return keys.some(key => status[key] && !status[key].valid);
+        },
+    },
 };
 </script>
 
 <style module>
 .indicator{
-    display: inline-block;
-    position: absolute;
-    width: 1.25em;
-    height: 1.25em;
-    line-height: 1.25em;
-    background: #cad4e4;
-    color: #fff;
-    border-radius: 100%;
-    right: 4px;
-    text-align: center;
-    top: 3px;
-    font-size: .8em;
+  display: inline-block;
+  position: absolute;
+  width: 1.25em;
+  height: 1.25em;
+  line-height: 1.25em;
+  background: #cad4e4;
+  color: #fff;
+  border-radius: 100%;
+  right: 4px;
+  text-align: center;
+  top: 3px;
+  font-size: .8em;
+}
+.errorIcon{
+  font-size: 14px;
+  color: #f54545;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  left: 4px;
 }
 </style>

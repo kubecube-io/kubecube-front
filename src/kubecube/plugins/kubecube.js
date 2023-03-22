@@ -26,6 +26,21 @@ import kubeLabelEditor from 'kubecube/component/global/k8s/label-editor';
 import kubePlainLabelEditor from 'kubecube/component/global/k8s/plain-label-editor.vue';
 import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue';
 import qzLinkGroup from 'kubecube/elComponent/qz-link-group';
+import statusIcon from 'kubecube/elComponent/status-icon';
+import elLink from 'kubecube/elComponent/el-Link';
+import headCard from 'kubecube/elComponent/head-card';
+import operateList from 'kubecube/elComponent/operate-list/index.vue';
+import operateButtonOption from 'kubecube/elComponent/operate-list/operate-button-option.vue';
+import qzTerminal from 'kubecube/elComponent/qz-terminal';
+import dynamicBlock from 'kubecube/elComponent/dynamic-block';
+import dynamicCard from 'kubecube/elComponent/dynamic-card';
+import dynamicTab from 'kubecube/elComponent/dynamic-tab.vue';
+import QzEditor from 'kubecube/elComponent/qz-editor';
+import LabelEditor from 'kubecube/elComponent/label-editor.vue';
+import EnhanceQzEditor from 'kubecube/elComponent/enhance-qz-editor';
+
+
+
 
 // elComponent
 import elInputSearch from 'kubecube/elComponent/inputSearch';
@@ -61,9 +76,24 @@ function addEllipsis(el, length) {
     el.innerHTML = nodeElem;
     el.appendChild(href);
 }
-
+// 引入Element
+import ElementUI from 'element-ui';
+Vue.use(ElementUI, { size: 'medium' });
 Vue.use({
     install(_Vue) {
+        _Vue.component('EnhanceQzEditor', EnhanceQzEditor);
+        _Vue.component('LabelEditor', LabelEditor);
+        _Vue.component('QzEditor', QzEditor);
+        _Vue.component('DynamicTab', dynamicTab);
+        _Vue.component('DynamicCard', dynamicCard);
+        _Vue.component('DynamicBlock', dynamicBlock);
+        _Vue.component('QzTerminal', qzTerminal);
+        _Vue.component('OperateButtonOption', operateButtonOption);
+        _Vue.component('OperateList', operateList);
+        _Vue.component('HeadCard', headCard);
+        _Vue.component('HeadCard', headCard);
+        _Vue.component('ElLink', elLink);
+        _Vue.component('StatusIcon', statusIcon);
         _Vue.component('QzLinkGroup', qzLinkGroup);
         _Vue.component('ElInputSearch', elInputSearch);
         _Vue.component('XRequest', xRequest);

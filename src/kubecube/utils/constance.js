@@ -78,9 +78,10 @@ export const JOB_STATUS_MAP = {
 };
 
 export const CLUSTER_STATUS_MAP = {
-    health: '正常',
-    unhealth: '异常',
-    unhealthy: '异常',
+    normal: '正常',
+    abnormal: '不正常',
+    processing: '运行中',
+    deleting: '删除中',
 };
 
 export const SERVICE_LOAD_BALANCER_IP_TYPE_MAP = {

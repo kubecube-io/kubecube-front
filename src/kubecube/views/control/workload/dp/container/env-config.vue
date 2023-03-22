@@ -1,88 +1,81 @@
 <template>
-  <kube-form-item
-    label="环境变量"
-    layout="block"
-  >
-    <kube-tab
-      :list="tabs"
-      title-key="title"
-      tab-key="tab"
-      :error-prefix="errorPrefix"
-      disabled
-    >
-      <template #[`configmap.tab`]>
-        <span
-          v-if="configmapLength"
-          :class="$style.indicator"
-        >
-          {{ configmapLength }}
-        </span>
-      </template>
-      <template #configmap="{ errorPrefix: prefix }">
-        <configmap-config
-          v-model="model.configMapKeyRef"
-          :prefix-key="prefix"
-        />
-      </template>
-      <template #[`value.tab`]>
-        <span
-          v-if="valueLength"
-          :class="$style.indicator"
-        >
-          {{ valueLength }}
-        </span>
-      </template>
-      <template #value="{ errorPrefix: prefix }">
-        <value-config
-          v-model="model.value"
-          :prefix-key="prefix"
-        />
-      </template>
-      <template #[`secret.tab`]>
-        <span
-          v-if="secretLength"
-          :class="$style.indicator"
-        >
-          {{ secretLength }}
-        </span>
-      </template>
-      <template #secret="{ errorPrefix: prefix }">
-        <secret-config
-          v-model="model.secretKeyRef"
-          :prefix-key="prefix"
-        />
-      </template>
-      <template #[`field.tab`]>
-        <span
-          v-if="fieldLength"
-          :class="$style.indicator"
-        >
-          {{ fieldLength }}
-        </span>
-      </template>
-      <template #field="{ errorPrefix: prefix }">
-        <field-config
-          v-model="model.fieldRef"
-          :prefix-key="prefix"
-        />
-      </template>
-      <template #[`resource.tab`]>
-        <span
-          v-if="resourceLength"
-          :class="$style.indicator"
-        >
-          {{ resourceLength }}
-        </span>
-      </template>
-      <template #resource="{ errorPrefix: prefix }">
-        <resource-config
-          v-model="model.resourceFieldRef"
-          :containers="containers"
-          :prefix-key="prefix"
-        />
-      </template>
-    </kube-tab>
-  </kube-form-item>
+  <div>
+    <el-form-item label="环境变量">
+      <dynamicTab
+        :value="tabs"
+        :showAddBtn="false"
+        :showDeleteBtn="false"
+      >
+        <template v-slot:tabNav="{item}">
+          {{item.title}}
+          <span
+            v-if="item.tab === 'value' && valueLength"
+            :class="$style.indicator"
+          >
+            {{ valueLength }}
+          </span>
+          <span
+            v-if="item.tab === 'secretKeyRef' && secretLength"
+            :class="$style.indicator"
+          >
+            {{ secretLength }}
+          </span>
+          <span
+            v-if="item.tab === 'configMapKeyRef' && configmapLength"
+            :class="$style.indicator"
+          >
+            {{ configmapLength }}
+          </span>
+          <span
+            v-if="item.tab === 'fieldRef' && fieldLength"
+            :class="$style.indicator"
+          >
+            {{ fieldLength }}
+          </span>
+          <span
+            v-if="item.tab === 'resourceFieldRef' && resourceLength"
+            :class="$style.indicator"
+          >
+            {{ resourceLength }}
+          </span>
+          <i v-if="hasError(item.tab, validateStatus)" :class="['el-icon-warning', $style.errorIcon]"/>
+        </template>
+        <template slot-scope="{item}">
+          <value-config
+            v-if="item.tab === 'value'"
+            v-model="model.value"
+            :prefix-key="`${errorPrefix}.${item.tab}`"
+            :existKeys="existKeys"
+          />
+          <secret-config
+            v-if="item.tab === 'secretKeyRef'"
+            v-model="model.secretKeyRef"
+            :prefix-key="`${errorPrefix}.${item.tab}`"
+            :existKeys="existKeys"
+          />
+          <configmap-config
+            v-if="item.tab === 'configMapKeyRef'"
+            v-model="model.configMapKeyRef"
+            :existKeys="existKeys"
+            :prefix-key="`${errorPrefix}.${item.tab}`"
+          />
+          <field-config
+            v-if="item.tab === 'fieldRef'"
+            v-model="model.fieldRef"
+            :prefix-key="`${errorPrefix}.${item.tab}`"
+            :existKeys="existKeys"
+          />
+          <resource-config
+            v-if="item.tab === 'resourceFieldRef'"
+            v-model="model.resourceFieldRef"
+            :containers="containers"
+            :prefix-key="`${errorPrefix}.${item.tab}`"
+            :existKeys="existKeys"
+          />
+        </template>
+      </dynamicTab>
+    </el-form-item>
+  </div>
 </template>
 
 <script>
@@ -105,18 +98,35 @@ export default {
         errorPrefix: String,
         containers: Array,
     },
+    inject: [ 'elForm' ],
     data() {
         return {
             tabs: [
                 { tab: 'value', title: '值' },
-                { tab: 'secret', title: 'Secret' },
-                { tab: 'configmap', title: 'Configmap' },
-                { tab: 'field', title: 'Field' },
-                { tab: 'resource', title: 'Resource' },
+                { tab: 'secretKeyRef', title: 'Secret' },
+                { tab: 'configMapKeyRef', title: 'Configmap' },
+                { tab: 'fieldRef', title: 'Field' },
+                { tab: 'resourceFieldRef', title: 'Resource' },
             ],
-        };
+            validateStatus: {}
+        }
+    },
+    watch: {
+        model: {
+            handler() {
+                this.validateStatus = {};
+            },
+        },
     },
     computed: {
+        existKeys() {
+            const typeKeys = Object.keys(this.model)
+            const res = [];
+            typeKeys.forEach(type => {
+                res.push(...(this.model[type] || []).map(i => i.key))
+            });
+            return res.filter(i => i);
+        },
         valueLength() {
             return this.model.value.filter(p => p.key && p.value).length;
         },
@@ -131,6 +141,31 @@ export default {
         },
         resourceLength() {
             return this.model.resourceFieldRef.filter(p => p.key && p.resource && p.resoueceKey).length;
+        },
+    },
+    mounted() {
+        this.elForm && this.elForm.$on('validate', this.validateListener);
+    },
+    destroyed() {
+        this.elForm && this.elForm.$off('validate', this.validateListener);
+    },
+    methods: {
+        validateListener(prop, valid, message) {
+            if (this.errorPrefix && prop.startsWith(`${this.errorPrefix}.`)) {
+                const key = prop.slice(`${this.errorPrefix}`.length).split('.')[1];
+                if (this.validateStatus[key]) {
+                    this.validateStatus[key][prop] = { valid, message };
+                } else {
+                    this.validateStatus[key] = {};
+                    this.validateStatus[key][prop] = { valid, message };
+                }
+                this.validateStatus = { ...this.validateStatus };
+            }
+        },
+        hasError(index, validateStatus) {
+            const status = validateStatus[index];
+            const keys = status ? Object.keys(status) : [];
+            return keys.some(key => status[key] && !status[key].valid);
         },
     },
 };
@@ -150,5 +185,13 @@ export default {
     text-align: center;
     top: 3px;
     font-size: .8em;
+}
+.errorIcon{
+  font-size: 14px;
+  color: #f54545;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  left: 4px;
 }
 </style>

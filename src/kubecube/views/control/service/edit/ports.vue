@@ -1,174 +1,143 @@
 <template>
-  <validation-provider
-    ref="provider"
-    :name="name"
-    :detect-input="false"
-    :rules="{
-      arrayRequired: {
-        filterkey: required ? ( isNodePort ? ['name', 'targetPort', 'port', 'nodePort'] : ['name', 'targetPort', 'port']) : ''
-      },
-    }"
-  >
-    <kube-form-item
+  <div>
+    <el-form-item
       label="Ports"
-      layout="block"
-      :required="required"
+      :prop="prefixProp"
+      :rules="[
+        ...(required ? [ validators.required() ] : []),
+        validators.arrayRequired(required ? ( isNodePort ? ['name', 'targetPort', 'port'] : ['name', 'targetPort', 'port']) : ''),
+      ]"
+      :class="$style.wrapFromItem"
     >
-      <kube-dynamic-block
+      <dynamicBlock
         v-model="model"
-        style="width: 580px"
-        :data-template="getDataTemplate"
+        :getDefaultItem="getDataTemplate"
+        :columns="[
+            {
+                title: 'TargetPort',
+                dataIndex: 'targetPort',
+            },
+            {
+                title: '协议',
+                dataIndex: 'protocol',
+            },
+            {
+                title: '服务端口',
+                dataIndex: 'port',
+            },
+            ...(isNodePort ? [ { title: 'NodePort', dataIndex: 'nodePort' }] : []),
+            {
+                title: '名称',
+                dataIndex: 'name'
+            }
+        ]"
       >
-        <template slot="column">
-          <th>目标端口</th>
-          <th>协议</th>
-          <th>服务端口</th>
-          <th v-if="isNodePort">
-            NodePort
-            <u-note>NodePort 方式下，可以直接指定暴露的 NodePort 端口，也可以让系统随机分配一个端口，端口将会在【30000~32767】之间，可以到Service详情中查看分配的端口</u-note>
-          </th>
-          <th>名称</th>
+        <template slot="th-targetPort">
+          目标端口
+          <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+            <template slot="content">
+              pod的端口
+            </template>
+            <i class="el-icon-question"/>
+          </el-tooltip>
         </template>
-        <template slot-scope="{ model, index }">
-          <td>
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`TargetPort-${index}`"
-              :rules="{
-                ConsistofNumber: true,
-                NumberBetween: { min: 1, max: 65535 },
-              }"
-            >
-              <kube-form-item
-                muted="no"
-                style="width: 100%;"
-                field-size="full"
-                layout="none"
-                :message="errors && errors[0]"
-                placement="bottom"
-              >
-                <u-input
-                  v-model="model.targetPort"
-                  size="normal huge"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  placeholder="1-65535内的整数"
-                />
-              </kube-form-item>
-            </validation-provider>
-          </td>
-
-          <td>
-            <u-select
-              v-model="model.protocol"
-              size="huge normal"
-            >
-              <u-select-item value="TCP">
-                TCP
-              </u-select-item>
-              <u-select-item
-                v-if="showUdp"
-                value="UDP"
-              >
-                UDP
-              </u-select-item>
-            </u-select>
-          </td>
-
-          <td>
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`Port-${index}`"
-              :rules="{
-                ConsistofNumber: true,
-                NumberBetween: { min: 1, max: 65535 },
-                noRedundance: { list: exsitKeys }
-              }"
-            >
-              <kube-form-item
-                muted="no"
-                style="width: 100%;"
-                field-size="full"
-                layout="none"
-                :message="errors && errors[0]"
-                placement="bottom"
-              >
-                <u-input
-                  v-model="model.port"
-                  size="normal huge"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  placeholder="1-65535内的整数"
-                />
-              </kube-form-item>
-            </validation-provider>
-          </td>
-
-          <td v-if="isNodePort">
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`nodePort-${index}`"
-              :rules="{
-                ConsistofNumber: true,
-                NumberBetween: { min: 30000, max: 32767 },
-              }"
-            >
-              <kube-form-item
-                muted="no"
-                style="width: 100%;"
-                field-size="full"
-                layout="none"
-                :message="errors && errors[0]"
-                placement="bottom"
-              >
-                <u-input
-                  v-model="model.nodePort"
-                  size="normal huge"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  placeholder="30000-32767，默认随机"
-                />
-              </kube-form-item>
-            </validation-provider>
-          </td>
-
-          <td>
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`Name-${index}`"
-              :rules="{
-                startsWithLowercaseLetter: true,
-                ConsistoLetterNumbersUnderscores: true,
-                endsWithLowercaseLetterOrNumber: true,
-                noRedundance: { list: exsitNames }
-              }"
-            >
-              <kube-form-item
-                muted="no"
-                style="width: 100%;"
-                field-size="full"
-                layout="none"
-                :message="errors && errors[0]"
-                placement="bottom"
-              >
-                <u-input
-                  v-model="model.name"
-                  size="normal huge"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  maxlength="63"
-                  placeholder="1-63位小写字母、数字或中划线组成，字母和数字开头和结尾"
-                />
-              </kube-form-item>
-            </validation-provider>
-          </td>
+        <template slot="th-port">
+          服务端口
+          <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+            <template slot="content">
+              k8s集群内部访问service的端口
+            </template>
+            <i class="el-icon-question"/>
+          </el-tooltip>
         </template>
-      </kube-dynamic-block>
-    </kube-form-item>
-  </validation-provider>
+        <template slot="th-nodePort">
+          NodePort
+          <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+            <template slot="content">
+              NodePort 为通过节点转发的访问端口，为空时K8s默认会自动在【30000~32767】之间随机分配，可能会与其他应用产生冲突，强烈建议该端口由管理员统一分配使用。
+            </template>
+            <i class="el-icon-question"/>
+          </el-tooltip>
+        </template>
+        <template v-slot:targetPort="{record: portModel, index: portIndex}">
+          <el-form-item
+            label=""
+            :prop="`${prefixProp}.${portIndex}.targetPort`"
+            :rules="[
+              validators.consistofNumber(false),
+              validators.numberBetween(1, 65535, false),
+            ]"
+          >
+            <el-input v-model="portModel.targetPort" placeholder="1-65535内的整数"/>
+          </el-form-item>
+        </template>
+        <template v-slot:protocol="{record: portModel}">
+          <el-select
+            v-model="portModel.protocol"
+          >
+            <el-option label="TCP" value="TCP"/>
+            <el-option v-if="showUdp" label="UDP" value="UDP"/>
+          </el-select>
+        </template>
+        <template v-slot:port="{record: portModel, index: portIndex}">
+          <el-form-item
+            label=""
+            :prop="`${prefixProp}.${portIndex}.port`"
+            :rules="[
+              validators.consistofNumber(false),
+              validators.numberBetween(1, 65535, false),
+              validators.enhanceNoRedundance(exsitKeys, `${portModel.protocol}-${portModel.port}`, false),
+            ]"
+          >
+            <el-input v-model="portModel.port" placeholder="1-65535内的整数"/>
+          </el-form-item>
+        </template>
+        <template v-slot:nodePort="{record: portModel, index: portIndex}">
+          <el-form-item 
+            label=""
+            :prop="`${prefixProp}.${portIndex}.nodePort`"
+            :rules="[
+              validators.consistofNumber(false),
+              validators.numberBetween(30000, 32767, false),
+            ]"
+          >
+            <el-input v-model="portModel.nodePort" placeholder="30000-32767，默认随机"/>
+          </el-form-item>
+        </template>
+        <template v-slot:name="{record: portModel, index: portIndex}">
+          <el-form-item
+            label=""
+            :prop="`${prefixProp}.${portIndex}.name`"
+            :rules="[
+              validators.consistoLetterNumbersUnderscores(false),
+              validators.endsWithLowercaseLetterOrNumber(false),
+              validators.noRedundance(exsitNames, false),
+              validators.lengthBetween(1, 63, false),
+            ]"
+          >
+            <el-input v-model="portModel.name" placeholder="1-63位小写字母、数字或中划线组成，字母和数字开头和结尾"/>
+          </el-form-item>
+        </template>
+      </dynamicBlock>
+      <el-alert
+        v-if="isEdit"
+        title="修改Ports名称会导致对应的对外服务端口失效，需要重新设置对应的对外服务端口"
+        type="info"
+        show-icon
+        :closable="false"
+        style="line-height: 22px;margin-top:4px"
+      >
+      </el-alert>
+    </el-form-item>
+  </div>
 </template>
-
 <script>
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 const CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin ],
+    inject: [ 'elForm' ],
     props: {
         name: {
             type: String,
@@ -187,6 +156,15 @@ export default {
             type: Boolean,
             default: false,
         },
+        prefixProp: {
+          type: String,
+          default: '',
+        }
+    },
+    data() {
+      return {
+        validators
+      }
     },
     computed: {
         exsitKeys() {
@@ -197,21 +175,38 @@ export default {
         },
     },
     watch: {
-        model: {
+        // model: {
+        //     handler(val) {
+        //         this.$nextTick(() => {
+        //           this.elForm.validateField(this.prefixProp);
+        //         });
+        //     },
+        //     deep: true,
+        // },
+        required() {
+            this.$nextTick(() => {
+                this.elForm.validateField(this.prefixProp);
+            });
+        },
+    },
+    mounted() {
+        this.$watch('model', {
             handler(val) {
-                this.$refs.provider.validate(val);
+                this.$nextTick(() => {
+                    this.elForm.validateField(this.prefixProp);
+                });
             },
             deep: true,
-        },
+        });
     },
     methods: {
         getRandomString(length = 1) {
-            let tmp = '';
+            let tmp = CHARS[ Math.floor(Math.random() * (CHARS.length - 10)) ];
             if (length < 1) {
                 length = 1;
             }
 
-            for (let i = 0; i < length; i++) {
+            for (let i = 0; i < length - 1; i++) {
                 const char = CHARS[Math.floor(Math.random() * CHARS.length)];
                 tmp += char;
             }
@@ -230,6 +225,11 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.wrapFromItem:global(.is-error .el-input__inner) {
+  border-color: #e5e5e5;
+}
+.wrapFromItem:global(.is-error .el-input__inner:focus) {
+  border-color: #467AFA;
+}
 </style>

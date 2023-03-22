@@ -45,6 +45,7 @@ export default function Service({
         requests[key] = async (requestBody = {}) => {
             let payload = cloneDeep(requestBody);
             let silent = false;
+            let noAlert = false;
             if (requestBody.pathParams) {
                 payload.url = template(requestBody.pathParams);
                 payload = omit(payload, 'pathParams');
@@ -54,12 +55,26 @@ export default function Service({
                 silent = true;
                 payload = omit(payload, 'silent');
             }
+            if (requestBody.noAlert) {
+                noAlert = requestBody.noAlert;
+            }
             return await axiosInstance.request({
                 ...preset,
                 ...payload,
             }).catch(error => {
+                if (noAlert) {
+                    const data = get(error, 'response.data', '');
+                    throw data || error;
+                }
                 if (!silent) {
-                    const notifyFunc = Vue.prototype.$toast;
+                    // const notifyFunc = Vue.prototype.$toast;
+                    const notifyFunc = Vue.prototype.$notify ? {
+                        error: message => {
+                            Vue.prototype.$notify.error({
+                                message,
+                            });
+                        },
+                    } : Vue.prototype.$toas;
                     const status = get(error, 'response.status', 0);
                     const data = get(error, 'response.data', '');
                     if (status === 404) {

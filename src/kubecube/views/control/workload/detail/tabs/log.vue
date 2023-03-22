@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="workload === 'pods'">
-      <div :class="$style.line_layout" style="margin-bottom: 20px">
+      <div :class="$style.line_layout" style="margin-bottom: 12px">
         <div style="display: inline-block">
             <span style="margin-right:8px;line-height:32px">Container</span>
             <el-select

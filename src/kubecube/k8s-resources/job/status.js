@@ -33,7 +33,7 @@ export const toPlainObject = model => {
     return {
         ...pickBy(g('status'), v => !isObjectLike(v)),
         conditions,
-        runningStatus,
+        runningStatus, // 状态
         tasks: 0,
     };
 };

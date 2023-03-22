@@ -14,6 +14,7 @@ export const toPlainObject = model => {
     return list.map(t => ({
         rules: resolveLableSelector(get(t, 'labelSelector.matchExpressions', [])),
         namespaces: t.namespace,
+        namespace: get(t, 'namespaces[0]', ''),
         topologyKey: t.topologyKey,
     }));
 };

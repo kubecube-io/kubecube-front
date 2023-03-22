@@ -39,6 +39,7 @@ const resolveVolume = volumes => {
 
 export const toPlainObject = model => {
     const g = getFromModel(model);
+    const hostNetwork = g('hostNetwork', false);
     const nodeAffinity = toNodeAffinityPlainObject(g('affinity.nodeAffinity', {}));
     const podAffinity = toPodAffinityPlainObject(g('affinity.podAffinity', {}));
     const podAntiAffinity = toPodAffinityPlainObject(g('affinity.podAntiAffinity', {}));
@@ -51,6 +52,7 @@ export const toPlainObject = model => {
         activeDeadlineSeconds: g('activeDeadlineSeconds'),
         imagePullSecrets: g('imagePullSecrets', []).map(p => p.name),
         restartPolicy: g('restartPolicy') || 'Always',
+        hostNetwork,
         deploymentStrategy: {
             enable,
             nodeAffinity,
@@ -59,7 +61,6 @@ export const toPlainObject = model => {
             tolerations,
         },
         volumes: resolveVolume(g('volumes', [])),
-
     };
 };
 
@@ -76,6 +77,14 @@ export const toK8SObject = model => {
         restartPolicy: g('spec.restartPolicy', 'Always'),
     };
     const enabled = g('spec.deploymentStrategy.enable');
+    const hostNetwork = g('spec.hostNetwork');
+    if (hostNetwork) {
+        yaml.hostNetwork = true;
+        yaml.dnsPolicy = 'ClusterFirstWithHostNet';
+    } else {
+        yaml.hostNetwork = false;
+        yaml.dnsPolicy = '';
+    }
     if (!enabled) {
         return yaml;
     }

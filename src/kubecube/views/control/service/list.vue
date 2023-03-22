@@ -1,94 +1,143 @@
 <template>
-  <u-linear-layout direction="vertical">
-    <u-linear-layout direction="horizontal">
-      <u-button
-        icon="create"
-        color="primary"
-        @click="toCreate"
-      >
-        创建{{ workloadLiteral }}
-      </u-button>
-      <u-button
-        icon="refresh"
-        square
-        @click="refresh"
-      />
-      <kube-input-search
-        :align-right="true"
-        placeholder="请输入名称搜索"
-        @search="onSearch"
-      />
-    </u-linear-layout>
-
-    <x-request
-      ref="request"
-      :service="service"
-      :params="requestParam"
-      :processor="resolver"
-    >
-      <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :loading="loading"
-          :columns="columns"
-          :items="data ? data.list : []"
-          :error="error"
-          @sort="onSort"
+  <div>
+    <div style="margin-bottom: 12px">
+        <el-button
+          type="primary"
+          :disabled="isReview"
+          @click="toCreate"
+          icon="el-icon-plus"
         >
-          <template #[`item.metadata.name`]="{ item }">
-            <u-link :to="{path: `/control/${workload}/${item.metadata.name}`}">
-              {{ item.metadata.name }}
-            </u-link>
-          </template>
-          <template #[`item.spec.rules`]="{ item }">
-            {{ ingressRuleFilter(item) }}
-          </template>
-
-          <template #[`item.metadata.creationTimestamp`]="{ item }">
-            {{ item.metadata.creationTimestamp | formatLocaleTime }}
-          </template>
-          <template #[`item.operation`]="{ item }">
-            <u-linear-layout gap="small">
-              <u-link-list :key="workload">
-                <u-link-list-item @click="editItem(item)">
-                  设置
-                </u-link-list-item>
-                <u-link-list-item @click="deleteItem(item)">
-                  删除
-                </u-link-list-item>
-                <u-link-list-item @click="editYAML(item)">
-                  YAML 设置
-                </u-link-list-item>
-              </u-link-list>
-            </u-linear-layout>
-          </template>
-          <template #noData>
-            <template v-if="pagenation.selector">
-              没有搜索到相关内容，可调整关键词重新搜索
+          创建{{ workloadLiteral }}
+        </el-button>
+        <el-button @click="refresh" square icon="el-icon-refresh-right"></el-button>
+        <inputSearch v-model="filterName" placeholder="请输入名称搜索" position="right" @search="onSearch"/>
+    </div>
+    <div :key="workload">
+        <x-request
+            ref="request"
+            :service="service"
+            :params="requestParam"
+            :processor="resolver"
+        >
+            <template slot-scope="{ data, loading, error }">
+                <el-table
+                    v-loading="loading"
+                    :data="data ? data.list : []"
+                    style="width: 100%"
+                    border
+                    :default-sort="defaultSort"
+                    @sort-change="tableSortChange"
+                >
+                    <el-table-column
+                        prop="metadata.name"
+                        label="名称"
+                        :show-overflow-tooltip="true"
+                        sortable
+                    >
+                        <template slot-scope="{ row }">
+                            <el-link type="primary" :to="{ path: `/control/${workload}/${row.metadata.name}`, query: $route.query }">
+                                {{row.metadata.name}}
+                            </el-link>
+                        </template>
+                    </el-table-column>
+                    <template v-if="['services'].includes(workload)">
+                        <el-table-column
+                            prop="spec.type"
+                            label="类型"
+                            width="120"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                            prop="spec.ports"
+                            label="	内部访问地址"
+                            width="160"
+                        >
+                            <template slot-scope="{ row }">
+                                <el-tooltip effect="dark" content="Top Center 提示文字" placement="top">
+                                     <div slot="content" v-html="(row.spec.ports || []).map(item => item.text).join('<br/>')"></div>
+                                    <div :class="$style.textEllipsis">{{(row.spec.ports || []).map(item => item.text).join(', ')}}</div>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            prop="spec.clusterIP"
+                            label="	集群 IP"
+                            width="100"
+                            :show-overflow-tooltip="true"
+                        >
+                        </el-table-column>
+                    </template>
+                    <template v-if="['ingresses'].includes(workload)">
+                        <el-table-column
+                            prop="outside"
+                            label="	外部访问地址"
+                            width="160"
+                            :show-overflow-tooltip="true"
+                        >
+                            <template slot-scope="{ row }">
+                                {{row.outside || '-'}}
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                            prop="spec.rules"
+                            label="	规则"
+                            width="200"
+                        >
+                            <template slot-scope="{ row }">
+                                <el-tooltip effect="dark" content="Top Center 提示文字" placement="top">
+                                     <div slot="content" v-html="ingressRuleFilter(row).join('<br/>')"></div>
+                                    <div :class="$style.textEllipsis">{{ingressRuleFilter(row).join(', ')}}</div>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </template>
+                    <el-table-column
+                        prop="metadata.creationTimestamp"
+                        label="创建时间"
+                        width="170"
+                        :show-overflow-tooltip="true"
+                        sortable
+                    >
+                        <template slot-scope="{ row }">
+                            {{ row.metadata.creationTimestamp | formatLocaleTime }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                        prop="action"
+                        label="操作"
+                        width="180"
+                    >
+                        <template slot-scope="{ row }">
+                            <qz-link-group max="3"  :key="workload">
+                                <el-link type="primary" @click="editItem(row)" :disabled="isReview">
+                                    设置
+                                </el-link>
+                                <el-link type="primary" @click="deleteItem(row)" :disabled="isReview">
+                                    删除
+                                </el-link>
+                                <el-link type="primary" @click="editYAML(row)" :disabled="isReview">
+                                    YAML 设置
+                                </el-link>
+                            </qz-link-group>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <el-pagination
+                    style="float:right;margin-top:12px"
+                    v-if="data && calculatePages(data.total) > 0"
+                    @size-change="pageSizeChange"
+                    @current-change="pageNumChange"
+                    :current-page="pagenation.pageNum"
+                    :page-sizes="[10, 20, 30, 40, 50, 100]"
+                    :page-size="pagenation.pageSize"
+                    layout="total, sizes, prev, pager, next"
+                    :total="data.total"
+                    background
+                />
             </template>
-            <template v-else>
-              还没有任何 {{ workloadLiteral }} 现在就 <u-link @click="toCreate">
-                立即创建
-              </u-link>
-              一个吧
-            </template>
-          </template>
-          <template #error>
-            获取数据失败，请<u-link @click="refresh">
-              重试
-            </u-link>
-          </template>
-        </kube-table>
-        <u-page
-          v-if="data && calculatePages(data.total) > 1"
-          :count="data.total"
-          :page-size="pagenation.pageSize"
-          :total="calculatePages(data.total)"
-          @select="selectPage"
-        />
-      </template>
-    </x-request>
-  </u-linear-layout>
+        </x-request>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -99,16 +148,34 @@ import workloadExtendService from 'kubecube/services/k8s-extend-resource';
 import PageMixin from 'kubecube/mixins/pagenation';
 import { toPlainObject as toServicePlainObject } from 'kubecube/k8s-resources/service';
 import { toPlainObject as toIngressPlainObject } from 'kubecube/k8s-resources/ingress';
+import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
 export default {
+    components: {
+        inputSearch,
+    },
     metaInfo() {
         return {
             title: `${this.workload} - kubecube`,
         };
     },
     mixins: [ PageMixin ],
+    data() {
+        return {
+            filterName: '',
+        };
+    },
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        userRole: get('scope/userRole'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
+        isReview() {
+            const keyMap = {
+                services: 'services',
+                ingresses: 'ingresses',
+            };
+            return !this.userResourcesPermission[keyMap[this.workload]];
+        },
         service() {
             switch (this.workload) {
                 case 'services':
@@ -166,7 +233,6 @@ export default {
                         { title: '名称', name: 'metadata.name', sortable: true, textwrap: true },
                         { title: '类型', name: 'spec.type', width: '80px' },
                         { title: '内部访问地址', name: 'spec.ports', width: '120px', type: 'tag' },
-                        { title: '外部访问地址', name: 'outside', width: '120px' },
                         { title: '集群 IP', name: 'spec.clusterIP', width: '100px' },
                         { title: '创建时间', name: 'metadata.creationTimestamp', width: '160px', sortable: true },
                         { title: '操作', name: 'operation', width: '160px' },
@@ -213,28 +279,43 @@ export default {
     },
     watch: {
         columns() {
+            this.pagenation.sortName = 'metadata.creationTimestamp';
+            this.pagenation.sortOrder = 'desc';
+            this.pagenation.sortFunc = 'time';
             this.$refs.request.resetData();
         },
+        workload() {
+            this.pagenation.selector = '';
+            this.filterName = '';
+        },
+    },
+    created() {
+        this.pagenation.sortName = 'metadata.creationTimestamp';
+        this.pagenation.sortOrder = 'desc';
+        this.pagenation.sortFunc = 'time';
+        this.pagenation.selector = '';
+        this.filterName = '';
     },
     methods: {
         ingressRuleFilter(item) {
-            const strArr = []
+            const strArr = [];
             const rules = getFun(item, 'spec.rules', []);
             rules.forEach(rule => {
                 const host = getFun(rule, 'host');
-                const paths =  getFun(rule, 'http.paths', []);
+                const paths = getFun(rule, 'http.paths', []);
                 paths.forEach(path => {
-                    let target = `${getFun(path, 'backend.service.name', '')}:${getFun(path, 'backend.service.port.number', '')}`
-                    let source = `${host}${getFun(path, 'path', '')}`;
+                    const target = `${getFun(path, 'backend.service.name', '')}:${getFun(path, 'backend.service.port.number', '')}`
+                    const source = `${host}${getFun(path, 'path', '')}`;
                     strArr.push(`${source}->${target}`);
-                })
-            })
-            return strArr.join(', ')
+                });
+            });
+            return strArr;
         },
         resolver(response) {
-            console.log(response);
+            if ((response.items || []).length === 0 && response.total > 0 && this.pagenation.pageNum > 1) {
+                this.pagenation.pageNum = this.pagenation.pageNum - 1;
+            }
             const list = (response.items || []).map(this.toPlainObject);
-            console.log(list);
             return {
                 list,
                 total: response.total,
@@ -246,10 +327,14 @@ export default {
         onSort({ order, name }) {
             this.pagenation.sortOrder = order;
             this.pagenation.sortName = `${name}`;
-            this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
+            this.pagenation.sortFunc = name === 'metadata.creationTimestamp' ? 'time' : 'string';
         },
         onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+            const temp = content ? `metadata.name~${content}` : undefined;
+            if (this.pagenation.selector === temp) {
+                this.refresh();
+            }
+            this.pagenation.selector = temp;
         },
         toCreate() {
             this.$router.push({ name: 'control.workload.create', params: this.$route.params });
@@ -260,9 +345,7 @@ export default {
         async editYAML(item) {
             const reqParam = {
                 pathParams: {
-                    cluster: this.cluster,
-                    namespace: this.namespace,
-                    resource: this.workload,
+                    ...this.requestParam.pathParams,
                     name: item.metadata.name,
                 },
             };
@@ -286,27 +369,50 @@ export default {
             });
         },
         deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确定删除 ${item.metadata.name} 吗？`,
+                width: '460px',
                 ok: async () => {
                     const reqParam = {
                         pathParams: {
-                            cluster: this.cluster,
-                            namespace: this.namespace,
-                            resource: this.workload,
+                            ...this.requestParam.pathParams,
                             name: item.metadata.name,
                         },
                     };
+                    if (this.workload === 'services') {
+                        if (item.spec.template === 'headless' && !item.spec.enableSelecter) {
+                            try {
+                                await this.deleteEndpoints(item.metadata.name);
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }
+                    }
                     await this.deleteService(reqParam);
                     this.$refs.request.request();
                 },
+            });
+        },
+        async deleteEndpoints(name) {
+            await workloadService.deleteAPIV1Instance({
+                pathParams: {
+                    cluster: this.cluster,
+                    namespace: this.namespace,
+                    resource: 'endpoints',
+                    name,
+                },
+                noAlert: true,
             });
         },
     },
 };
 </script>
 
-<style>
-
+<style module>
+.textEllipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 </style>

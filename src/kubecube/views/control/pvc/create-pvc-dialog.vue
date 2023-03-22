@@ -1,111 +1,119 @@
 <template>
-  <u-modal
+  <el-dialog
     :title="isEdit ? '编辑存储声明' : '创建存储声明'"
+    :visible.sync="show"
+    width="800px"
+    @close="close"
     ok-button=""
     cancel-button=""
-    :visible.sync="show"
-    size="large"
-    @close="close"
+    :close-on-click-modal="false"
   >
-    <validation-observer
-      ref="observer"
-      v-slot="{ invalid }"
+    <x-request
+      v-if="show"
+      ref="request"
+      :service="storageService"
+      :params="params"
+      :processor="storageResolver"
     >
-      <x-request
-        ref="request"
-        :service="storageService"
-        :params="params"
-        :processor="storageResolver"
-      >
-        <template slot-scope="{ data, loading }">
-          <u-loading v-if="loading" />
-          <kube-form
+      <template slot-scope="{ data, loading }">
+          <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
+          <el-form
             v-else
-            label-size="small"
+            :model="model"
+            ref="form"
+            label-width="120px"
           >
-            <kube-form-item label="存储类别">
-              <u-select
-                v-if="data.length"
-                key="list"
-                v-model="model.spec.storageClassName"
-                :disabled="isEdit"
-                size="large"
-                :data="data"
-              />
-              <u-select
-                v-else
-                key="none"
-                disabled
-                size="large"
-                :data="[{ text: '暂无存储类别'}]"
-              />
-            </kube-form-item>
-            <kube-name-input
-              v-model="model.metadata.name"
-              :disabled="isEdit"
-            />
-            <validation-provider
-              v-slot="{ errors }"
-              name="storage"
-              :rules="{
-                NumberBiggerThen: {
-                  min: initStorage,
-                },
-              }"
+            <el-form-item
+              label="存储类别"
+              :rules="[
+                validators.required(),
+              ]"
+              prop="spec.storageClassName"
             >
-              <kube-form-item
-                label="容量"
-                :message="errors && errors[0]"
-                name="storage"
+              <el-select
+                v-if="(data || []).length"
+                v-model="model.spec.storageClassName" 
+                filterable
+                placeholder="选择存储类别"
+                :disabled="isEdit"
               >
-                <u-linear-layout
-                  direction="horizontal"
-                  style="display: flex; flex-direction: horizontal; align-items: center; justify-content: center;"
-                >
-                  <u-input
-                    v-model="model.spec.storage"
-                    size="large"
-                    :color="errors && errors[0] ? 'error' : ''"
-                  />
-                  <u-text>GiB</u-text>
-                </u-linear-layout>
-              </kube-form-item>
-            </validation-provider>
-
-            <kube-form-item label="模式">
-              <u-select
+                <el-option
+                  v-for="item in data"
+                  :key="item.value"
+                  :label="item.text"
+                  :value="item.value"
+                  :title="item.text"
+                />
+              </el-select>
+              <el-input
+                v-else
+                disabled
+                placeholder="暂无存储类别"
+              />
+            </el-form-item>
+            <el-form-item
+              label="名称"
+              :rules="[
+                validators.required(),
+                validators.k8sResourceNameValidator()
+              ]"
+              prop="metadata.name"
+            >
+              <el-input v-model="model.metadata.name" :disabled="isEdit" placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"/>
+            </el-form-item>
+            <el-form-item 
+              label="容量"
+              :rules="[
+                validators.required(),
+                validators.consistofFloatNumber(false),
+                validators.numberBiggerThen(0, false)
+              ]"
+              prop="spec.storage"
+            >
+              <el-input
+                v-model="model.spec.storage"
+              >
+                <template slot="append">GiB</template>
+              </el-input>
+            </el-form-item>
+            <el-form-item
+              label="模式"
+              :rules="[
+                validators.required(),
+              ]"
+              prop="spec.accessMode"
+            >
+              <template slot="label">
+                模式
+                <el-tooltip effect="dark" placement="bottom-start" popper-class="ncs-el-tooltip-popper">
+                  <template slot="content">
+                    根据存储提供者的不同，选择所支持的访问模式，具体规则参照
+                    <el-link type="primary" @click="handleJump('https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/#access-modes')">链接</el-link>
+                  </template>
+                  <i class="el-icon-question" style="position: absolute;right:4px;top:11px"/>
+                </el-tooltip>
+              </template>
+              <el-select
                 v-model="model.spec.accessMode"
                 :disabled="isEdit"
-                size="large"
-                :data="getModes(data)"
-              />
-            </kube-form-item>
-
-            <u-submit-button
-              :click="submit.bind(this)"
-              place="right"
-            >
-              <template slot-scope="scope">
-                <u-linear-layout>
-                  <u-button
-                    color="primary"
-                    :disabled="invalid || scope.submitting"
-                    :icon="scope.submitting ? 'loading' : ''"
-                    @click="scope.submit"
-                  >
-                    确定
-                  </u-button>
-                  <u-button @click="close">
-                    取消
-                  </u-button>
-                </u-linear-layout>
-              </template>
-            </u-submit-button>
-          </kube-form>
-        </template>
-      </x-request>
-    </validation-observer>
-  </u-modal>
+              >
+                <el-option
+                  v-for="item in getModes(data)"
+                  :key="item.value"
+                  :label="item.text"
+                  :value="item.value"
+                  :title="item.text"
+                />
+              </el-select>
+            </el-form-item>
+          </el-form>
+      </template>
+    </x-request>
+    <div slot="footer">
+      <el-button @click="close">取 消</el-button>
+      <el-button type="primary" @click="submit" :loading="commitLoading">确 定</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script>
@@ -119,7 +127,6 @@ import {
 import {
     toPlainObject as toPVCPlainObject,
     toK8SObject as toPVCK8SObject,
-    patchK8SObject as PatchPVCK8SObject,
 } from 'kubecube/k8s-resources/persistentvolumeclaim';
 import {
     PVC_MODE_TEXT_MAP,
@@ -127,6 +134,7 @@ import {
 import {
     setValueIfListNotPresent,
 } from 'kubecube/utils/functional';
+import * as validators from 'kubecube/utils/validators';
 
 const modes = Object.keys(PVC_MODE_TEXT_MAP).map(key => ({
     text: PVC_MODE_TEXT_MAP[key],
@@ -136,11 +144,12 @@ export default {
     mixins: [ Modal ],
     data() {
         return {
+            validators,
             storageService: workloadService.getStorage,
             model: toPVCPlainObject(),
             isEdit: false,
             initStorage: 0,
-
+            commitLoading: false,
         };
     },
     computed: {
@@ -157,6 +166,9 @@ export default {
         },
     },
     methods: {
+        handleJump(url) {
+            window.open(url);
+        },
         async open(item) {
             if (item) {
                 this.isEdit = true;
@@ -169,7 +181,8 @@ export default {
                     },
                 });
                 this.model = toPVCPlainObject(response);
-
+            } else {
+                this.model = toPVCPlainObject();
             }
             this.show = true;
         },
@@ -194,32 +207,47 @@ export default {
             return curr.provisioner === 'ceph.com/rbd' ? modes.slice(0, 2) : modes;
         },
         async submit() {
-            if (this.isEdit) {
-                const yaml = cloneDeep(this.model.puresource);
-                console.log(yaml);
-                yaml.spec.resources.requests.storage = `${this.model.spec.storage}Gi`
-                await workloadService.modifyAPIV1Instance({
-                    pathParams: {
-                        cluster: this.cluster,
-                        namespace: this.namespace,
-                        resource: 'persistentvolumeclaims',
-                        name: this.model.metadata.name,
-                    },
-                    data: yaml,
-                });
-            } else {
-                const yaml = toPVCK8SObject(this.model);
-                await workloadService.createAPIV1Instance({
-                    pathParams: {
-                        cluster: this.cluster,
-                        namespace: this.namespace,
-                        resource: 'persistentvolumeclaims',
-                    },
-                    data: yaml,
-                });
+            // 触发校验
+            try {
+                if (this.$refs) {
+                    await this.$refs.form.validate();
+                } else {
+                    return;
+                }
+            } catch (error) {
+                return;
             }
-            this.$emit('refresh');
-            this.close();
+            this.commitLoading = true;
+            try {
+                if (this.isEdit) {
+                    const yaml = cloneDeep(this.model.puresource);
+                    yaml.spec.resources.requests.storage = `${this.model.spec.storage}Gi`
+                    await workloadService.modifyAPIV1Instance({
+                        pathParams: {
+                            cluster: this.cluster,
+                            namespace: this.namespace,
+                            resource: 'persistentvolumeclaims',
+                            name: this.model.metadata.name,
+                        },
+                        data: yaml,
+                    });
+                } else {
+                    const yaml = toPVCK8SObject(this.model);
+                    await workloadService.createAPIV1Instance({
+                        pathParams: {
+                            cluster: this.cluster,
+                            namespace: this.namespace,
+                            resource: 'persistentvolumeclaims',
+                        },
+                        data: yaml,
+                    });
+                }
+                this.$emit('refresh');
+                this.close();
+            } catch (error) {
+                console.log(error);
+            }
+            this.commitLoading = false;
         },
     },
 };

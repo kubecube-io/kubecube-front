@@ -1,22 +1,22 @@
 <template>
   <div>
-    <u-head-card
+    <headCard
       :title="`${name} ${version}`"
     >
       <div slot="logo">
         {{ (name || '').substring(0, 2).toUpperCase() }}
       </div>
       <div slot="act">
-        <u-detail-operate>
-          <u-detail-operate-item @click="editYAML">
-            YAML 设置
-          </u-detail-operate-item>
-          <u-detail-operate-item @click="deleteItem">
-            删除
-          </u-detail-operate-item>
-        </u-detail-operate>
+        <operateList>
+          <operateButtonOption @click="editYAML" :disabled="isReview">
+          YAML 设置
+          </operateButtonOption>
+          <operateButtonOption @click="deleteCrd" :disabled="isReview">
+          删除
+          </operateButtonOption>
+        </operateList>
       </div>
-    </u-head-card>
+    </headCard>
     <x-request
       ref="request"
       :service="crdService"
@@ -24,28 +24,25 @@
       :processor="crdResolver"
     >
       <template slot-scope="{ data, loading }">
-        <u-loading v-if="loading" />
+        <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
         <template v-else>
-          <u-tabs>
-            <u-tab title="实例" />
-          </u-tabs>
-          <u-linear-layout direction="horizontal">
-            <u-button
-              icon="create"
-              color="primary"
+          <el-tabs value="instance" page="main">
+            <el-tab-pane label="实例" name="instance"/>
+          </el-tabs>
+          <div>
+            <el-button 
+              type="primary"
               @click="toCreate(data)"
+              icon="el-icon-plus"
+              :disabled="isReview"
             >
               创建 {{ data.names.plural }}
-            </u-button>
-            <u-button
-              icon="refresh"
-              square
-              @click="refresh"
-            />
-          </u-linear-layout>
+            </el-button>
+            <el-button @click="refresh" square icon="el-icon-refresh-right"></el-button>
+          </div>
           <x-request
             ref="request"
-            style="margin-top: 20px"
+            style="margin-top: 12px"
             :service="crService"
             :params="{
               pathParams: {
@@ -60,43 +57,51 @@
             :processor="crResolver"
           >
             <template slot-scope="{ data: crData, loading: crLoading, error }">
-              <kube-table
-                table-width="100%"
-                :loading="crLoading"
-                :columns="columns"
-                :items="crData ? crData.list : []"
-                :error="error"
+              <el-table
+                v-loading="crLoading"
+                :data="crData ? crData.list : []"
+                style="width: 100%"
+                border
               >
-                <template #[`item.metadata.creationTimestamp`]="{ item }">
-                  {{ item.metadata.creationTimestamp | formatLocaleTime }}
-                </template>
-                <template #[`item.operation`]="{ item }">
-                  <u-linear-layout gap="small">
-                    <u-link-list>
-                      <u-link-list-item @click="editItem(data, item)">
-                        设置 YAML
-                      </u-link-list-item>
-                      <u-link-list-item @click="deleteItem(data, item)">
-                        删除
-                      </u-link-list-item>
-                    </u-link-list>
-                  </u-linear-layout>
-                </template>
-                <template #noData>
-                  <template v-if="pagenation.selector">
-                    没有搜索到相关内容，可调整关键词重新搜索
+                <el-table-column
+                  prop="metadata.name"
+                  label="名称"
+                  :show-overflow-tooltip="true"
+                >
+                </el-table-column>
+                <el-table-column
+                  prop="metadata.creationTimestamp"
+                  label="创建时间"
+                  width="170"
+                >
+                  <template slot-scope="{ row }">
+                  {{ row.metadata.creationTimestamp | formatLocaleTime }}
                   </template>
-                  <template v-else>
-                    还没有任何 {{ data.names.plural }}
+                </el-table-column>
+                <el-table-column
+                  prop="action"
+                  label="操作"
+                  width="180"
+                >
+                  <template slot-scope="{ row }">
+                    <qz-link-group max="3">
+                      <el-link type="primary" @click="editItem(data, row)">YAML 设置</el-link>
+                      <el-link type="primary" @click="deleteItem(data, row)">删除</el-link>
+                    </qz-link-group>
                   </template>
-                </template>
-              </kube-table>
-              <u-page
-                v-if="data && calculatePages(data.total) > 1"
-                :count="data.total"
+                </el-table-column>
+              </el-table>
+              <el-pagination
+                v-if="crData && calculatePages(crData.total) > 0"
+                style="float:right;margin-top:12px"
+                @size-change="pageSizeChange"
+                @current-change="pageNumChange"
+                :current-page="pagenation.pageNum"
+                :page-sizes="[10, 20, 30, 40, 50, 100]"
                 :page-size="pagenation.pageSize"
-                :total="calculatePages(data.total)"
-                @select="selectPage"
+                layout="total, sizes, prev, pager, next"
+                :total="crData.total"
+                background
               />
             </template>
           </x-request>
@@ -116,7 +121,11 @@ import {
 import {
     toPlainObject as toConfigPlainObject,
 } from 'kubecube/k8s-resources/base/config';
+import headCard from 'kubecube/elComponent/head-card.vue';
 export default {
+    components: {
+        headCard,
+    },
     mixins: [ PageMixin ],
     metaInfo() {
         return {
@@ -136,6 +145,10 @@ export default {
     computed: {
         cluster: get('scope/cluster@value'),
         namespace: get('scope/namespace@value'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
+        isReview() {
+            return !this.userResourcesPermission['customresourcedefinitions'];
+        },
         reqParam() {
             return {
                 pathParams: {
@@ -252,9 +265,9 @@ export default {
             });
         },
         deleteItem(data, item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
                     await this.opCRService('delete')({
                         pathParams: {
@@ -263,6 +276,23 @@ export default {
                         },
                     });
                     this.$refs.request.request();
+                },
+            });
+        },
+        deleteCrd() {
+            this.$eConfirm({
+                title: '删除',
+                message: `确认要删除 ${this.name} 吗？`,
+                ok: async () => {
+                    await workloadService.deleteCRDInstance({
+                        ...this.crdParam
+                    })
+                    this.$router.push({
+                        name: 'crd.list',
+                        params: {
+                            level: this.level,
+                        },
+                    });
                 },
             });
         },

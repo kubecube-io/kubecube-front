@@ -1,61 +1,60 @@
 <template>
   <div>
-    <kube-dynamic-block
+    <dynamicBlock
       v-model="model"
-      style="width: 580px"
-      :data-template="getDataTemplate"
+      :getDefaultItem="getDataTemplate"
+      :columns="[
+          {
+              title: '挂载目录',
+              dataIndex: 'mountPath',
+          },
+          {
+              title: '参数',
+              dataIndex: 'name'
+          }
+      ]"
     >
-      <template slot="column">
-        <th>挂载目录</th>
-        <th>参数</th>
-      </template>
-      <template slot-scope="{ model: item, index }">
-        <td>
-          <validation-provider
-            v-slot="{ errors }"
-            :name="`${errorprefix}mountPath-${index}`"
-            :rules="{
-              startsWithSlash: true,
-              ConsistofPath: true,
-              noRedundance: { list: allMountPath }
-            }"
-          >
-            <kube-form-item
-              muted="no"
-              style="width: 100%;"
-              field-size="full"
-              layout="none"
-              :message="errors && errors[0]"
-              placement="bottom"
-            >
-              <u-input
-                v-model="item.mountPath"
-                size="huge"
-                :color="errors && errors[0] ? 'error' : ''"
-              />
-            </kube-form-item>
-          </validation-provider>
-        </td>
-        <td>
-          <u-select
-            v-model="item.name"
-            size="huge"
-            :data="vcts"
+      <template v-slot:mountPath="{record, index}">
+        <el-form-item 
+          label=""
+          :prop="`${prefixKey}.${index}.mountPath`"
+          :rules="[
+            validators.startsWithSlash(false),
+            validators.consistofPath(false),
+            validators.noRedundance(allMountPath, false)
+          ]"
+        >
+          <el-input
+            v-model="record.mountPath"
           />
-        </td>
+        </el-form-item>
       </template>
-    </kube-dynamic-block>
+      <template v-slot:name="{record}">
+          <el-select v-model="record.name" placeholder="请选择" filterable size="huge">
+            <el-option
+              v-for="item in vcts"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+    </dynamicBlock>
   </div>
 </template>
 
 <script>
 import { makeVModelMixin } from 'kubecube/mixins/functional';
 import volumnMixin from './volumn-mixin';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin, volumnMixin ],
     props: {
         storage: Array,
     },
+    data: () => ({
+        validators,
+    }),
     computed: {
         errorprefix() {
             return `${this.prefixKey}-volume-vct-`;

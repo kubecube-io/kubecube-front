@@ -7,102 +7,153 @@
     :poll="{ interval: 8000 }"
   >
     <template slot-scope="{ data, loading }">
-      <u-info-list-group title="基本信息">
-        <kube-table
-          table-width="100%"
-          :columns="columns"
-          :loading="loading"
-          :items="data || []"
+      <el-descriptions title="基本信息" :column="1" />
+      <el-table
+        v-loading="loading"
+        :data="data || []"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="metadata.name"
+          label="副本名称"
+          :show-overflow-tooltip="true"
+        ></el-table-column>
+        <el-table-column
+          prop="status.phase"
+          label="副本状态"
+          :show-overflow-tooltip="true"
+          width="80"
+        ></el-table-column>
+        <el-table-column
+          prop="status.podIP"
+          label="IP"
+          :show-overflow-tooltip="true"
+          width="100"
+        ></el-table-column>
+        <el-table-column
+          prop="status.hostIP"
+          label="所在节点IP"
+          :show-overflow-tooltip="true"
+          width="100"
         >
-          <template #[`item.status.hostIP`]="{ item }">
-            <u-link @click="toNode(item)">
-              {{ item.status.hostIP }}
-            </u-link>
+          <template slot-scope="{ row }">
+            <el-link type="primary" @click="toNode(row)">
+              {{ row.status.hostIP }}
+            </el-link>
           </template>
-          <template #[`item.creationTimestamp`]="{ item }">
-            {{ item.metadata.creationTimestamp | formatLocaleTime }}
+        </el-table-column>
+        <el-table-column
+          prop="status.restartCount"
+          label="重启次数"
+          :show-overflow-tooltip="true"
+          width="100"
+        ></el-table-column>
+        <el-table-column
+          prop="creationTimestamp"
+          label="创建时间"
+          :show-overflow-tooltip="true"
+          width="180"
+        >
+          <template slot-scope="{ row }">
+            {{ row.metadata.creationTimestamp | formatLocaleTime }}
           </template>
-          <template #[`item.operation`]="{ item }">
-            <u-linear-layout gap="small">
-              <u-link-list>
-                <u-link-list-item @click="viewYAML(item)">
-                  查看详细信息
-                </u-link-list-item>
-                <u-link-list-item @click="toEvent(item)">
-                  查看事件
-                </u-link-list-item>
-                <u-link-list-item @click="deleteItem(item)">
-                  删除
-                </u-link-list-item>
-              </u-link-list>
-            </u-linear-layout>
+        </el-table-column>
+        <el-table-column
+          prop="operation"
+          label="操作"
+          width="200"
+        >
+          <template slot-scope="{ row }">
+            <el-link type="primary" @click="viewYAML(row)" style="marginRight:10px">
+              查看详细信息
+            </el-link>
+            <el-link type="primary" @click="toEvent(row)" style="marginRight:10px">
+              查看事件
+            </el-link>
+            <el-link type="primary" @click="deleteItem(row)" :disabled="isReview">
+              删除
+            </el-link>
           </template>
-          <template #noData>
-            暂无 副本 详情
+        </el-table-column>
+      </el-table>
+      <el-descriptions title="容器详情" :column="1" />
+      <div style="marginBottom: 12px">
+        <span style="margin-right: 8px; line-height: 32px;">副本: </span>
+        <el-select
+          key="list"
+          v-model="podName"
+          style="width:440px"
+        >
+          <el-option
+            v-for="item in (data || [])"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value"
+            :title="item.text"
+          />
+        </el-select>
+      </div>
+      <el-table
+        v-loading="loading"
+        :data="getContainer(data || [])"
+        style="width: 100%"
+      >
+        <el-table-column
+          prop="containerName"
+          label="容器名称"
+          :show-overflow-tooltip="true"
+        >
+          <template slot-scope="{ row }">
+            <el-tooltip effect="dark" :content="getContainerText(row.type)" placement="top" popper-class="ncs-el-tooltip-popper">
+              <u-icons
+                style="color: #508de8;"
+                :name="row.type | getContainerIcon"
+              />
+            </el-tooltip>
+            <el-link
+              type="primary"
+              :to="{ path: `/control/${$route.params.workload}/${$route.params.instance}/${podName}/${row.containerName}`, query: $route.query }"
+            >
+              {{ row.containerName }}
+            </el-link>
           </template>
-        </kube-table>
-      </u-info-list-group>
-      <u-info-list-group title="容器详情">
-        <div :class="$style.gap">
-          <u-linear-layout>
-            <u-text>副本</u-text>
-            <u-select
-              v-if="data && data.length"
-              key="list"
-              v-model="podName"
-              :data="data"
-              size="large"
-            />
-            <u-select
-              v-else
-              key="none"
-              :data="[{ text: '暂无副本' }]"
-              size="large"
-              disabled
-            />
-          </u-linear-layout>
-          <kube-table
-            table-width="100%"
-            :columns="containerColumns"
-            :loading="loading"
-            :items="getContainer(data || [])"
-          >
-            <template #[`item.containerName`]="{ item }">
-              <u-linear-layout gap="small">
-                <u-icons
-                  v-tooltip.top="getContainerText(item.type)"
-                  style="color: #508de8;"
-                  :name="item.type | getContainerIcon"
-                />
-                <u-link
-                  :to="{ path: `/control/${$route.params.workload}/${$route.params.instance}/${podName}/${item.containerName}`}"
-                >
-                  {{ item.containerName }}
-                </u-link>
-              </u-linear-layout>
-            </template>
-            <template #[`item.status`]="{ item }">
-              {{ Object.keys(item.status.state)[0] }}
-            </template>
-            <template #[`item.operation`]="{ item }">
-              <u-linear-layout gap="small">
-                <u-link-list>
-                  <u-link-list-item @click="$kubeterm({ pod: podName, container: item.containerName })">
-                    console
-                  </u-link-list-item>
-                  <u-link-list-item @click="toLog(item)">
-                    查看日志
-                  </u-link-list-item>
-                </u-link-list>
-              </u-linear-layout>
-            </template>
-            <template #noData>
-              暂无 容器 详情
-            </template>
-          </kube-table>
-        </div>
-      </u-info-list-group>
-      <!-- <kube-term ref="kubeterm" /> -->
+        </el-table-column>
+        <el-table-column
+          prop="image"
+          label="镜像"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="status"
+          label="容器状态"
+          :show-overflow-tooltip="true"
+          width="100"
+        >
+          <template slot-scope="{ row }">
+            {{ Object.keys(row.status.state)[0] }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="status.restartCount"
+          label="重启次数"
+          :show-overflow-tooltip="true"
+          width="100"
+        />
+        <el-table-column
+          prop="operation"
+          label="操作"
+          width="160"
+        >
+          <template slot-scope="{ row }">
+            <el-link type="primary" @click="$termModal.open('container', { cluster, namespace, pod: podName, container: row.containerName })" style="marginRight:10px">
+              console
+            </el-link>
+            <el-link type="primary" @click="toLog(row)">
+              查看日志
+            </el-link>
+          </template>
+        </el-table-column>
+      </el-table>
     </template>
   </x-request>
 </template>
@@ -116,22 +167,17 @@ import {
     toPlainObject as toPodPlainObject,
 } from 'kubecube/k8s-resources/pod/index.js';
 import { CONTAINERTYPE } from 'kubecube/utils/constance';
-// import kubeTerm from 'kubecube/component/global/xterm/kube-terminal.vue';
 export default {
     filters: {
         getContainerIcon(type) {
             return (CONTAINERTYPE[type] || {}).icon || 'container';
         },
     },
-    // components: {
-    //     kubeTerm,
-    // },
     props: {
         instance: Object,
     },
     data() {
         return {
-
             columns: [
                 { title: '副本名称', name: 'metadata.name' },
                 { title: '副本状态', name: 'status.phase', width: '80px' },
@@ -155,6 +201,12 @@ export default {
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
+        controlClusterList: get('scope/controlClusterList'),
+        userRole: get('scope/userRole'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
+        isReview() {
+            return !this.userResourcesPermission['pods'];
+        },
         podService() {
             return podService({
                 workload: this.workload,
@@ -170,7 +222,7 @@ export default {
 
     methods: {
         toNode(item) {
-            const href = window.location.origin + `#/platform/cluster/pivot-cluster/${item.spec.nodeName}/info`;
+            const href = window.location.origin + `#/platform/cluster/${this.cluster}/${item.spec.nodeName}/info`;
             window.open(href, '_blank');
         },
         getContainerText(type) {
@@ -186,7 +238,10 @@ export default {
                 };
             });
             console.log(items);
-            this.podName = getFunc(items, '[0].value');
+            const target = items.find(item => item.value === this.podName);
+            if (!target) {
+                this.podName = getFunc(items, '[0].value');
+            }
             return items;
         },
         getContainer(data) {
@@ -212,9 +267,9 @@ export default {
             });
         },
         async deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
                     const reqParam = {
                         pathParams: {

@@ -1,31 +1,35 @@
 <template>
   <div>
-    <u-steps :value="step">
-      <u-step title="基本信息">
-        <basic-info
-          v-model="model"
-          @go="changeStep"
-        />
-      </u-step>
-      <u-step title="容器配置">
-        <container-info
-          v-model="model"
-          @go="changeStep"
-        />
-      </u-step>
-      <u-step title="高级配置">
-        <advance-info
-          v-model="model"
-          :resolve-data="resolveData"
-          @go="changeStep"
-        />
-      </u-step>
-    </u-steps>
+    <div :class="$style.stepTitle">
+      <el-steps :active="step">
+        <el-step title="基本信息" />
+        <el-step title="容器配置" />
+        <el-step title="高级配置" />
+      </el-steps>
+    </div>
+    <div :class="$style.stepContent">
+      <basic-info
+        v-if="step === 0"
+        v-model="model"
+        @go="changeStep"
+      />
+      <container-info
+        v-if="step === 1"
+        v-model="model"
+        @go="changeStep"
+      />
+      <advance-info
+        v-if="step === 2"
+        v-model="model"
+        :resolve-data="resolveData"
+        @go="changeStep"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import { cloneDeep } from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
 import {
@@ -88,6 +92,7 @@ export default {
                 persistentvolumeclaims: null,
                 secrets: null,
             },
+            isChange: false,
         };
     },
     computed: {
@@ -190,7 +195,17 @@ export default {
     },
     created() {
         this.loadResources();
-        this.model = cloneDeep(this.instance) || this.toPlainObject();
+        const tempValue = cloneDeep(this.instance) || this.toPlainObject();
+        const volumes = _.get(tempValue, 'podTemplate.spec.volumes.hostPath', []);
+        tempValue.timeSync = !!volumes.find(item => item.hostPath.path === '/etc/localtime');
+        this.model = tempValue;
+        // this.model = cloneDeep(this.instance) || this.toPlainObject();
+        this.$watch('model', () => {
+            this.$emit('inputChange', true);
+        },
+        {
+            deep: true,
+        });
     },
     methods: {
         async loadResources() {
@@ -224,8 +239,28 @@ export default {
         updateResource(key, value) {
             this.$set(this.resources, key, value);
         },
+        handleTimeSync() {
+            if (this.model.timeSync) {
+                this.model.containers.forEach(cItem => {
+                    if (!cItem.volumes.hostpath.find(item => item.path === '/etc/localtime')) {
+                        cItem.volumes.hostpath.push({
+                            mountPath: '/etc/localtime',
+                            path: '/etc/localtime',
+                            pathType: 'FileOrCreate',
+                        });
+                    }
+                });
+            } else {
+                this.model.containers.forEach(cItem => {
+                    const index = cItem.volumes.hostpath.findIndex(item => item.path === '/etc/localtime');
+                    if (index !== -1) {
+                        cItem.volumes.hostpath.splice(index, 1);
+                    }
+                });
+            }
+        },
         async resolveData() {
-
+            this.handleTimeSync();
             if (this.isEdit) {
                 const instance = await this.getService({
                     pathParams: {
@@ -237,6 +272,12 @@ export default {
                 });
                 this.model.puresource = instance;
                 const yaml = this.toModifiedObject(this.model);
+                yaml.metadata.annotations['kubecube.io/schedule-inject'] = 'true';
+                if (this.model.apmEvnInject) {
+                    yaml.metadata.annotations['kubecube.io/apm-env-inject'] = 'enabled';
+                } else {
+                    yaml.metadata.annotations['kubecube.io/apm-env-inject'] = 'disabled';
+                }
                 // debugger
                 await this.modifyService({
                     pathParams: {
@@ -246,9 +287,16 @@ export default {
                         name: yaml.metadata.name,
                     },
                     data: yaml,
+                    noAlert: true,
                 });
             } else {
                 const yaml = this.toK8SObject(this.model);
+                yaml.metadata.annotations['kubecube.io/schedule-inject'] = 'true';
+                if (this.model.apmEvnInject) {
+                    yaml.metadata.annotations['kubecube.io/apm-env-inject'] = 'enabled';
+                } else {
+                    yaml.metadata.annotations['kubecube.io/apm-env-inject'] = 'disabled';
+                }
                 await this.createService({
                     pathParams: {
                         cluster: this.cluster,
@@ -256,13 +304,23 @@ export default {
                         resource: this.workload,
                     },
                     data: yaml,
+                    noAlert: true,
                 });
             }
+            this.$emit('inputChange', false);
         },
     },
 };
 </script>
 
-<style>
+<style module>
+.root :global(.el-form-item__error) {
+    white-space: nowrap;
+}
+.stepTitle {
 
+}
+.stepContent {
+    padding: 20px;
+}
 </style>

@@ -18,6 +18,4 @@ export const toPlainObject = (model, mode = 'normal') => {
 };
 
 
-export const toK8SObject = model => {
-   
-};
+export const toK8SObject = model => {};

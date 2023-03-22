@@ -1,79 +1,184 @@
 <template>
   <div>
-    <u-linear-layout style="margin-bottom: 20px">
+    <div :class="$style.line_layout" style="margin-bottom: 12px">
       <template v-if="!noPodEvent">
-        <u-select
+        <el-select
           v-model="kind"
-          :data="kinds"
-        />
-
+          style="width:200px"
+          placeholder="请选择"
+        >
+          <el-option
+            v-for="item in kinds"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value"
+            :title="item.text"
+          />
+        </el-select>
         <template v-if="kind === 'pod'">
           <template v-if="workload === 'deployments'">
-            <u-select
+            <el-select
               v-model="type"
-              :data="types"
-            />
-            <u-select
+              style="width:200px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in types"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
               v-if="podList.length"
-              key="podList"
               v-model="pod"
-              :data="podList"
-              size="large"
-            />
-            <u-select
+              style="width:400px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in podList"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
               v-else
-              key="nopodList"
-              :data="[{ text: '暂无 Pod 事件', value: '' }]"
-              size="large"
-              disabled
+              style="width:400px"
+              placeholder="暂无 Pod"
+              :disabled="true"
+            />
+          </template>
+          <template v-else-if="workload === 'cronjobs'">
+            <el-select
+              v-if="currentVersionPods.length"
+              v-model="currentJob"
+              style="width:200px"
+              placeholder="请选择"
+              @change="handleJobChange"
+            >
+              <el-option
+                v-for="item in jobList"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
+              v-else
+              style="width:200px"
+              placeholder="暂无 job"
+              :disabled="true"
+            />
+            <el-select
+              v-if="currentVersionPods.length"
+              v-model="pod"
+              style="width:400px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in currentVersionPods"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
+              v-else
+              style="width:400px"
+              placeholder="暂无 Pod"
+              :disabled="true"
             />
           </template>
           <template v-else>
-            <u-select
+            <el-select
               v-if="currentVersionPods.length"
-              key="podList2"
               v-model="pod"
-              :data="currentVersionPods"
-              size="large"
-            />
-            <u-select
+              style="width:400px"
+              placeholder="请选择"
+            >
+              <el-option
+                v-for="item in currentVersionPods"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-select
               v-else
-              key="nopodList2"
-              :data="[{ text: '暂无 Pod 事件', value: '' }]"
-              size="large"
-              disabled
+              style="width:400px"
+              placeholder="暂无 Pod"
+              :disabled="true"
             />
           </template>
         </template>
       </template>
-      <u-checkbox v-model="autoRefresh">
+      <el-checkbox v-model="autoRefresh">
         自动刷新
-      </u-checkbox>
-    </u-linear-layout>
-    <kube-table
-      table-width="100%"
-      :columns="columns"
-      :loading="loading"
-      :items="(workload === 'deployments' && kind === 'pod') ? (eventGrouped[pod] || []) : events"
+      </el-checkbox>
+    </div>
+    <el-table
+      v-loading="loading"
+      :data="events"
+      style="width: 100%"
     >
-      <template #[`item.firstTimestamp`]="{ item }">
-        {{ item.firstTimestamp | formatLocaleTime }}
-      </template>
-      <template #[`item.lastTimestamp`]="{ item }">
-        {{ item.lastTimestamp | formatLocaleTime }}
-      </template>
-      <template #noData>
-        暂无数据
-      </template>
-    </kube-table>
+      <el-table-column
+        prop="message"
+        label="消息"
+      />
+      <el-table-column
+        prop="reason"
+        label="原因"
+        width="120"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
+        prop="involvedObject.fieldPath"
+        label="事件对象fieldPath"
+        width="160"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
+        prop="firstTimestamp"
+        label="首次出现时间"
+        width="160"
+        :show-overflow-tooltip="true"
+      >
+        <template slot-scope="{ row }">
+          {{ row.firstTimestamp | formatLocaleTime }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="lastTimestamp"
+        label="上次出现时间"
+        width="160"
+        :show-overflow-tooltip="true"
+      >
+        <template slot-scope="{ row }">
+          {{ row.lastTimestamp | formatLocaleTime }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="count"
+        label="计数"
+        width="100"
+        :show-overflow-tooltip="true"
+      />
+    </el-table>
   </div>
 </template>
 
 <script>
 
-import { get as getFunc, groupBy, uniq, omit, upperFirst, flatten } from 'lodash';
+import { get as getFunc, uniq, omit, upperFirst, flatten } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
+import extendWorkloadService from 'kubecube/services/k8s-extend-resource';
 import {
     toPlainObject as toEventPlainObject,
 } from 'kubecube/k8s-resources/event/index.js';
@@ -135,6 +240,9 @@ export default {
             eventGrouped: {},
             currentVersionPods: [],
             historyVersionPods: [],
+            jobList: [],
+            currentJob: '',
+            loadCount: 1,
         };
     },
     computed: {
@@ -145,14 +253,28 @@ export default {
         },
         workloadLiteral() {
             const literal = upperFirst(this.$route.params.workload);
+            if ([ 'ingresses' ].includes(this.$route.params.workload)) {
+                return literal.substring(0, literal.length - 2);
+            }
             return literal.substring(0, literal.length - 1);
         },
         eventParams() {
-            const params = {};
-            if (this.kind === 'pod' && this.pod) {
-                params.fieldSelector = `involvedObject.kind=Pod,involvedObject.name=${this.pod}`;
+            const params = {
+                sortFunc: 'time',
+                sortName: 'lastTimestamp',
+                sortOrder: 'desc',
+            };
+            if (this.kind === 'pod') {
+                if (this.workload === 'deployments') {
+                    params.fieldSelector = `involvedObject.kind=Pod,involvedObject.name=${this.pod || ''}`;
+                } else {
+                    // const target = this.currentVersionPods.find(item => item.value === this.pod);
+                    // params.fieldSelector = `involvedObject.uid=${target && target.uid || ''}`;
+                    params.fieldSelector = `involvedObject.kind=Pod,involvedObject.name=${this.pod || ''}`;
+                }
             } else {
-                params.fieldSelector = `involvedObject.kind=${this.workloadLiteral},involvedObject.name=${this.instance.metadata.name}`;
+                params.fieldSelector = `involvedObject.name=${this.instance.metadata.name},involvedObject.uid=${this.instance.metadata.uid}`;
+                // params.fieldSelector = `involvedObject.kind=${this.workloadLiteral},involvedObject.name=${this.instance.metadata.name}`;
             }
             return {
                 pathParams: {
@@ -172,6 +294,9 @@ export default {
                 },
                 params: {
                     fieldSelector: 'involvedObject.kind=Pod',
+                    sortFunc: 'time',
+                    sortName: 'lastTimestamp',
+                    sortOrder: 'desc',
                 },
             };
         },
@@ -191,6 +316,14 @@ export default {
             };
         },
         podParams() {
+            // selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
+            let selector = `metadata.ownerReferences.uid=${this.instance.metadata.uid}`;
+            if (this.workload === 'services') {
+                selector = this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(',');
+            }
+            if (this.workload === 'cronjobs') {
+                selector = `metadata.ownerReferences.uid=${this.currentJob}`;
+            }
             return {
                 pathParams: {
                     cluster: this.cluster,
@@ -201,7 +334,7 @@ export default {
                     pageSize: 10000,
                     // labelSelector: this.instance.spec.matchLabels.map(l => `${l.key}=${l.value}`).join(','),
                     // selector: this.instance.spec.matchLabels.map(l => `metadata.labels.${l.key}=${l.value}`).join(','),
-                    selector: `metadata.ownerReferences.uid=${this.instance.metadata.uid}`,
+                    selector,
                 },
             };
         },
@@ -233,6 +366,9 @@ export default {
         '$route.query': function() {
             this.load();
         },
+        currentJob() {
+            this.load();
+        },
     },
     created() {
         this.load();
@@ -251,24 +387,66 @@ export default {
         });
     },
     destroyed() {
+        this.isDestroyed = true;
         if (this.currtimeout) {
             clearTimeout(this.currtimeout);
         }
     },
     methods: {
+        async loadJobList() {
+            const response = await extendWorkloadService.getInstance({
+                pathParams: {
+                    cluster: this.cluster,
+                    namespace: this.namespace,
+                    resource: this.workload,
+                    name: this.instance.metadata.name,
+                },
+            });
+            const jobs = getFunc(response, 'extendInfo.jobs');
+            this.jobList = (jobs || []).map(item => {
+                return {
+                    text: item.metadata.name,
+                    value: item.metadata.uid,
+                };
+            });
+            setValueIfListNotPresent({
+                list: this.jobList,
+                path: 'value',
+                current: this.currentJob,
+            }, val => {
+                this.currentJob = getFunc(val, 'value');
+            });
+        },
+        async loadPodList() {
+            const response = await workloadService.getAPIV1(this.podParams);
+            const list = (response.items || []).map(i => ({
+                text: i.metadata.name,
+                value: i.metadata.name,
+                uid: i.metadata.uid,
+            }));
+            setValueIfListNotPresent({
+                list,
+                path: 'value',
+                current: this.pod,
+            }, val => {
+                this.pod = getFunc(val, 'value');
+            });
+            this.currentVersionPods = list;
+        },
+        async loadEventsList() {
+            const resevent = await workloadService.getAPIV1(this.eventParams);
+            this.events = (resevent.items || []).map(toEventPlainObject);
+        },
         async load() {
+            const currentCount = ++this.loadCount;
             this.loading = true;
-            if (this.autoRefresh) {
-                if (this.currtimeout) {
-                    clearTimeout(this.currtimeout);
-                }
-                this.currtimeout = setTimeout(() => {
-                    this.load();
-                }, 3000);
+            if (this.currtimeout) {
+                clearTimeout(this.currtimeout);
             }
             if (this.kind === 'default' || this.noPodEvent) {
-                const response = await workloadService.getAPIV1(this.eventParams);
-                this.events = (response.items || []).map(toEventPlainObject);
+                await this.loadEventsList();
+                // const response = await workloadService.getAPIV1(this.eventParams);
+                // this.events = (response.items || []).map(toEventPlainObject);
             } else if (this.workload === 'deployments') {
                 // const dpname = this.instance.metadata.name;
                 // const [ rptRes, evtRes ] = await Promise.all([
@@ -293,7 +471,6 @@ export default {
                     },
                 });
                 const replicasets = replicasRes.items || [];
-                const evtRes = await workloadService.getAPIV1(this.podEventParams);
                 const rpIds = replicasets.map(i => getFunc(i, 'metadata.uid'));
                 const rpOld = rpIds.slice(1);
                 const rpCurr = getFunc(rpIds, '[0]');
@@ -333,19 +510,6 @@ export default {
                     }),
                 ]);
                 historyVersionPods = flatten(historyVersionPods);
-                const events = [];
-                evtRes.items.forEach(i => {
-                    const podName = getFunc(i, 'involvedObject.name');
-                    const arr = podName.split('-');
-                    const podPrefix = arr.slice(0, arr.length - 1).join('-');
-                    if (currentVersionPods.includes(podName)) {
-                        events.push(i);
-                    } else if (historyVersionPods.includes(podPrefix)) {
-                        events.push(i);
-                    }
-                });
-
-                this.eventGrouped = groupBy(events, i => getFunc(i, 'involvedObject.name'));
 
                 const makeTV = n => ({ text: n, value: n });
                 currentVersionPods = uniq(currentVersionPods).map(makeTV);
@@ -365,31 +529,62 @@ export default {
                 }
                 this.currentVersionPods = currentVersionPods;
                 this.historyVersionPods = historyVersionPods;
+                await this.loadEventsList();
+                // const evtRes = await workloadService.getAPIV1(this.podEventParams);
+                // const events = [];
+                // evtRes.items.forEach(i => {
+                //     const podName = getFunc(i, 'involvedObject.name');
+                //     const arr = podName.split('-');
+                //     const podPrefix = arr.slice(0, arr.length - 1).join('-');
+                //     if (currentVersionPods.includes(podName)) {
+                //         events.push(i);
+                //     } else if (historyVersionPods.includes(podPrefix)) {
+                //         events.push(i);
+                //     }
+                // });
+                // this.eventGrouped = groupBy(events, i => getFunc(i, 'involvedObject.name'));
+
+            } else if (this.workload === 'cronjobs') {
+                await this.loadJobList();
+                await this.loadPodList();
+                await this.loadEventsList();
             } else {
-                const response = await workloadService.getAPIV1(this.podParams);
-                const list = (response.items || []).map(i => ({
-                    text: i.metadata.name,
-                    value: i.metadata.name,
-                }));
-                setValueIfListNotPresent({
-                    list,
-                    path: 'value',
-                    current: this.pod,
-                }, val => {
-                    this.pod = getFunc(val, 'value');
-                });
-                this.currentVersionPods = list;
-                const resevent = await workloadService.getAPIV1(this.eventParams);
-                this.events = (resevent.items || []).map(toEventPlainObject);
+                await this.loadPodList();
+                await this.loadEventsList();
+                // const response = await workloadService.getAPIV1(this.podParams);
+                // const list = (response.items || []).map(i => ({
+                //     text: i.metadata.name,
+                //     value: i.metadata.name,
+                //     uid: i.metadata.uid,
+                // }));
+                // setValueIfListNotPresent({
+                //     list,
+                //     path: 'value',
+                //     current: this.pod,
+                // }, val => {
+                //     this.pod = getFunc(val, 'value');
+                // });
+                // this.currentVersionPods = list;
+                // const resevent = await workloadService.getAPIV1(this.eventParams);
+                // this.events = (resevent.items || []).map(toEventPlainObject);
 
             }
             this.loading = false;
-
+            if (currentCount === this.loadCount && this.autoRefresh && !this.isDestroyed) {
+                if (this.currtimeout) {
+                    clearTimeout(this.currtimeout);
+                }
+                this.currtimeout = setTimeout(() => {
+                    this.load();
+                }, 3000);
+            }
         },
     },
 };
 </script>
 
-<style>
-
+<style module>
+.line_layout > * {
+    margin-right: 12px;
+}
 </style>

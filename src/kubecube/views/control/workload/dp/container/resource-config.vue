@@ -1,65 +1,47 @@
 <template>
-  <kube-form-item
+  <el-form-item
     label="配置"
-    layout="block"
   >
-    <kube-form label-size="normal">
-      <kube-form-item label="基础配置">
-        <u-select
-          v-model="model.type"
-          size="large huge"
-          :class="$style.select"
-        >
-          <u-select-item :value="0">
-            0.1 Cores / 128 MiB
-          </u-select-item>
-          <u-select-item :value="1">
-            0.5 Cores / 512 MiB
-          </u-select-item>
-          <u-select-item :value="2">
-            1 Cores / 1024 MiB
-          </u-select-item>
-          <u-select-item :value="-1">
-            自定义
-          </u-select-item>
-        </u-select>
-      </kube-form-item>
-      <template v-if="model.type === -1">
-        <kube-form-item label="CPU">
-          <u-number-input
-            v-model="model.cpu"
-            size="huge normal"
-            :min="0.001"
-            :step="0.1"
-            :precision="0.001"
-          /> Cores
-        </kube-form-item>
-        <kube-form-item label="内存">
-          <u-number-input
-            v-model="model.memory"
-            size="huge normal"
-            :min="1"
-            :step="128"
-          /> MiB
-        </kube-form-item>
-      </template>
-      <kube-form-item label="配置上限">
-        基础配置 x <u-number-input
-          v-model="model.multiple"
-          size="huge normal"
-          :min="1"
+    <el-form-item label="基础配置" style="margin-bottom: 22px;" label-width="120px">
+      <el-select v-model="model.type">
+        <el-option
+          :value="0"
+          label="0.1 Cores / 128 MiB"
         />
-        {{ (model.cpu * model.multiple).toFixed(3) }}Cores / {{ model.memory * model.multiple }}MiB
-      </kube-form-item>
-      <kube-form-item label="GPU 配置">
-        <u-number-input
-          v-model="model.gpu"
-          size="huge normal"
-          :min="0"
-        /> 颗
-      </kube-form-item>
-    </kube-form>
-  </kube-form-item>
+        <el-option
+          :value="1"
+          label="0.5 Cores / 512 MiB"
+        />
+        <el-option
+          :value="2"
+          label="1 Cores / 1024 MiB"
+        />
+        <el-option
+          :value="-1"
+          label="自定义"
+        />
+      </el-select>
+    </el-form-item>
+    <template v-if="model.type === -1">
+      <el-form-item label="CPU" style="margin-bottom: 22px;" label-width="120px">
+        <el-input-number v-model="model.cpu" controls-position="right" :min="0.001" style="width: 260px;" :step="0.1" :precision="3"/>
+        <span style="margin-left:8px">Cores</span>
+      </el-form-item>
+      <el-form-item label="内存" style="margin-bottom: 22px;" label-width="120px">
+        <el-input-number v-model="model.memory" controls-position="right" :min="1" style="width: 260px;" :step="128"/>
+        <span style="margin-left:8px">MiB</span>
+      </el-form-item>
+    </template>
+    <el-form-item label="配置上限" style="margin-bottom: 22px;" label-width="120px">
+      <span style="margin-right:8px">基础配置 x</span>
+      <el-input-number v-model="model.multiple" controls-position="right" :min="1" style="width: 260px;"/>
+      <span style="margin-left:8px">{{ (model.cpu * model.multiple).toFixed(3) }}Cores / {{ model.memory * model.multiple }}MiB</span>
+    </el-form-item>
+    <el-form-item label="GPU 配置" style="margin-bottom: 22px;" label-width="120px">
+      <el-input-number v-model="model.gpu" controls-position="right" :min="0" style="width: 260px;" :step-strictly="true" :step="1"/>
+      <span style="margin-left:8px">颗</span>
+    </el-form-item>
+  </el-form-item>
 </template>
 
 <script>

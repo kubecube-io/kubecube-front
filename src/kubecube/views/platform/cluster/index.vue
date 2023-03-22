@@ -34,7 +34,7 @@
           >
             <template slot-scope="{ row }">
               <el-link
-                v-toPath="{ path: `/platform/cluster/${row.clusterName}` }"
+                :to="{ path: `/platform/cluster/${row.clusterName}` }"
                 type="primary"
                 :title="row.annotations && row.annotations['cluster.kubecube.io/cn-name']"
               >

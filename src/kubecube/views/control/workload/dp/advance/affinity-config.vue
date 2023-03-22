@@ -1,119 +1,112 @@
 <template>
-  <kube-form-item
-    layout="list"
-    :label="title"
-  >
-    <kube-dynamic-block
-      v-model="model"
-      :layout-comp="blockLayout"
-      :row-comp="blockRowLayout"
-      :init-required="false"
-      :column-comp="null"
-      :data-template="getDataTemplate"
-      style="width: 750px"
-      button-name="添加规则"
+  <div>
+    <el-form-item
+      :label="title"
+      :required="required"
+      :class="$style.columnFormItem"
     >
-      <template slot-scope="{ model: blockModel, index: blockIndex }">
-        <kube-dynamic-block
-          v-model="blockModel.rules"
-          :data-template="getRuleTemplate"
-        >
-          <template slot="column">
-            <th>Key</th>
-            <th>Operator</th>
-            <th>Values</th>
-          </template>
-          <template slot-scope="{ model: ruleModel, index: ruleIndex }">
-            <td>
-              <validation-provider
-                v-slot="{ errors }"
-                :name="`affinity-${type}-${blockIndex}-Key-${ruleIndex}`"
-                :rules="{
-                  startsWithLetter: true,
-                  KeyPattern: true,
-                  noRedundance: { list: blockModel.rules.map(r => r.key) }
-                }"
+      <dynamicCard
+        v-model="model"
+        :initialAdd="required"
+        :minCount="required ? 1 : 0"
+        :getDefaultItem="getDataTemplate"
+        addButtonText="添加规则"
+        :validateFile="prefixProp"
+      >
+        <template slot-scope="{ item: blockModel, index: blockIndex }">
+          <dynamicBlock
+            v-model="blockModel.rules"
+            :getDefaultItem="getRuleTemplate"
+            :columns="[
+                {
+                    title: 'Key',
+                    dataIndex: 'key',
+                },
+                {
+                    title: 'Operator',
+                    dataIndex: 'operator',
+                },
+                {
+                    title: 'Values',
+                    dataIndex: 'value',
+                }
+            ]"
+          >
+            <template v-slot:key="{record: ruleModel, index: ruleIndex}">
+              <el-form-item
+                label=""
+                :prop="`${prefixProp}.${blockIndex}.rules.${ruleIndex}.key`"
+                :rules="[
+                  ...(required && blockIndex === 0 && ruleIndex === 0 ? [ validators.required() ] : []),
+                  validators.startsWithLetter(false),
+                  validators.keyPattern(false),
+                  validators.noRedundance(blockModel.rules.map(r => r.key), false),
+                ]"
               >
-                <kube-form-item
-                  muted="no"
-                  style="width: 100%;"
-                  field-size="full"
-                  layout="none"
-                  :message="errors && errors[0]"
-                  placement="bottom"
-                >
-                  <u-input
-                    v-model="ruleModel.key"
-                    size="normal huge"
-                    :color="errors && errors[0] ? 'error' : ''"
-                  />
-                </kube-form-item>
-              </validation-provider>
-            </td>
-            <td>
-              <u-select
+                <el-input v-model="ruleModel.key"/>
+              </el-form-item>
+            </template>
+            <template v-slot:operator="{record: ruleModel}">
+              <el-select
                 v-model="ruleModel.operator"
-                size="normal huge"
                 :data="operators"
-              />
-            </td>
-            <td>
-              <validation-provider
-                v-slot="{ errors }"
-                :name="`affinity-${type}-${blockIndex}-Value-${ruleIndex}`"
-                :rules="{
-                  multipart: ['Exists', 'DoesNotExist'].includes(ruleModel.operator) ? false : {
-                    rule: 'LabelValuePatten',
-                    spliter: /\s/,
-                  },
-                  ConsistofNumber: ['Gt', 'Lt'].includes(ruleModel.operator),
-                }"
+                placeholder="请选择"
               >
-                <kube-form-item
-                  muted="no"
-                  style="width: 100%;"
-                  field-size="full"
-                  layout="none"
-                  :message="errors && errors[0]"
-                  placement="bottom"
-                >
-                  <u-input
-                    v-if="['Exists', 'DoesNotExist'].includes(ruleModel.operator)"
-                    key="none"
-                    disabled
-                    size="huge"
-                    value="无需填写values"
-                  />
-                  <u-input
-                    v-else
-                    v-model="ruleModel.value"
-                    size="normal huge"
-                    :color="errors && errors[0] ? 'error' : ''"
-                  />
-                </kube-form-item>
-              </validation-provider>
-            </td>
-          </template>
-        </kube-dynamic-block>
-
-        <kube-form
-          v-if="['podAntiAffinity', 'podAffinity'].includes(type)"
-          label-size="normal"
-        >
-          <kube-form-item label="作用空间">
-            {{ namespace }}
-          </kube-form-item>
-          <kube-form-item label="拓扑域">
-            <u-select
-              v-model="blockModel.topologyKey"
-              size="huge"
-              :data="topologyKeyData"
-            />
-          </kube-form-item>
-        </kube-form>
-      </template>
-    </kube-dynamic-block>
-  </kube-form-item>
+                <el-option
+                  v-for="item in operators"
+                  :key="item.value"
+                  :lable="item.text"
+                  :value="item.value"
+                />
+              </el-select>
+            </template>
+            <template v-slot:value="{record: ruleModel, index: ruleIndex}">
+              <el-form-item 
+                label=""
+                :prop="`${prefixProp}.${blockIndex}.rules.${ruleIndex}.value`"
+                :rules="[
+                  ...(required && blockIndex === 0 && ruleIndex === 0 ? [ validators.required() ] : []),
+                  validators.multipartLabelValuePatten(/\s/, false),
+                  ...(['Gt', 'Lt'].includes(ruleModel.operator) ? [ validators.consistofNumber(false) ] : []),
+                ]"
+              >
+                <el-input
+                  v-if="['Exists', 'DoesNotExist'].includes(ruleModel.operator)"
+                  disabled
+                  value="无需填写values"
+                />
+                <el-input
+                  v-else
+                  v-model="ruleModel.value"
+                />
+              </el-form-item>
+            </template>
+          </dynamicBlock>
+          <div
+            v-if="['podAntiAffinity', 'podAffinity'].includes(type)"
+            style="marginTop: 20px"
+          >
+            <el-form-item label="作用空间" style="margin-bottom: 22px;">
+              {{ namespace }}
+            </el-form-item>
+            <el-form-item label="拓扑域" style="margin-bottom: 22px;">
+              <el-select
+                v-model="blockModel.topologyKey"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in topologyKeyData"
+                  :key="item.value"
+                  :lable="item.text"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </div>
+        </template>
+      </dynamicCard>
+    </el-form-item>
+  </div>
 </template>
 
 <script>
@@ -129,6 +122,7 @@ import {
     getDefaultAffinityRule,
     operators,
 } from 'kubecube/k8s-resources/pod/affinity';
+import * as validators from 'kubecube/utils/validators';
 const titleMap = {
     nodeAffinity: '节点亲和性',
     podAffinity: '副本亲和性',
@@ -141,8 +135,17 @@ export default {
             type: String,
             required: true,
         },
+        required: {
+            type: Boolean,
+            default: false,
+        },
+        prefixProp: {
+            type: String,
+            default: '',
+        },
     },
     data: () => ({
+        validators,
         topologyKeyData: topologyKeyData.map(o => ({
             text: o,
             value: o,
@@ -173,6 +176,17 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.columnFormItem {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 22px !important;
+}
+.columnFormItem>:global(.el-form-item__content) {
+  margin-left: 0 !important;
+}
+.columnFormItem>:global(.el-form-item__label) {
+  align-self: start;
+  width: auto !important;
+}
 </style>

@@ -32,10 +32,28 @@
 
 <script>
 import Vue from 'vue';
-import { get } from 'vuex-pathify';
+import { get, sync } from 'vuex-pathify';
 import uAppBreadCrumbs from 'kubecube/component/global/u-app-bread-cumbs.vue';
 import uAppSideBar from 'kubecube/component/global/u-app-nav.vue';
 import kubeTerm from 'kubecube/component/global/xterm/kube-terminal.vue';
+import userService from 'kubecube/services/user';
+const resourceList = [
+    'dashboards',
+    'deployments',
+    'statefulsets',
+    'daemonsets',
+    'cronjobs',
+    'jobs',
+    'pods',
+    'services',
+    'ingresses',
+    'loadbalancers',
+    'persistentvolumeclaims',
+    'secrets',
+    'configmaps',
+    'poddisruptionbudgets',
+    'customresourcedefinitions',
+];
 export default {
     components: {
         uAppBreadCrumbs,
@@ -52,14 +70,47 @@ export default {
                 text: '我的空间',
             };
         },
+        cluster: get('scope/cluster@value'),
+        namespace: get('scope/namespace@value'),
+        userResourcesPermission: sync('scope/userResourcesPermission'),
+        permissionParams() {
+            return {
+                cluster: this.cluster,
+                namespace: this.namespace,
+            };
+        },
     },
     watch: {
         globalLoading(val) {
             console.log(val);
         },
+        permissionParams() {
+            this.resolveUserResourcesPermission();
+        },
     },
     mounted() {
         Vue.prototype.$kubeterm = this.$refs.kubeterm.open;
+    },
+    methods: {
+        async resolveUserResourcesPermission() {
+            if (!this.namespace) {
+                this.userResourcesPermission = {};
+                return;
+            }
+            const userResourcesPermission = await userService.getUserResourcesPermission({
+                data: {
+                    cluster: this.cluster,
+                    infos: resourceList.map(item => {
+                        return {
+                            resource: item,
+                            operator: 'write',
+                            namespace: this.namespace,
+                        };
+                    }),
+                },
+            });
+            this.userResourcesPermission = userResourcesPermission;
+        },
     },
 };
 </script>

@@ -1,132 +1,121 @@
 <template>
-  <u-modal
-    title="YAML 编排"
-    ok-button=""
-    cancel-button=""
-    :visible.sync="show"
-    size="huge"
-    @close="close"
-  >
-    <div style="margin-bottom: 20px">
-      <u-linear-layout
-        style="position: relative;"
-        justify="end"
-      >
-        <u-notice
-          v-show="uploadErrorTip"
-          icon="error"
-          color="error"
-          :class="$style.uploadErrorTip"
-        >
-          {{ uploadErrorTip }}
-        </u-notice>
-        <u-uploader
-          :class="$style.uploader"
-          :extensions="['yaml', 'yml']"
-          @before-send="onUpload($event)"
-          @error="uploadError($event)"
-        >
-          <u-button>
-            <i-line-awesome
-              name="download"
-              :class="$style.download"
-            />从文件导入
-          </u-button>
-        </u-uploader>
-
-        <u-button
-          icon="create"
-          @click="showResourceModal = true"
-        >
-          从已有资源导入
-        </u-button>
-      </u-linear-layout>
-    </div>
-    <!-- <div style="margin-bottom: 20px">
-      <u-notice icon="warning">
-        为保证通过 YAML 文件创建的资源能够通过KubeCube进行管理，平台将自动设置KubeCube内置标签。
-        <u-link
-          @click="preview"
-        >
-          {{ isPreview ? '返回编辑' : '预览' }}
-        </u-link>
-      </u-notice>
-    </div> -->
-    <div
-      ref="editor"
-      :class="$style.editor"
-    />
-
-    <u-submit-button
-      :click="submit.bind(this)"
-      place="middle"
-      :message="yamlErrorTip"
+  <div>
+    <el-dialog
+      title="YAML 编排"
+      width="800px"
+      :visible.sync="show"
+      @close="close"
+      :close-on-click-modal="false"
     >
-      <template slot-scope="scope">
-        <u-linear-layout>
-          <u-button
-            color="primary"
-            :disabled="!!readOnly || scope.submitting"
-            :icon="scope.submitting ? 'loading' : ''"
-            @click="scope.submit"
-          >
-            确定
-          </u-button>
-          <u-button
-            :disabled="!!readOnly || scope.submitting"
-            :icon="scope.submitting ? 'loading' : ''"
-            @click="scope.submit(true)"
-          >
-            预检测
-          </u-button>
-          <u-button @click="close">
-            取消
-          </u-button>
-        </u-linear-layout>
+      <template v-if="show">
+        <el-alert
+          v-if="uploadErrorTip"
+          :title="uploadErrorTip"
+          type="warning"
+          show-icon
+          :closable="false"
+        />
+        <div style="margin-bottom: 20px">
+          <div style="display: flex; justify-content: flex-end">
+            <u-uploader
+              :class="$style.uploader"
+              :extensions="['yaml', 'yml']"
+              @before-send="onUpload($event)"
+              @error="uploadError($event)"
+            >
+              <el-button icon="el-icon-download">
+                从文件导入
+              </el-button>
+            </u-uploader>
+            <el-button
+              style="margin-left: 12px"
+              icon="el-icon-plus"
+              @click="showResourceModal = true"
+            >
+              从已有资源导入
+            </el-button>
+          </div>
+        </div>
+        <div
+          v-if="!fullScreen"
+          :class="$style.editor"
+        >
+          <div :class="$style.header">
+              <div @click="handleChangeFullScreen">
+                <i style="cursor: pointer" :class="fullScreen ? 'el-icon-close' : 'el-icon-full-screen'"/>
+              </div>
+          </div>
+          <qz-editor
+            style="border: 1px solid #E1E8ED"
+            ref="yamlEdit"
+            :value="yamlContent"
+            theme="vs"
+            language="yaml"
+            :options="{ minimap: {enabled: true}, readOnly }"
+            @change="handleEditorChange"
+          />
+        </div>
       </template>
-    </u-submit-button>
-
-    <u-modal
+      <div slot="footer">
+        <el-button @click="close">取消</el-button>
+        <el-button :disabled="!!readOnly" @click="submit" :loading="commitLoading">预检测</el-button>
+        <el-button type="primary" :disabled="!!readOnly" @click="submit" :loading="commitLoading">确定</el-button>
+      </div>
+    </el-dialog>
+    <el-dialog
       :visible.sync="showResourceModal"
       title="已有资源导入"
-      size="normal"
-      ok-button=""
-      cancel-button=""
+      :close-on-click-modal="false"
     >
-      <kube-form label-size="small">
-        <kube-form-item label="资源类型">
-          <u-select
+      <el-form label-width="120px">
+        <el-form-item label="资源类型">
+          <el-select
             v-model="model.kind"
-            :data="kinds"
-            size="large"
-          />
-        </kube-form-item>
-        <kube-form-item label="实例">
-          <u-loading v-if="model.loading" />
+            filterable
+          >
+            <el-option
+              v-for="item in kinds"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value"
+              :title="item.text"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="实例">
+          <i v-if="model.loading" class="el-icon-loading" style="font-size: 24px"/>
           <template v-else>
-            <u-select
+            <el-select
               v-if="model.instance.length"
               key="list"
               v-model="model.target"
-              size="large"
-              :data="model.instance"
-            />
-            <u-select
+            >
+              <el-option
+                v-for="item in model.instance"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+                :title="item.text"
+              />
+            </el-select>
+            <el-input
               v-else
               key="none"
-              size="large"
-              :data="[{ text: '暂无实例' }]"
               disabled
+              placeholder="暂无选项"
             />
           </template>
-        </kube-form-item>
-        <u-submit-button
+        </el-form-item>
+        <!-- <u-submit-button
           v-if="!readOnly"
           :click="loadResource.bind(this)"
           place="middle"
         >
           <template slot-scope="scope">
             <u-linear-layout>
+              <u-button @click="showResourceModal = false">
+                取消
+              </u-button>
               <u-button
                 color="primary"
                 :disabled="model.instance.length === 0 || scope.submitting"
@@ -135,27 +124,43 @@
               >
                 确定
               </u-button>
-              <u-button @click="showResourceModal = false">
-                取消
-              </u-button>
             </u-linear-layout>
           </template>
-        </u-submit-button>
-      </kube-form>
-      <!-- <div slot="foot"></div> -->
-    </u-modal>
-  </u-modal>
+        </u-submit-button> -->
+      </el-form>
+      <div slot="footer">
+        <el-button @click="showResourceModal = false">取 消</el-button>
+        <el-button :disabled="model.instance.length === 0" type="primary" @click="loadResource" :loading="resourceLoading">确 定</el-button>
+      </div>
+    </el-dialog>
+    <div v-if="fullScreen" :class="$style.fullScreenEditor">
+      <div :class="$style.header">
+          <div @click="handleChangeFullScreen">
+            <i style="cursor: pointer" :class="fullScreen ? 'el-icon-close' : 'el-icon-full-screen'"/>
+          </div>
+      </div>
+      <qz-editor
+        style="border: 1px solid #E1E8ED"
+        ref="yamlEdit"
+        :value="yamlContent"
+        theme="vs"
+        language="yaml"
+        :options="{ minimap: {enabled: true}, readOnly }"
+        @change="handleEditorChange"
+      />
+    </div>
+  </div>
 </template>
 
 <script>
 import { get } from 'vuex-pathify';
-import { debounce, cloneDeep } from 'lodash';
-// import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { debounce, cloneDeep, get as getFunc } from 'lodash';
 import { Modal } from '@micro-app/common/mixins';
 import workloadService from 'kubecube/services/k8s-resource';
 import workloadExtendService from 'kubecube/services/k8s-extend-resource';
 import { toPlainObject as toMetadataPlainObject } from 'kubecube/k8s-resources/metadata';
 import yamljs from 'yamljs';
+import YAML from 'yaml';
 import {
     configs,
     getAPIKeyWork,
@@ -163,17 +168,6 @@ import {
 import {
     setValueIfListNotPresent,
 } from 'kubecube/utils/functional';
-// import { makeVModelMixin } from 'kubecube/mixins/functional';
-// monaco.editor.defineTheme('lightvs', {
-//     base: 'vs',
-//     inherit: true,
-//     rules: [{ background: '#eeeeee19' }],
-//     colors: {
-//         'editor.background': '#eeeeee19',
-//         'editor.lineHighlightBorder': '#ffffff00',
-//     },
-// });
-// options in https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
 const defaultOption = {
     language: 'yaml',
     theme: 'lightvs',
@@ -201,8 +195,10 @@ export default {
                 instance: [],
                 target: null,
             },
-
             isPreview: false,
+            fullScreen: false,
+            resourceLoading: false,
+            commitLoading: false,
         };
     },
     computed: {
@@ -235,31 +231,36 @@ export default {
             this.requestResource();
         },
     },
-    created() {
-        this.loadMonaco();
-    },
     destroyed() {
         this.uploadTimeoutId && clearTimeout(this.uploadTimeoutId);
         this.validateTimeoutId && clearTimeout(this.validateTimeoutId);
     },
-    // mounted() {
-    //     this.createMonaco();
-    // },
     methods: {
-        async loadMonaco() {
-            if (!window.monaco) {
-                const monaco = await import(/* webpackChunkName: "monaco-editor" */ 'monaco-editor/esm/vs/editor/editor.api');
-                monaco.editor.defineTheme('lightvs', {
-                    base: 'vs',
-                    inherit: true,
-                    rules: [{ background: '#eeeeee19' }],
-                    colors: {
-                        'editor.background': '#eeeeee19',
-                        'editor.lineHighlightBorder': '#ffffff00',
-                    },
-                });
-                window.monaco = monaco;
+        handleChangeFullScreen() {
+            this.fullScreen = !this.fullScreen;
+        },
+        handleEditorChange(value) {
+            if (this.validateTimeoutId) {
+                clearTimeout(this.validateTimeoutId);
+                this.validateTimeoutId = null;
             }
+            this.validateTimeoutId = window.setTimeout(() => {
+                this.yamlContent = value;
+                try {
+                // 重置
+                    this.yamlErrorTip = '';
+                    yamljs.parse(value);
+                } catch (err) {
+                    console.log(err);
+                    // 二次校验
+                    try {
+                        YAML.parse(value);
+                    } catch (e) {
+                        const { parsedLine, snippet } = err;
+                        this.yamlErrorTip = `第${parsedLine}行解析错误："${snippet}"`;
+                    }
+                }
+            }, 300);
         },
         async requestResource() {
             this.model.loading = true;
@@ -285,40 +286,24 @@ export default {
             this.model.loading = false;
         },
         async loadResource() {
-            const keyword = getAPIKeyWork(configs[this.model.kind]);
-            const p = cloneDeep(this.requestParam);
-            Object.assign(p.pathParams, configs[this.model.kind], {
-                name: this.model.target,
-            });
-            const response = await workloadService[`get${keyword}Instance`](p);
-            const ctnt = yamljs.stringify(response, 20, 2);
-            this.editor.getModel().setValue(ctnt);
-            this.showResourceModal = false;
+            this.resourceLoading = true;
+            try {
+                const keyword = getAPIKeyWork(configs[this.model.kind]);
+                const p = cloneDeep(this.requestParam);
+                Object.assign(p.pathParams, configs[this.model.kind], {
+                    name: this.model.target,
+                });
+                const response = await workloadService[`get${keyword}Instance`](p);
+                this.yamlContent = yamljs.stringify(response, 20, 2);
+                this.$refs.yamlEdit.setValue(this.yamlContent);
+                this.showResourceModal = false;
+            } catch (error) {
+                console.log(error);
+            }
+            this.resourceLoading = false;
         },
         open() {
             this.show = true;
-            const editorOp = Object.assign({}, defaultOption);
-            this.readOnly = editorOp.readOnly;
-            this.$nextTick(() => {
-                this.editor = window.monaco.editor.create(
-                    this.$refs.editor,
-                    editorOp);
-
-                this.editor.onDidChangeModelContent(debounce(() => {
-                    const value = this.editor.getModel().getValue();
-                    try {
-                    // 重置
-                        this.yamlErrorTip = '';
-
-                        yamljs.parse(value);
-                        this.yamlContent = value;
-                    } catch (err) {
-                        const { parsedLine, snippet } = err;
-                        this.yamlErrorTip = `第${parsedLine}行解析错误："${snippet}"`;
-                    }
-                }, 250, { maxWait: 1000 }));
-                // this.editor.getModel().setValue(ctnt);
-            });
         },
         onUpload(event) {
             event.preventDefault();
@@ -326,7 +311,8 @@ export default {
             reader.readAsText(event.file);
             this.uploadErrorTip = '';
             reader.onload = e => {
-                this.editor.getModel().setValue(e.target.result);
+                this.$refs.yamlEdit.setValue(e.target.result);
+                // this.editor.getModel().setValue();
             };
         },
         uploadError(e) {
@@ -336,8 +322,9 @@ export default {
             try {
                 if (!this.isPreview) {
                     this.oldYamlContent = this.yamlContent;
-                    let content = this.editor.getModel().getValue();
-                    content = yamljs.parse(content);
+                    // let content = this.editor.getModel().getValue();
+                    // const content = yamljs.parse(this.yamlContent);
+                    const content = YAML.parse(this.yamlContent);
                     const response = await workloadExtendService.deploy({
                         pathParams: {
                             cluster: this.cluster,
@@ -347,22 +334,24 @@ export default {
                         },
                         data: content,
                     });
-                    const ctnt = yamljs.stringify(response, 20, 2);
-                    this.editor.getModel().setValue(ctnt);
-                    const editorOp = Object.assign({}, defaultOption, {
-                        readOnly: true,
-                    });
+                    this.yamlContent = yamljs.stringify(response, 20, 2);
+                    // const ctnt = yamljs.stringify(response, 20, 2);
+                    // this.editor.getModel().setValue(ctnt);
+                    // const editorOp = Object.assign({}, defaultOption, {
+                    //     readOnly: true,
+                    // });
                     this.readOnly = true;
-                    this.editor.updateOptions(editorOp);
+                    // this.editor.updateOptions(editorOp);
                     this.isPreview = true;
 
                 } else {
-                    this.editor.getModel().setValue(this.oldYamlContent);
-                    const editorOp = Object.assign({}, defaultOption, {
-                        readOnly: false,
-                    });
+                    this.yamlContent = this.oldYamlContent;
+                    // this.editor.getModel().setValue(this.oldYamlContent);
+                    // const editorOp = Object.assign({}, defaultOption, {
+                    //     readOnly: false,
+                    // });
                     this.readOnly = false;
-                    this.editor.updateOptions(editorOp);
+                    // this.editor.updateOptions(editorOp);
                     this.isPreview = false;
 
                 }
@@ -372,25 +361,34 @@ export default {
 
         },
         async submit(dryRun) {
-            this.yamlErrorTip = '';
-            let content = this.editor.getModel().getValue();
-            content = yamljs.parse(content);
+            this.commitLoading = true;
+            try {
+                this.yamlErrorTip = '';
+                // let content = this.editor.getModel().getValue();
+                let content = this.yamlContent;
 
-            await workloadExtendService.deploy({
-                pathParams: {
-                    cluster: this.cluster,
-                },
-                params: {
-                    ...(dryRun === true ? { dryRun: true } : {}),
-                },
-                data: content,
-            });
-            if (dryRun === true) {
-                this.$toast.success('预检测成功');
-            } else {
-                this.editor.dispose();
-                this.close();
+                // content = yamljs.parse(content);
+                content = YAML.parse(content);
+
+                await workloadExtendService.deploy({
+                    pathParams: {
+                        cluster: this.cluster,
+                    },
+                    params: {
+                        ...(dryRun === true ? { dryRun: true } : {}),
+                    },
+                    data: content,
+                    noAlert: true,
+                });
+                if (dryRun === true) {
+                    this.$toast.success('预检测成功');
+                } else {
+                    this.close();
+                }
+            } catch (err) {
+                this.$globalErrorModal(getFunc(err, 'details.causes[0]') || err);
             }
+            this.commitLoading = false;
         },
     },
 };
@@ -398,8 +396,39 @@ export default {
 
 <style module>
 .editor{
-    height: 60vh;
-    margin-bottom: 20px;
+  position: relative;
+  padding-top: 30px;
+  height: 60vh;
+  margin-bottom: 20px;
+}
+.editor .header{
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 30px;
+  background: #F5F7FA;
+  display: flex;
+  padding: 8px;
+  justify-content: flex-end
+}
+.fullScreenEditor {
+  padding-top: 30px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 10000;
+}
+.fullScreenEditor .header{
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 30px;
+  background: #F5F7FA;
+  display: flex;
+  padding: 8px;
+  justify-content: flex-end;
 }
 
 .uploadErrorTip[class] {

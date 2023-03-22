@@ -1,196 +1,443 @@
 <template>
-  <u-linear-layout direction="vertical">
-    <u-linear-layout direction="horizontal">
-      <u-button
-        icon="create"
-        color="primary"
-        :disabled="isReview"
-        @click="toCreate"
-      >
-        部署
-      </u-button>
-      <u-button
-        icon="refresh"
-        square
-        @click="refresh"
-      />
-      <kube-input-search
-        :align-right="true"
-        placeholder="请输入名称搜索"
-        @search="onSearch"
-      />
-    </u-linear-layout>
-
-    <x-request
-      ref="request"
-      :service="service"
-      :params="requestParam"
-      :processor="resolver"
-    >
-      <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :loading="loading"
-          :columns="columns"
-          :items="data ? data.list : []"
-          :error="error"
-          :resizable="true"
-          @sort="onSort"
+  <div>
+    <el-row :class="$style.root">
+      <el-row>
+        <el-col>
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            :disabled="isReview"
+            @click="toCreate"
+          >
+            部署
+          </el-button>
+          <el-button
+            square
+            icon="el-icon-refresh-right"
+            @click="refresh"
+          />
+          <elInputSearch
+            v-model="filterName"
+            placeholder="请输入名称搜索"
+            position="right"
+            @search="onSearch"
+          />
+        </el-col>
+      </el-row>
+      <el-row>
+        <x-request
+          ref="request"
+          :service="service"
+          :params="requestParam"
+          :processor="resolver"
         >
-          <template #[`column.status`]="{ column }">
-            {{ column.title }}
-            <u-note v-if="workload === 'deployments'">
-              <div>工作负载状态给出工作负载各个副本的状态统计</div>
-              <div>desired：预期的副本数</div>
-              <div>updated：已经是最新版本的副本数</div>
-              <div>available：可用副本数</div>
-              <div>unavailable：不可用副本数</div>
-              <div>total：总副本数</div>
-            </u-note>
-            <u-note v-if="workload === 'statefullsets'">
-              <div>状态信息给出副本的状态统计数据</div>
-              <div>desired：预期的副本数</div>
-              <div>total：总副本数</div>
-            </u-note>
-          </template>
-          <template #[`item.name`]="{ item }">
-            <u-link :to="{path: `/control/${workload}/${item.metadata.name}`}">
-              {{ item.metadata.name }}
-            </u-link>
-          </template>
-          <template #[`item.status`]="{ item }">
-            <template v-if="['deployments', 'statefullsets'].includes(workload)">
-              <u-tooltip>
-                <u-status-icon :name="getStatus(item)" />
-                <div
-                  v-if="item.podStatus.warning && item.podStatus.warning.length"
-                  slot="content"
+          <template slot-scope="{ data, loading }">
+            <el-table
+              :key="workload"
+              v-loading="loading"
+              :data="data ? data.list : []"
+              style="width: 100%"
+              border
+              :default-sort="defaultSort"
+              @sort-change="tableSortChange"
+            >
+              <template v-if="['statefulsets', 'deployments'].includes(workload)">
+                <el-table-column
+                  prop="metadata.name"
+                  label="名称"
+                  :show-overflow-tooltip="true"
+                  sortable
                 >
-                  <span
-                    v-for="(warn, idx) in item.podStatus.warning"
-                    :key="idx"
-                    :class="$style.podStatus"
-                  >
-                    {{ warn.message }}
-                  </span>
-                  <!-- <u-link v-if="props.row.pods.warnings.length > 1" @click="showMore(props.row)">更多</u-link> -->
-                </div>
-              </u-tooltip>
-            </template>
-            {{ item.status | statusFilter(workload) }}
+                  <template slot-scope="{ row }">
+                    <el-link
+                      :to="{ path: `/control/${workload}/${row.metadata.name}/info`, query: $route.query }"
+                      type="primary"
+                    >
+                      {{ row.metadata.name }}
+                    </el-link>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="date"
+                  label="镜像"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ calculateImages(row) }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="date"
+                  label="状态"
+                  :width="workload === 'deployments' ? 360 : 180"
+                >
+                  <template slot="header">
+                    状态
+                    <el-tooltip
+                      class="item"
+                      effect="dark"
+                      placement="top"
+                      popper-class="ncs-el-tooltip-popper"
+                    >
+                      <div
+                        v-if="workload === 'deployments'"
+                        slot="content"
+                      >
+                        <div>工作负载状态给出工作负载各个副本的状态统计</div>
+                        <div>desired：预期的副本数</div>
+                        <div>updated：已经是最新版本的副本数</div>
+                        <div>available：可用副本数</div>
+                        <div>unavailable：不可用副本数</div>
+                        <div>total：总副本数</div>
+                      </div>
+                      <div
+                        v-if="workload === 'statefulsets'"
+                        slot="content"
+                      >
+                        <div>状态信息给出副本的状态统计数据</div>
+                        <div>desired：预期的副本数</div>
+                        <div>total：总副本数</div>
+                      </div>
+                      <i class="el-icon-question" />
+                    </el-tooltip>
+                  </template>
+                  <template slot-scope="{ row }">
+                    <statusIcon
+                      v-if="getStatus(row) === 'success'"
+                      name="success"
+                    />
+                    <statusIcon
+                      v-else-if="!row.podStatus.warning || !row.podStatus.warning.length"
+                      name="warning"
+                    />
+                    <el-tooltip
+                      v-else
+                      class="item"
+                      effect="dark"
+                      placement="top"
+                      popper-class="ncs-el-tooltip-popper"
+                    >
+                      <div
+                        v-if="row.podStatus.warning && row.podStatus.warning.length"
+                        slot="content"
+                      >
+                        <div
+                          v-for="(warn, idx) in row.podStatus.warning"
+                          :key="idx"
+                        >
+                          {{ warn.message }}
+                        </div>
+                      </div>
+                      <statusIcon name="warning" />
+                    </el-tooltip>
+                    {{ row.status | statusFilter(workload) }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="metadata.creationTimestamp"
+                  label="创建时间"
+                  width="170"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.metadata.creationTimestamp | formatLocaleTime }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="action"
+                  label="操作"
+                  width="180"
+                >
+                  <template slot-scope="{ row }">
+                    <qz-link-group max="3">
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="toEditItem(row)"
+                      >
+                        设置
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="resize(row)"
+                      >
+                        调整副本数
+                      </el-link>
+                      <el-link
+                        v-if="workload === 'deployments'"
+                        :disabled="isReview"
+                        type="primary"
+                        @click="toUpdateImage(row)"
+                      >
+                        滚动更新
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="restart(row)"
+                      >
+                        重建
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="deleteItem(row)"
+                      >
+                        删除
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="editYAML(row)"
+                      >
+                        YAML 设置
+                      </el-link>
+                    </qz-link-group>
+                  </template>
+                </el-table-column>
+              </template>
+              <template v-if="['daemonsets'].includes(workload)">
+                <el-table-column
+                  prop="metadata.name"
+                  label="名称"
+                  :show-overflow-tooltip="true"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    <el-link
+                      :to="{ path: `/control/${workload}/${row.metadata.name}/info`, query: $route.query}"
+                      type="primary"
+                    >
+                      {{ row.metadata.name }}
+                    </el-link>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="level"
+                  label="级别"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.spec.level && (row.spec.level.ind === 'platform' ? '平台级' : '租户级') || '-' }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="metadata.creationTimestamp"
+                  label="创建时间"
+                  width="170"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.metadata.creationTimestamp | formatLocaleTime }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="action"
+                  label="操作"
+                  width="180"
+                >
+                  <template slot-scope="{ row }">
+                    <qz-link-group max="3">
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="toEditItem(row)"
+                      >
+                        设置
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="deleteItem(row)"
+                      >
+                        删除
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="editYAML(row)"
+                      >
+                        YAML 设置
+                      </el-link>
+                    </qz-link-group>
+                  </template>
+                </el-table-column>
+              </template>
+              <template v-if="['cronjobs'].includes(workload)">
+                <el-table-column
+                  prop="metadata.name"
+                  label="名称"
+                  :show-overflow-tooltip="true"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    <el-link
+                      :to="{ path: `/control/${workload}/${row.metadata.name}/info`, query: $route.query }"
+                      type="primary"
+                    >
+                      {{ row.metadata.name }}
+                    </el-link>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="status.runningStatus"
+                  label="状态"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.spec.suspend ? '暂停' : '已启动' }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="spec.schedule"
+                  label="定时设置"
+                  :show-overflow-tooltip="true"
+                />
+                <el-table-column
+                  prop="status.tasks"
+                  label="正在运行任务数"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ (row.status.active || []).length }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="metadata.creationTimestamp"
+                  label="创建时间"
+                  width="170"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.metadata.creationTimestamp | formatLocaleTime }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="action"
+                  label="操作"
+                  width="180"
+                >
+                  <template slot-scope="{ row }">
+                    <qz-link-group max="3">
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="toEditItem(row)"
+                      >
+                        设置
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="deleteItem(row)"
+                      >
+                        删除
+                      </el-link>
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="editYAML(row)"
+                      >
+                        YAML 设置
+                      </el-link>
+                    </qz-link-group>
+                  </template>
+                </el-table-column>
+              </template>
+              <template v-if="['jobs'].includes(workload)">
+                <el-table-column
+                  prop="metadata.name"
+                  label="名称"
+                  :show-overflow-tooltip="true"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    <el-link
+                      :to="{ path: `/control/${workload}/${row.metadata.name}/info`, query: $route.query }"
+                      type="primary"
+                    >
+                      {{ row.metadata.name }}
+                    </el-link>
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="status"
+                  label="状态"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.status | statusFilter(workload) }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="jobstatus"
+                  label="执行情况（完成/全部）"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.status.succeeded || 0 }} / {{ row.spec && row.spec.completions }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="period"
+                  label="运行时长"
+                  :show-overflow-tooltip="true"
+                >
+                  <template slot-scope="{ row }">
+                    {{ getJobPeriod(row) }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="metadata.creationTimestamp"
+                  label="创建时间"
+                  width="170"
+                  sortable
+                >
+                  <template slot-scope="{ row }">
+                    {{ row.metadata.creationTimestamp | formatLocaleTime }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  prop="action"
+                  label="操作"
+                  width="180"
+                >
+                  <template slot-scope="{ row }">
+                    <qz-link-group max="3">
+                      <el-link
+                        type="primary"
+                        :disabled="isReview"
+                        @click="deleteItem(row)"
+                      >
+                        删除
+                      </el-link>
+                    </qz-link-group>
+                  </template>
+                </el-table-column>
+              </template>
+            </el-table>
+            <el-pagination
+              v-if="data && calculatePages(data.total) > 0"
+              style="float:right;margin-top:12px"
+              :current-page="pagenation.pageNum"
+              :page-sizes="[10, 20, 30, 40, 50, 100]"
+              :page-size="pagenation.pageSize"
+              layout="total, sizes, prev, pager, next"
+              :total="data.total"
+              background
+              @size-change="pageSizeChange"
+              @current-change="pageNumChange"
+            />
           </template>
-          <template #[`item.creationTimestamp`]="{ item }">
-            {{ item.metadata.creationTimestamp | formatLocaleTime }}
-          </template>
-          <template #[`item.jobstatus`]="{ item }">
-            {{ item.status.succeeded }} / {{ item.spec && item.spec.completions }}
-          </template>
-          <template #[`item.period`]="{ item }">
-            {{ getJobPeriod(item) }}
-          </template>
-
-          <template #[`item.operation`]="{ item }">
-            <u-linear-layout gap="small">
-              <u-link-list :key="workload">
-                <template v-if="workload === 'jobs'">
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="deleteItem(item)"
-                  >
-                    删除
-                  </u-link-list-item>
-                </template>
-                <template v-if="['cronjobs', 'daemonsets'].includes(workload)">
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="toEditItem(item)"
-                  >
-                    设置
-                  </u-link-list-item>
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="deleteItem(item)"
-                  >
-                    删除
-                  </u-link-list-item>
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="editYAML(item)"
-                  >
-                    YAML 设置
-                  </u-link-list-item>
-                </template>
-                <template v-if="['deployments','statefulsets'].includes(workload)">
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="toEditItem(item)"
-                  >
-                    设置
-                  </u-link-list-item>
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="resize(item)"
-                  >
-                    调整副本数
-                  </u-link-list-item>
-                  <!-- <u-link-list-item
-                    v-if="workload === 'deployments'"
-                    to="deployment.updateImage"
-                  >
-                    滚动更新
-                  </u-link-list-item> -->
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="deleteItem(item)"
-                  >
-                    删除
-                  </u-link-list-item>
-                  <!-- <u-link-list-item>
-                    设置
-                  </u-link-list-item> -->
-                  <u-link-list-item
-                    :disabled="isReview"
-                    @click="editYAML(item)"
-                  >
-                    YAML 设置
-                  </u-link-list-item>
-                </template>
-              </u-link-list>
-            </u-linear-layout>
-          </template>
-          <template #noData>
-            <template v-if="pagenation.selector">
-              没有搜索到相关内容，可调整关键词重新搜索
-            </template>
-            <template v-else>
-              还没有任何 {{ workloadLiteral }} , 现在就 <u-link
-                :disabled="isReview"
-                @click="toCreate"
-              >
-                立即创建
-              </u-link> 一个吧。
-            </template>
-          </template>
-          <template #error>
-            获取数据失败，请<u-link @click="refresh">
-              重试
-            </u-link>
-          </template>
-        </kube-table>
-        <u-page
-          v-if="data && calculatePages(data.total) > 1"
-          :count="data.total"
-          :page-size="pagenation.pageSize"
-          :total="calculatePages(data.total)"
-          @select="selectPage"
-        />
-      </template>
-    </x-request>
+        </x-request>
+      </el-row>
+    </el-row>
     <modify-replicas-dialog
       ref="modifyDialog"
       @refresh="refresh"
     />
-  </u-linear-layout>
+  </div>
 </template>
 
 <script>
@@ -198,7 +445,6 @@ import { upperFirst } from 'lodash';
 import { get } from 'vuex-pathify';
 import workloadService from 'kubecube/services/k8s-resource';
 import workloadExtendService from 'kubecube/services/k8s-extend-resource';
-import PageMixin from 'kubecube/mixins/pagenation';
 import { toPlainObject as toDeploymentPlainObject } from 'kubecube/k8s-resources/deployment';
 import { toPlainObject as toStatefulsetPlainObject } from 'kubecube/k8s-resources/statefulset';
 import { toPlainObject as toDaemonsetPlainObject } from 'kubecube/k8s-resources/daemonsets';
@@ -206,6 +452,7 @@ import { toPlainObject as toJobPlainObject } from 'kubecube/k8s-resources/job';
 import { toPlainObject as toCronJobPlainObject } from 'kubecube/k8s-resources/cronjob';
 // import { toPlainObject as toMetadataPlainObject } from 'kubecube/k8s-resources/metadata';
 import modifyReplicasDialog from './detail/dialog/modify-replicas.vue';
+import { pagenationMixin } from 'kubecube/mixins';
 
 import {
     JOB_STATUS_MAP,
@@ -237,13 +484,19 @@ export default {
 
         },
     },
-    mixins: [ PageMixin ],
+    mixins: [ pagenationMixin ],
+    data() {
+        return {
+            filterName: '',
+        };
+    },
     computed: {
         namespace: get('scope/namespace@value'),
         cluster: get('scope/cluster@value'),
         userRole: get('scope/userRole'),
+        userResourcesPermission: get('scope/userResourcesPermission'),
         isReview() {
-            return !(this.userRole.tenantAdmin || this.userRole.projectAdmin || this.userRole.platformAdmin);
+            return !this.userResourcesPermission[this.workload];
         },
         workload() {
             return this.$route.params.workload;
@@ -412,8 +665,43 @@ export default {
         },
     },
     methods: {
+        toUpdateImage(item) {
+            this.$router.push({
+                path: `/control/${this.workload}/${item.metadata.name}/updateImage`,
+            });
+        },
+        async restart(item) {
+            await workloadService.patchWorkload({
+                pathParams: {
+                    cluster: this.cluster,
+                    namespace: this.namespace,
+                    resource: this.workload,
+                    name: item.metadata.name,
+                },
+                data: {
+                    spec: {
+                        template: {
+                            metadata: {
+                                annotations: {
+                                    'kubectl.kubernetes.io/restartedAt': `${new Date().toLocaleString()}`,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            this.$message({
+                message: '已触发重建',
+                type: 'success',
+            });
+            this.refresh();
+        },
+        calculateImages(item) {
+            return item.containers.map(item => item.image).join(', ');
+        },
         getStatus(item) {
-            if ((item.podStatus.warning || []).length > 0 || item.spec.replicas === 0) { return 'warning'; }
+            console.log(item.status);
+            if ((item.podStatus.warning || []).length > 0 || item.status.desired !== item.status.readyReplicas) { return 'warning'; }
             if (item.podStatus.pending > 0) { return 'waiting'; }
             return 'success';
         },
@@ -446,51 +734,6 @@ export default {
             this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
         },
         toCreate() {
-            // let content;
-            // switch (this.workload) {
-            //     case 'deployments':
-            //         content = {
-            //             apiVersion: 'apps/v1',
-            //             kind: 'Deployment',
-            //         };
-            //         break;
-            //     case 'statefulsets':
-            //         content = {
-            //             apiVersion: 'apps/v1',
-            //             kind: 'StatefulSet',
-            //         };
-            //         break;
-            //     case 'jobs':
-            //         content = {
-            //             apiVersion: 'apps/v1',
-            //             kind: 'Job',
-            //         };
-            //         break;
-            //     case 'cronjobs':
-            //         content = {
-            //             apiVersion: 'apps/v1',
-            //             kind: 'CronJob',
-            //         };
-            //         break;
-            //     default:
-            //         content = {};
-            // }
-            // this.$editResource({
-            //     title: `${this.workload} —— YAML 设置`,
-            //     content,
-            //     onSubmit: async content => {
-            //         console.log(content);
-            //         await this.createInstanceService({
-            //             pathParams: {
-            //                 cluster: this.cluster,
-            //                 namespace: this.namespace,
-            //                 resource: this.workload,
-            //             },
-            //             data: content,
-            //         });
-            //         this.refresh();
-            //     },
-            // });
             this.$router.push({
                 path: `/control/${this.workload}/create`,
             });
@@ -504,9 +747,9 @@ export default {
             this.$refs.modifyDialog.open(item);
         },
         deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
                     const reqParam = {
                         pathParams: {
@@ -552,5 +795,11 @@ export default {
 <style module>
 .podStatus{
     display: block;
+}
+.podStatus{
+    display: block;
+}
+.root :global(.el-row) + :global(.el-row) {
+  margin-top: 12px;
 }
 </style>

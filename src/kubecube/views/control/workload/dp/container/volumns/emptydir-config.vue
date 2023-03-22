@@ -1,65 +1,68 @@
 <template>
   <div>
-    <kube-dynamic-block
+    <dynamicBlock
       v-model="model"
-      style="width: 580px"
-      :data-template="getDataTemplate"
+      :getDefaultItem="getDataTemplate"
+      :columns="[
+          {
+              title: '名称',
+              dataIndex: 'resource',
+          },
+          {
+              title: '权限',
+              dataIndex: 'readOnly'
+          },
+          {
+              title: '挂载目录',
+              dataIndex: 'mountPath'
+          }
+      ]"
     >
-      <template slot="column">
-        <th>名称</th>
-        <th>权限</th>
-        <th>挂载目录</th>
+      <template v-slot:resource="{record}">
+        <el-select v-model="record.resource" placeholder="请选择" filterable>
+            <el-option
+              v-for="item in volumeResources"
+              :key="item.value"
+              :label="item.text"
+              :value="item.value">
+            </el-option>
+          </el-select>
       </template>
-      <template slot-scope="{ model: item, index }">
-        <td>
-          <u-select
-            v-model="item.resource"
-            dense
-            :data="volumeResources"
-          />
-        </td>
-        <td>
-          <u-select
-            v-model="item.readOnly"
-            dense
-            :data="readOnlyList"
-          />
-        </td>
-        <td>
-          <validation-provider
-            v-slot="{ errors }"
-            :name="`${errorprefix}mountPath-${index}`"
-            :rules="{
-              startsWithSlash: true,
-              ConsistofPath: true,
-              noRedundance: { list: allMountPath }
-            }"
-          >
-            <kube-form-item
-              muted="no"
-              style="width: 100%;"
-              field-size="full"
-              layout="none"
-              :message="errors && errors[0]"
-              placement="bottom"
-            >
-              <u-input
-                v-model="item.mountPath"
-                size="huge"
-                :color="errors && errors[0] ? 'error' : ''"
-              />
-            </kube-form-item>
-          </validation-provider>
-        </td>
+      <template v-slot:readOnly="{record}">
+        <el-select v-model="record.readOnly" placeholder="请选择" filterable>
+          <el-option
+            v-for="item in readOnlyList"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value">
+          </el-option>
+        </el-select>
       </template>
-    </kube-dynamic-block>
-    <div class="text-subtitle-2 mt-2">
+      <template v-slot:mountPath="{record, index}">
+        <el-form-item 
+          label=""
+          :prop="`${prefixKey}.${index}.mountPath`"
+          :rules="[
+            validators.startsWithSlash(false),
+            validators.consistofPath(false),
+            validators.noRedundance(allMountPath, false)
+          ]"
+        >
+          <el-input
+            v-model="record.mountPath"
+            :disabled="!record.resource"
+          />
+        </el-form-item>
+      </template>
+    </dynamicBlock>
+    <div>
       如需新的EmptyDir，可
-      <u-link
+      <el-link
+        type="primary"
         @click="openDialog"
       >
         创建EmptyDir
-      </u-link>
+      </el-link>
     </div>
   </div>
 </template>
@@ -67,6 +70,7 @@
 <script>
 import { makeVModelMixin } from 'kubecube/mixins/functional';
 import volumnMixin from './volumn-mixin';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin, volumnMixin ],
     props: {
@@ -74,6 +78,7 @@ export default {
         openDialog: Function,
     },
     data: () => ({
+        validators,
         resource: 'emptydir',
         readOnlyList: [
             { text: 'ReadAndWrite', value: false },
