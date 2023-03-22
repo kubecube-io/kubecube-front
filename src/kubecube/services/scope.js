@@ -1,8 +1,9 @@
 import Service from './service';
 import { userInterceptor } from './interceptor';
-const controlCluster = 'pivot-cluster';
+// const controlCluster = 'pivot-cluster';
+import store from 'kubecube/store';
 const service = Service({
-    baseURL: `/api/v1/cube/proxy/clusters/${controlCluster}`,
+    baseURL: `/api/v1/cube/proxy/clusters/${store.get('scope/controlClusterList')[0].clusterName}`,
     apis: {
         getScopeList: {
             template: '/apis/tenant.kubecube.io/v1/{scope}',

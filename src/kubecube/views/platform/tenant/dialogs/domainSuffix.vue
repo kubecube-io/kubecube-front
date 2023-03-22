@@ -60,7 +60,7 @@ import dynamicBlock from 'kubecube/elComponent/dynamic-block/index.vue';
 import * as validators from 'kubecube/utils/validators';
 export default {
     components: {
-        dynamicBlock
+        dynamicBlock,
     },
     data() {
         return {
@@ -76,7 +76,7 @@ export default {
                     { type: 'string', pattern: /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, trigger: 'input', message: '' },
                     { type: 'string', pattern: /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/, trigger: 'blur', message: '请输入合法的 ingress 后缀' },
                     { type: 'string', trigger: 'input+blur', message: '域名后缀重复', validator: (rule, value, callback) => {
-                        let targets = this.model.domainSuffixList.filter(item => item.name).filter(item => item.name === value);
+                        const targets = this.model.domainSuffixList.filter(item => item.name).filter(item => item.name === value);
                         if (targets.length > 1) { callback(new Error()); } else { callback(); }
                     } },
                 ],
@@ -86,10 +86,10 @@ export default {
         };
     },
     computed: {
-        // controlClusterList: get('scope/controlClusterList'),
+        controlClusterList: get('scope/controlClusterList'),
         existSuffixs() {
-          return this.model.domainSuffixList.map(item => item.name).filter(item => item);
-        }
+            return this.model.domainSuffixList.map(item => item.name).filter(item => item);
+        },
     },
     methods: {
         getDataTemplate() {
@@ -117,38 +117,36 @@ export default {
         },
         async submit() {
             try {
-              await this.$refs.form.validate();
+                await this.$refs.form.validate();
             } catch (error) {
-              console.log(error);
-              return;
+                console.log(error);
+                return;
             }
             this.commitLoading = true;
             try {
-              await k8sResourceService.patchClusterCRResourceInstance({
-                pathParams: {
-                    // cluster: this.controlClusterList[0].clusterName,
-                    cluster: 'pivot-cluster',
-                    group: 'tenant.kubecube.io',
-                    version: 'v1',
-                    plural: 'projects',
-                    name: this.projectInfo.metadata.name,
-                },
-                data: [{
-                    op: 'replace',
-                    path: '/spec/ingressDomainSuffix',
-                    value: this.model.domainSuffixList.map(item => item.name).filter(item => item),
-                }],
-                headers: {
-                    'Content-Type': 'application/json-patch+json',
-                },
-              });
-              this.show = false;
-              this.$emit('refresh');
+                await k8sResourceService.patchClusterCRResourceInstance({
+                    pathParams: {
+                        cluster: this.controlClusterList[0].clusterName,
+                        group: 'tenant.kubecube.io',
+                        version: 'v1',
+                        plural: 'projects',
+                        name: this.projectInfo.metadata.name,
+                    },
+                    data: [{
+                        op: 'replace',
+                        path: '/spec/ingressDomainSuffix',
+                        value: this.model.domainSuffixList.map(item => item.name).filter(item => item),
+                    }],
+                    headers: {
+                        'Content-Type': 'application/json-patch+json',
+                    },
+                });
+                this.show = false;
+                this.$emit('refresh');
             } catch (error) {
-              console.log(error)
+                console.log(error);
             }
             this.commitLoading = false;
-            
         },
     },
 };
