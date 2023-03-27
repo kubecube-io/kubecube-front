@@ -2,7 +2,7 @@
   <u-linear-layout direction="vertical">
     <u-linear-layout>
       <u-text>集群</u-text>
-      <cluster-selector v-model="cluster" />
+      <cluster-selector v-model="cluster" style="width:200px" />
       <u-button
         icon="create"
         color="primary"

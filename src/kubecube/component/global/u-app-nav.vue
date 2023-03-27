@@ -5,15 +5,19 @@
         <u-sidebar-header
           label="控制台"
         />
-        <div style="margin-left: 3px;">
+        <div style="margin-bottom: 12px;">
           <div :class="$style.subTitle">
             集群
           </div>
-          <u-app-cluster-select />
+          <div :class="$style.subTitle">
+            <u-app-cluster-select />
+          </div>
           <div :class="$style.subTitle">
             空间
           </div>
-          <u-app-namespace-select />
+          <div :class="$style.subTitle">
+            <u-app-namespace-select />
+          </div>
         </div>
         <u-sidebar-divider />
 
@@ -217,7 +221,7 @@ export default {
     height: 100%;
 }
 .subTitle {
-    margin: 10px 0 -5px 20px;
+    margin: 10px 0 0px 12px;
 }
 .subTitleblock{
     padding: 10px;

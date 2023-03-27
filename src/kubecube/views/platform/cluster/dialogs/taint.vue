@@ -1,128 +1,91 @@
 <template>
-  <u-modal
+  <el-dialog
     title="设置污点"
-    ok-button=""
-    cancel-button=""
     :visible.sync="show"
-    size="large"
+    width="640px"
     @close="close"
   >
-    <u-text>污点（taint），只有拥有和 taint 相匹配的 toleration 的 pod 才能够被分配到节点。</u-text>
-    <validation-observer
-      ref="observer"
-      v-slot="{ errors, invalid }"
-    >
-      <u-form
-        ref="form"
-        gap="large"
-        layout="block"
-      >
-        <kube-dynamic-block
-          v-model="model"
-          style="width: 100%;"
-          :data-template="getDataTemplate"
+    <div>污点（taint），只有拥有和 taint 相匹配的 toleration 的 pod 才能够被分配到节点。</div>
+    <el-form v-if="show" ref="form" :model="model" label-position="right">
+      <el-form-item>
+        <dynamicBlock
+          v-model="model.taints"
+          :getDefaultItem="getDataTemplate"
+          :columns="[
+              {
+                  title: 'Key',
+                  dataIndex: 'key',
+              },
+              {
+                  title: 'Value',
+                  dataIndex: 'value',
+              },
+              {
+                  title: 'Effect',
+                  dataIndex: 'effect',
+              }
+          ]"
         >
-          <template slot="column">
-            <th>Key</th>
-            <th>Value</th>
-            <th>
-              Effect<u-note>
+          <template slot="th-effect">
+            Effect
+            <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+              <template slot="content">
                 <div>NoSchedule：POD 不会被调度到标记为 taints 节点。</div>
                 <div>PreferNoSchedule：NoSchedule 的软策略版本。尽量避免将 pod 调度到存在其不能容忍 taint 的节点上</div>
                 <div>NoExecute：该选项意味着一旦 Taint 生效，如该节点内正在运行的 POD 没有对应 Tolerate 设置，会直接被逐出。</div>
-              </u-note>
-            </th>
+              </template>
+              <i class="el-icon-question"/>
+            </el-tooltip>
           </template>
-          <template slot-scope="{ model, index }">
-            <td>
-              <validation-provider
-                v-slot="{ errors }"
-                :name="`Key-${index}`"
-                :rules="{
-                  KeyPattern: true,
-                  noRedundance: { list: exsitKeys }
-                }"
-              >
-                <kube-form-item
-                  muted="no"
-                  style="width: 100%;"
-                  field-size="full"
-                  layout="none"
-                  :message="errors && errors[0]"
-                  placement="bottom"
-                >
-                  <u-input
-                    v-model="model.key"
-                    size="normal huge"
-                    :color="errors && errors[0] ? 'error' : ''"
-                  />
-                </kube-form-item>
-              </validation-provider>
-            </td>
 
-            <td>
-              <validation-provider
-                v-slot="{ errors }"
-                :name="`Value-${index}`"
-                :rules="{
-                  dependOnPattern: { depend: model.key }
-                }"
-              >
-                <kube-form-item
-                  muted="no"
-                  style="width: 100%;"
-                  field-size="full"
-                  layout="none"
-                  :message="errors && errors[0]"
-                  placement="bottom"
-                >
-                  <u-input
-                    v-model="model.value"
-                    size="normal huge"
-                    :color="errors && errors[0] ? 'error' : ''"
-                  />
-                </kube-form-item>
-              </validation-provider>
-            </td>
-            <td>
-              <u-select
-                v-model="model.effect"
-                size="huge"
-                :data="effects"
+          <template v-slot:key="{record, index}">
+            <el-form-item 
+              label=""
+              :prop="`taints.${index}.key`"
+              :rules="[
+                validators.keyPattern(false),
+                validators.noRedundance(exsitKeys, false),
+              ]"
+            >
+              <el-input
+                v-model="record.key"
               />
-            </td>
+            </el-form-item>
           </template>
-        </kube-dynamic-block>
-        <u-submit-button
-          ref="submit"
-          :click="submit.bind(this)"
-          place="right"
-        >
-          <template slot-scope="scope">
-            <u-linear-layout>
-              <u-button
-                :disabled="scope.submitting || invalid"
-                :icon="scope.submitting ? 'loading' : null "
-                color="primary"
-                @click="scope.submit"
-              >
-                确定
-              </u-button>
-              <u-button @click="close">
-                取消
-              </u-button>
-            </u-linear-layout>
+          <template v-slot:value="{record, index}">
+              <el-input
+                v-model="record.value"
+              />
           </template>
-        </u-submit-button>
-      </u-form>
-    </validation-observer>
-  </u-modal>
+          <template v-slot:effect="{record, index}">
+            <el-select
+              v-model="record.effect"
+              placeholder="请选择"
+              filterable
+            >
+              <el-option
+                v-for="item in effects"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+              />
+            </el-select>
+          </template>
+        </dynamicBlock>
+      </el-form-item>
+    </el-form>
+    <div slot="footer">
+      <el-button @click="close">取 消</el-button>
+      <el-button type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
+    </div>
+  </el-dialog>
 </template>
 
 <script>
-import { get, cloneDeep } from 'lodash';
+import { get, cloneDeep, set } from 'lodash';
 import { Modal } from '@micro-app/common/mixins';
 import workloadService from 'kubecube/services/k8s-resource';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ Modal ],
     props: {
@@ -131,20 +94,24 @@ export default {
     data() {
         return {
             effects: [ 'NoSchedule', 'PreferNoSchedule', 'NoExecute' ].map(item => ({ text: item, value: item })),
-            model: [],
+            model: {
+                taints: [],
+            },
+            test: [],
             raw: null,
+            validators,
+            submitLoading: false,
         };
     },
     computed: {
         exsitKeys() {
-            return this.model.map(t => t.key);
+            return this.model.taints.map(t => t.key);
         },
     },
     methods: {
         open(item) {
-            console.log(item);
-            const taint = get(item, 'spec.taints', []);
-            this.model = cloneDeep(taint);
+            const taints = get(item, 'spec.taints', []);
+            this.model.taints = cloneDeep(taints);
             this.raw = item;
             this.show = true;
         },
@@ -156,17 +123,36 @@ export default {
             };
         },
         async submit() {
-            const data = { spec: { taints: this.model } };
-            await workloadService.modifyResourceWithoutNamespace({
-                pathParams: {
-                    cluster: this.instance.clusterName,
-                    resource: 'nodes',
-                    name: get(this.raw, 'metadata.name'),
-                },
-                data,
-            });
-            this.show = false;
-            this.$emit('refresh');
+            // 触发校验
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                return;
+            }
+            this.submitLoading = true;
+            try {
+                const data = await workloadService.getResourceWithoutNamespace({
+                    pathParams: {
+                        cluster: this.instance.clusterName,
+                        resource: 'nodes',
+                        name: get(this.raw, 'metadata.name'),
+                    },
+                });
+                set(data, 'spec.taints', this.model.taints.filter(item => item.key && item.value));
+                await workloadService.updateResourceWithoutNamespace({
+                    pathParams: {
+                        cluster: this.instance.clusterName,
+                        resource: 'nodes',
+                        name: get(this.raw, 'metadata.name'),
+                    },
+                    data,
+                });
+                this.show = false;
+                this.$emit('refresh');
+            } catch (error) {
+                console.log(error);
+            }
+            this.submitLoading = false;
         },
     },
 };

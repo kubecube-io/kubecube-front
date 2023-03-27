@@ -17,15 +17,14 @@
           加载出错！
         </div>
         <template v-else>
-          <u-tabs router>
-            <u-tab
+          <el-tabs :value="routeName" page="main" @tab-click="(pane) => handleTabClick(pane, tabs)">
+            <el-tab-pane
               v-for="(item, index) in tabs"
+              :label="item.title"
               :key="index"
-              :value="item"
-              :title="item.title"
-              :to="item.route"
+              :name="item.route.name"
             />
-          </u-tabs>
+          </el-tabs>
           <router-view :instance="data" />
         </template>
       </template>
@@ -42,7 +41,6 @@ export default {
     data() {
         return {
             service: workloadService.getResourceWithoutNamespace,
-
         };
     },
     computed: {
@@ -60,10 +58,19 @@ export default {
                 { title: '事件', route: { name: 'platform.cluster.nodedetail.event', params: this.$route.params } },
             ];
         },
+        routeName() {
+            return this.$route.name;
+        },
     },
     methods: {
+        handleTabClick(pane, tabs) {
+            const target = tabs.find(item => item.route.name === pane.name);
+            this.$router.push(target.route);
+        },
         resolver(response) {
-            return toNodePlainObject(response);
+            const temp = toNodePlainObject(response);
+            temp.clusterName = this.clusterName;
+            return temp;
         },
     },
 };

@@ -1,195 +1,150 @@
 <template>
-  <u-loading v-if="loading" />
-  <validation-observer
-    v-else
-    ref="observer"
-    v-slot="{ invalid }"
-  >
-    <kube-form ref="form">
-      <kube-name-input
-        v-model="model.metadata.name"
-        :disabled="isEdit"
-      />
-      <validation-provider
-        v-slot="{ errors }"
-        name="Namespace"
-        rules="required"
+  <div>
+    <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
+    <el-form v-else ref="form" :model="model" label-position="right" label-width="120px">
+      <el-form-item
+        label="名称"
+        prop="metadata.name"
+        :rules="[
+          validators.required(),
+          validators.k8sResourceNameValidator(),
+        ]"
       >
-        <kube-form-item
-          label="空间"
-          required
-          :message="errors && errors[0]"
-        >
-          <ns-select
-            v-model="model.metadata.namespace"
-            :cluster="cluster"
-            :disabled="isEdit"
-            no-title
-            size="large"
-            :color="errors && errors[0] ? 'error' : ''"
-          />
-        </kube-form-item>
-      </validation-provider>
-
-      <kube-form-item
+        <el-input
+          v-model="model.metadata.name"
+          :disabled="isEdit"
+          placeholder="1-63位小写字母、数字、或中划线组成，以字母开头，字母或数字结尾"
+        />
+      </el-form-item>
+      <el-form-item
+        label="空间"
+        prop="metadata.namespace"
+        :rules="[
+          validators.required()
+        ]"
+      >
+        <ns-select
+          v-model="model.metadata.namespace"
+          :cluster="cluster"
+          :disabled="isEdit"
+        />
+      </el-form-item>
+      <el-form-item
         label="访问目标"
-        :layout="selections.target === 'regular'?'block': 'normal'"
       >
-        <u-radios
-          v-model="selections.target"
-          style="margin-bottom: 20px;"
-        >
-          <u-radio label="all">
-            所有副本
-          </u-radio>
-          <u-radio label="regular">
+        <el-radio-group v-model="selections.target">
+          <el-radio label="all">所有副本</el-radio>
+          <el-radio label="regular">
             符合规则的副本
-            <u-note>多条规则间是“与”的关系，至少有一条规则</u-note>
-          </u-radio>
-        </u-radios>
-        <template v-if="selections.target === 'regular'">
+            <el-tooltip effect="dark" content="多条规则间是“与”的关系，至少有一条规则" placement="right" popper-class="ncs-el-tooltip-popper">
+              <i class="el-icon-question"/>
+            </el-tooltip>
+          </el-radio>
+        </el-radio-group>
+        <template
+          v-if="selections.target === 'regular'"
+        >
           <regular-input
             v-model="model.spec.podSelector"
             prefix-key="target"
-            style="width: 580px"
+            prefixProp="spec.podSelector"
+            :isRequired="true"
           />
         </template>
-      </kube-form-item>
-
-      <kube-form-item
+      </el-form-item>
+      <el-form-item
         label="入向规则"
-        layout="block"
       >
-        <kube-form-item
-          layout="list"
-          label="来源限制"
-        >
-          <u-radios
-            v-model="selections.insource"
-            style="margin-bottom: 20px;"
-          >
-            <u-radio label="all">
-              允许所有入向访问
-            </u-radio>
-            <u-radio label="none">
-              禁止所有入向访问
-            </u-radio>
-            <u-radio label="regular">
-              允许符合规则的入向访问
-              <u-note>多条规则间是“或”的关系，至少有一条规则。当空间和副本规则共存时，两者是“与”的关系筛选来源</u-note>
-            </u-radio>
-          </u-radios>
-          <template v-if="selections.insource === 'regular'">
-            <source-block
-              v-model="model.spec.ingress.from"
-              style="width: 580px"
-            />
-          </template>
-        </kube-form-item>
-        <kube-form-item
-          v-if="selections.insource === 'regular'"
-          layout="list"
-          label="端口限制"
-          style="margin-top: 20px"
-        >
-          <u-radios
-            v-model="selections.inport"
-            style="margin-bottom: 20px;"
-          >
-            <u-radio label="all">
-              允许访问所有端口
-            </u-radio>
-            <u-radio label="regular">
+        <div>
+          来源限制
+        </div>
+        <el-radio-group v-model="selections.insource">
+          <el-radio label="all">允许所有入向访问</el-radio>
+          <el-radio label="none">禁止所有入向访问</el-radio>
+          <el-radio label="regular">
+            允许符合规则的入向访问
+            <el-tooltip effect="dark" content="多条规则间是“或”的关系，至少有一条规则。当空间和副本规则共存时，两者是“与”的关系筛选来源" placement="right" popper-class="ncs-el-tooltip-popper">
+              <i class="el-icon-question"/>
+            </el-tooltip>
+          </el-radio>
+        </el-radio-group>
+        <template v-if="selections.insource === 'regular'">
+          <source-block
+            v-model="model.spec.ingress.from"
+            prefixProp="spec.ingress.from"
+          />
+          <div style="margin-top: 24px">
+            端口限制
+          </div>
+          <el-radio-group v-model="selections.inport">
+            <el-radio label="all">允许访问所有端口</el-radio>
+            <el-radio label="regular">
               允许访问以下端口
-              <u-note>多条规则间是“或”的关系，至少有一个端口</u-note>
-            </u-radio>
-          </u-radios>
+              <el-tooltip effect="dark" content="多条规则间是“或”的关系，至少有一个端口" placement="right" popper-class="ncs-el-tooltip-popper">
+                <i class="el-icon-question"/>
+              </el-tooltip>
+            </el-radio>
+          </el-radio-group>
           <template v-if="selections.inport === 'regular'">
             <port-input
               v-model="model.spec.ingress.ports"
-              style="width: 580px"
+              prefixProp="spec.ingress.ports"
             />
           </template>
-        </kube-form-item>
-      </kube-form-item>
-
-      <kube-form-item
+        </template>
+      </el-form-item>
+      <el-form-item
         label="出向规则"
-        layout="block"
       >
-        <kube-form-item
-          layout="list"
-          label="目标限制"
-        >
-          <u-radios
-            v-model="selections.outsource"
-            style="margin-bottom: 20px;"
-          >
-            <u-radio label="all">
-              允许所有出向访问
-            </u-radio>
-            <u-radio label="none">
-              禁止所有出向访问
-            </u-radio>
-            <u-radio label="regular">
-              允许符合规则的出向访问
-              <u-note>多条规则间是“或”的关系，至少有一条规则。当空间和副本规则共存时，两者是“与”的关系筛选来源</u-note>
-            </u-radio>
-          </u-radios>
-          <template v-if="selections.outsource === 'regular'">
-            <source-block
-              v-model="model.spec.egress.to"
-              style="width: 580px"
-            />
-          </template>
-        </kube-form-item>
-        <kube-form-item
-          v-if="selections.outsource === 'regular'"
-          layout="list"
-          label="端口限制"
-          style="margin-top: 20px"
-        >
-          <u-radios
-            v-model="selections.outport"
-            style="margin-bottom: 20px;"
-          >
-            <u-radio label="all">
-              允许访问所有端口
-            </u-radio>
-            <u-radio label="regular">
+        <div>
+          目标限制
+        </div>
+        <el-radio-group v-model="selections.outsource">
+          <el-radio label="all">允许所有出向访问</el-radio>
+          <el-radio label="none">禁止所有出向访问</el-radio>
+          <el-radio label="regular">
+            允许符合规则的出向访问
+            <el-tooltip effect="dark" content="多条规则间是“或”的关系，至少有一条规则。当空间和副本规则共存时，两者是“与”的关系筛选目标" placement="right" popper-class="ncs-el-tooltip-popper">
+              <i class="el-icon-question"/>
+            </el-tooltip>
+          </el-radio>
+        </el-radio-group>
+        <template v-if="selections.outsource === 'regular'">
+          <source-block
+            v-model="model.spec.egress.to"
+            prefixProp="spec.egress.to"
+          />
+          <div style="margin-top: 24px">
+            端口限制
+          </div>
+          <el-radio-group v-model="selections.outport">
+            <el-radio label="all">允许访问所有端口</el-radio>
+            <el-radio label="regular">
               允许访问以下端口
-              <u-note>多条规则间是“或”的关系，至少有一个端口</u-note>
-            </u-radio>
-          </u-radios>
+              <el-tooltip effect="dark" content="多条规则间是“或”的关系，至少有一个端口" placement="right" popper-class="ncs-el-tooltip-popper">
+                <i class="el-icon-question"/>
+              </el-tooltip>
+            </el-radio>
+          </el-radio-group>
           <template v-if="selections.outport === 'regular'">
             <port-input
               v-model="model.spec.egress.ports"
-              style="width: 580px"
+              prefixProp="spec.egress.ports"
             />
           </template>
-        </kube-form-item>
-      </kube-form-item>
-
-      <kube-form-item>
-        <u-submit-button
-          :click="submit.bind(this)"
+        </template>
+      </el-form-item>
+      <el-form-item>
+        <el-button
+          type="primary"
+          @click="submit"
+          :loading="submitLoading"
         >
-          <template slot-scope="scope">
-            <u-linear-layout>
-              <u-button
-                color="primary"
-                :disabled="invalid || scope.submitting"
-                :icon="scope.submitting ? 'loading' : ''"
-                @click="scope.submit"
-              >
-                {{ isEdit ? '立即修改' : '立即创建' }}
-              </u-button>
-            </u-linear-layout>
-          </template>
-        </u-submit-button>
-      </kube-form-item>
-    </kube-form>
-  </validation-observer>
+          {{ isEdit ? '立即修改' : '立即创建' }}
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 
 <script>
@@ -197,12 +152,12 @@ import workloadService from 'kubecube/services/k8s-resource';
 import {
     toPlainObject as toNetworkPolicyPlainObject,
     toK8SObject as toNetworkPolicyK8SObject,
-    // patchK8SObject as toPatchNetworkPolicyObject,
 } from 'kubecube/k8s-resources/networkPolicy';
 import nsSelect from './ns-select.vue';
 import regularInput from './regular-input.vue';
 import sourceBlock from './source-block.vue';
 import portInput from './port-inputs.vue';
+import * as validators from 'kubecube/utils/validators';
 export default {
     components: {
         nsSelect,
@@ -221,6 +176,8 @@ export default {
                 outport: 'all',
             },
             loading: false,
+            validators,
+            submitLoading: false,
         };
     },
     computed: {
@@ -259,34 +216,45 @@ export default {
             this.loading = false;
         },
         async submit() {
-            if (this.isEdit) {
-                const pureSource = this.model.puresource;
-                const yaml = toNetworkPolicyK8SObject(this.model, this.selections);
-                await workloadService.modifyNetworkingInstance({
-                    pathParams: {
-                        cluster: this.cluster,
-                        namespace: this.model.metadata.namespace,
-                        resource: 'networkpolicies',
-                        name: this.model.metadata.name,
-                    },
-                    data: {
-                        ...pureSource,
-                        spec: yaml.spec,
-                    },
-                });
-            } else {
-                const yaml = toNetworkPolicyK8SObject(this.model, this.selections);
-                await workloadService.createNetworkingInstance({
-                    pathParams: {
-                        cluster: this.cluster,
-                        namespace: this.model.metadata.namespace,
-                        resource: 'networkpolicies',
-                    },
-                    data: yaml,
-                });
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                console.log(error);
+                return;
             }
-
-            this.$router.push({ path: `/platform/cluster/${this.cluster}/network` });
+            this.submitLoading = true;
+            try {
+                if (this.isEdit) {
+                    const pureSource = this.model.puresource;
+                    const yaml = toNetworkPolicyK8SObject(this.model, this.selections);
+                    await workloadService.modifyNetworkingInstance({
+                        pathParams: {
+                            cluster: this.cluster,
+                            namespace: this.model.metadata.namespace,
+                            resource: 'networkpolicies',
+                            name: this.model.metadata.name,
+                        },
+                        data: {
+                            ...pureSource,
+                            spec: yaml.spec,
+                        },
+                    });
+                } else {
+                    const yaml = toNetworkPolicyK8SObject(this.model, this.selections);
+                    await workloadService.createNetworkingInstance({
+                        pathParams: {
+                            cluster: this.cluster,
+                            namespace: this.model.metadata.namespace,
+                            resource: 'networkpolicies',
+                        },
+                        data: yaml,
+                    });
+                }
+                this.$router.push({ path: `/platform/cluster/${this.cluster}/network` });
+            } catch (error) {
+                console.log(error);
+            }
+            this.submitLoading = false;
         },
     },
 };

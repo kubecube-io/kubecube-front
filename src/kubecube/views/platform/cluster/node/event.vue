@@ -24,7 +24,7 @@
         </template>
       </kube-table>
       <u-page
-        v-if="data && calculatePages(data.total) > 1"
+        v-if="data && calculatePages(data.total) > 0"
         :count="data.total"
         :page-size="pagenation.pageSize"
         :total="calculatePages(data.total)"

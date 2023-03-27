@@ -1,47 +1,44 @@
 <template>
   <div>
-    <u-button
-      color="primary"
+    <el-button
+      type="primary"
       style="margin-bottom: 20px"
       @click="viewYAML"
     >
       查看详细信息
-    </u-button>
-    <u-info-list-group
-      title="基本信息"
-      column="1"
-      label-size="large"
-    >
-      <u-info-list-item label="集群名称">
+    </el-button>
+    <el-descriptions title="基本信息" :column="1">
+      <el-descriptions-item label="集群名称">
+        {{ instance.annotations && instance.annotations['cluster.kubecube.io/cn-name'] }}
+      </el-descriptions-item>
+      <el-descriptions-item label="集群标识">
         {{ instance.clusterName }}
-      </u-info-list-item>
-      <u-info-list-item label="描述">
+      </el-descriptions-item>
+      <el-descriptions-item label="描述">
         {{ instance.clusterDescription }}
-      </u-info-list-item>
-      <u-info-list-item label="状态">
+      </el-descriptions-item>
+      <el-descriptions-item label="状态">
         {{ instance.status | clusterStatus }}
-      </u-info-list-item>
-      <u-info-list-item label="创建时间">
+      </el-descriptions-item>
+      <el-descriptions-item label="创建时间">
         {{ instance.createTime | formatLocaleTime }}
-      </u-info-list-item>
-      <u-info-list-item label="节点数">
+      </el-descriptions-item>
+      <el-descriptions-item label="节点数">
         {{ instance.nodeCount }}
-      </u-info-list-item>
-      <u-info-list-item label="CPU">
-        {{ instance.totalCpu | clusterCup }} Cores
-      </u-info-list-item>
-      <u-info-list-item label="内存">
+      </el-descriptions-item>
+      <el-descriptions-item label="CPU">
+        {{ instance.totalCpu | clusterCpu }} Cores
+      </el-descriptions-item>
+      <el-descriptions-item label="内存">
         {{ instance.totalMem | clusterMemory }} GiB
-      </u-info-list-item>
-      <u-info-list-item label="集群用途">
+      </el-descriptions-item>
+      <el-descriptions-item label="集群用途">
         {{ instance.isMemberCluster ? '业务集群' : '管控集群' }}
-      </u-info-list-item>
-      <!-- 原生集群 || 开启了集群创建时能够设置轻舟项目权限模型，展示此信息  -->
-      <!-- <u-info-list-item v-if="model.clusterMode === 'native' || showNativeClusterOption" label="轻舟项目权限模型">{{ model.clusterMode === 'native' ? '未启用' : '启用' }}</u-info-list-item> -->
-      <u-info-list-item label="集群网络">
+      </el-descriptions-item>
+      <el-descriptions-item label="集群网络">
         {{ instance.networkType }}
-      </u-info-list-item>
-    </u-info-list-group>
+      </el-descriptions-item>
+    </el-descriptions>
   </div>
 </template>
 
@@ -56,7 +53,7 @@ export default {
         clusterStatus(status) {
             return CLUSTER_STATUS_MAP[status] || '-';
         },
-        clusterCup(cpu) {
+        clusterCpu(cpu) {
             return unitConvertCPU(`${cpu}m`); // m -> plain
         },
         clusterMemory(memory) {
@@ -75,6 +72,10 @@ export default {
                     readOnly: true,
                 },
             });
+        },
+        areaText(val, list) {
+            const target = list.find(item => item.value === val);
+            return target && target.text || val;
         },
     },
 };

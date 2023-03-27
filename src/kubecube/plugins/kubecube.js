@@ -38,6 +38,8 @@ import dynamicTab from 'kubecube/elComponent/dynamic-tab.vue';
 import QzEditor from 'kubecube/elComponent/qz-editor';
 import LabelEditor from 'kubecube/elComponent/label-editor.vue';
 import EnhanceQzEditor from 'kubecube/elComponent/enhance-qz-editor';
+import TagList from 'kubecube/elComponent/tagList.vue';
+
 
 
 
@@ -81,6 +83,7 @@ import ElementUI from 'element-ui';
 Vue.use(ElementUI, { size: 'medium' });
 Vue.use({
     install(_Vue) {
+        _Vue.component('TagList', TagList);
         _Vue.component('EnhanceQzEditor', EnhanceQzEditor);
         _Vue.component('LabelEditor', LabelEditor);
         _Vue.component('QzEditor', QzEditor);

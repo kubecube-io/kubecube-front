@@ -25,7 +25,7 @@ const service = Service({
         },
         getInnerDashboardByQuery: {
             method: 'get',
-            url: '/cube/proxy/clusters/{cluster}/apis/monitoring.kubecube.io/v1/namespaces/kubecube-monitoring/dashboards',
+            template: '/cube/proxy/clusters/{cluster}/apis/monitoring.kubecube.io/v1/namespaces/kubecube-monitoring/dashboards',
         },
         // getPodDashboards: {
         //     method: 'get',

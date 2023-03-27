@@ -1,44 +1,42 @@
 <template>
-  <kube-dynamic-block
-    v-model="model"
-    style="width: 100%;"
-    :column-comp="null"
-    :data-template="getDataTemplate"
-    :disabled="disabled"
-  >
-    <template slot-scope="{ model, index }">
-      <td>
-        <validation-provider
-          v-slot="{ errors }"
-          :name="`${prefixKey}CIDR-${index}`"
-          :rules="{
-            cidr: true,
-            noRedundance: { list: exsitKeys }
-          }"
+  <div>
+    <dynamicBlock
+      v-model="model"
+      :getDefaultItem="getDataTemplate"
+      :columns="[
+        {
+          title: '例外 CIDR',
+          dataIndex: 'cidr',
+        },
+      ]"
+      :disabled="disabled"
+    >
+      <template v-slot:cidr="{record, index}">
+        <el-form-item
+          label=""
+          :prop="`${prefixProp}.${index}.cidr`"
+          :rules="[
+            validators.cidr(false),
+            validators.noRedundance(exsitKeys, false),
+          ]"
         >
-          <kube-form-item
-            muted="no"
-            style="width: 100%;"
-            field-size="full"
-            layout="none"
-            :message="errors && errors[0]"
-            placement="bottom"
-          >
-            <u-input
-              v-model="model.cidr"
-              size="huge"
-              :color="errors && errors[0] ? 'error' : ''"
-            />
-          </kube-form-item>
-        </validation-provider>
-      </td>
-    </template>
-  </kube-dynamic-block>
+          <el-input
+            v-model="record.cidr"
+          />
+        </el-form-item>
+      </template>
+    </dynamicBlock>
+  </div>
 </template>
 
 <script>
+import dynamicBlock from 'kubecube/elComponent/dynamic-block/index.vue';
+import * as validators from 'kubecube/utils/validators';
 import { makeVModelMixin } from 'kubecube/mixins/functional';
 export default {
+    components: {
+        dynamicBlock,
+    },
     mixins: [ makeVModelMixin ],
     props: {
         prefixKey: {
@@ -46,6 +44,15 @@ export default {
             default: '',
         },
         disabled: Boolean,
+        prefixProp: {
+            type: String,
+            default: '',
+        },
+    },
+    data() {
+        return {
+            validators,
+        };
     },
     computed: {
         exsitKeys() {

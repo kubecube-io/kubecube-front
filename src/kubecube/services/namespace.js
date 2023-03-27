@@ -8,6 +8,14 @@ const service = Service({
             template: '/{cluster}/api/v1/namespaces',
             method: 'get',
         },
+        getNamespaceInstance: {
+            template: '/{cluster}/api/v1/namespaces/{name}',
+            method: 'get',
+        },
+        updatetNamespaceInstance: {
+            template: '/{cluster}/api/v1/namespaces/{name}',
+            method: 'put',
+        },
     },
 });
 

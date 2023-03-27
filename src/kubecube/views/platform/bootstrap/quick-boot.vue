@@ -1,47 +1,38 @@
 <template>
-  <kube-tab
-    ref="tab"
-    v-model="tabs"
-    title-key="title"
-    tab-key="tab"
-    disabled
-    @tabChange="tabChange"
-  >
-    <template #tenant="{ model, state }">
-      <tenantBoot
-        v-model="model.model"
-        :state="state"
-        @next="next($event)"
-      />
-    </template>
-    <template #tenantquota="{ model, state }">
-      <tenantQuotaBoot
-        v-model="model.model"
-        :state="state"
-        @next="next()"
-      />
-    </template>
-    <template #project="{ model, state }">
-      <project-boot
-        v-model="model.model"
-        :state="state"
-        @next="next($event)"
-      />
-    </template>
-    <template #member="{ model, state }">
-      <member-boot
-        v-model="model.model"
-        :state="state"
-        @next="next($event)"
-      />
-    </template>
-    <template #namespace="{ model, state }">
-      <namespace-boot
-        v-model="model.model"
-        :state="state"
-      />
-    </template>
-  </kube-tab>
+    <div>
+        <el-tabs :value="activeInfo.tab" page="main" @tab-click="(pane) => handleTabClick(pane, tabs)">
+            <el-tab-pane
+                v-for="(item, index) in tabs"
+                :label="item.title"
+                :key="index"
+                :name="item.tab"
+            />
+        </el-tabs>
+        <tenantBoot
+            v-if="activeInfo.tab === 'tenant'"
+            v-model="activeInfo.model"
+            @next="next($event)"
+        />
+        <tenantQuotaBoot
+            v-if="activeInfo.tab === 'tenantquota'"
+            v-model="activeInfo.model"
+            @next="next()"
+        />
+        <project-boot
+            v-if="activeInfo.tab === 'project'"
+            v-model="activeInfo.model"
+            @next="next($event)"
+        />
+        <member-boot
+            v-if="activeInfo.tab === 'member'"
+            v-model="activeInfo.model"
+            @next="next($event)"
+        />
+        <namespace-boot
+            v-if="activeInfo.tab === 'namespace'"
+            v-model="activeInfo.model"
+        />
+  </div>
 </template>
 
 <script>
@@ -85,6 +76,8 @@ export default {
     },
     data() {
         return {
+            activeTab: '',
+            activeInfo: {},
             tabs: [],
             currentTitle: '',
         };
@@ -113,8 +106,11 @@ export default {
                     resource: toResourceQuotaPlainObject(),
                     availables: {
                         cpu: 0,
+                        limitsCpu: 0,
                         memory: 0,
+                        limitsMemory: 0,
                         gpu: 0,
+                        storage: 0,
                     },
                     pipe: {
                         namespace: '',
@@ -172,15 +168,29 @@ export default {
         }
         if (tabs.length > 0) {
             this.currentTitle = tabs[0].title;
+            this.activeInfo = tabs[0];
         }
         return tabs;
     },
     methods: {
+        handleTabClick(pane, tabs) {
+            const target = tabs.find(item => item.tab === pane.name);
+            this.currentTitle = target.title;
+            this.activeInfo = target;
+        },
         tabChange(curTab) {
             this.currentTitle = curTab.title;
         },
         next(callback) {
-            this.$refs.tab.chooseNext();
+            let index = 0;
+            this.tabs.forEach((item, i) => {
+                if (item.tab === this.activeInfo.tab) {
+                    index = i;
+                }
+            });
+            if (this.tabs[index + 1]) {
+                this.activeInfo = this.tabs[index + 1];
+            }
             if (callback) {
                 callback(this.tabs);
             }

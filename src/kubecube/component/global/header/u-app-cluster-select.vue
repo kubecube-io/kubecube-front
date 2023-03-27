@@ -1,6 +1,30 @@
 <template>
   <div>
-    <u-sidebar-suggest
+    <el-select
+      v-if="items.length"
+      v-model="model"
+      filterable
+      placeholder="选择集群"
+      :class="$style.suggestBox"
+      :popper-class="$style.suggestPopper"
+      @change="onBeforeSelect"
+    >
+      <el-option
+        v-for="item in items"
+        :key="item.value"
+        :label="item.text"
+        :value="item.value"
+        :title="item.text"
+      />
+    </el-select>
+    <el-input
+      v-else
+      value=""
+      disabled
+      placeholder="暂无集群"
+      :class="$style.suggestBox"
+    />
+    <!-- <u-sidebar-suggest
       v-if="items.length"
       key="list"
       ref="cluster"
@@ -17,7 +41,7 @@
       disabled
       size="huge normal"
       placeholder="暂无集群"
-    />
+    /> -->
   </div>
 </template>
 
@@ -84,10 +108,10 @@ export default {
                 });
                 const items = (response.items || []).filter(i => clusters.includes(i.clusterName));
                 this.items = items.map(i => ({
-                    text: i.clusterName,
+                    text: i.annotations && i.annotations['cluster.kubecube.io/cn-name'] || i.clusterName,
                     value: i.clusterName,
                     ...i,
-                    disabled: i.status !== 'normal'  //异常的禁用
+                    disabled: i.status !== 'normal', // 异常的禁用
                 }));
                 this.clusterList = this.items.slice();
                 setValueIfListNotPresent({
@@ -128,8 +152,13 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+    .suggestBox {
+        width: 158px;
+    }
+    .suggestPopper {
+        z-index: 500 !important;
+    }
 </style>
 <i18n locale="en">
 {

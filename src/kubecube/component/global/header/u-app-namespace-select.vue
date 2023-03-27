@@ -1,6 +1,31 @@
 <template>
   <div>
-    <u-sidebar-suggest
+    <el-select
+      v-if="items.length"
+      key="list"
+      v-model="model"
+      filterable
+      placeholder="选择空间"
+      :class="$style.suggestBox"
+      :popper-class="$style.suggestPopper"
+      @change="beforeChange"
+    >
+      <el-option
+        v-for="item in items"
+        :key="item.value"
+        :label="item.text"
+        :value="item.value"
+        :title="item.text"
+      />
+    </el-select>
+    <el-select
+      v-else
+      value=""
+      disabled
+      placeholder="暂无空间"
+      :class="$style.suggestBox"
+    />
+    <!-- <u-sidebar-suggest
       v-if="items.length"
       key="list"
       ref="cluster"
@@ -17,7 +42,7 @@
       disabled
       size="huge normal"
       placeholder="暂无空间"
-    />
+    /> -->
   </div>
 </template>
 
@@ -135,7 +160,7 @@ export default {
                 },
             });
         },
-        beforeChange({ value }) {
+        beforeChange(value) {
             if (value === this.namespace.value) return;
             this.namespace = this.items.find(i => i.value === value);
             const pathArr = this.$route.path.split('/');
@@ -177,6 +202,11 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+    .suggestBox {
+        width: 158px;
+    }
+    .suggestPopper {
+        z-index: 500 !important;
+    }
 </style>
