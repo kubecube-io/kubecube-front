@@ -27,7 +27,7 @@ import kubePlainLabelEditor from 'kubecube/component/global/k8s/plain-label-edit
 import kubeDynamicLabels from 'kubecube/component/common/kube-dynamic-labels.vue';
 import qzLinkGroup from 'kubecube/elComponent/qz-link-group';
 import statusIcon from 'kubecube/elComponent/status-icon';
-import elLink from 'kubecube/elComponent/el-Link';
+import elLink from 'kubecube/elComponent/el-link';
 import headCard from 'kubecube/elComponent/head-card';
 import operateList from 'kubecube/elComponent/operate-list/index.vue';
 import operateButtonOption from 'kubecube/elComponent/operate-list/operate-button-option.vue';
