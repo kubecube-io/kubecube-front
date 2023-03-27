@@ -4,11 +4,14 @@
       <router-view />
     </template>
     <template v-else>
-      <u-head-card :title="clusterName">
+      <headCard :title="clusterDisplayName">
         <div slot="logo">
           {{ (clusterName || '').substring(0, 2).toUpperCase() }}
         </div>
-      </u-head-card>
+        <div slot="act">
+          ({{ clusterName }})
+        </div>
+      </headCard>
       <x-request
         :service="service"
         :params="{
@@ -19,12 +22,21 @@
         :processor="resolver"
       >
         <template slot-scope="{ data, loading, error }">
-          <u-loading v-if="loading" />
+          <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
           <div v-else-if="error">
             加载出错！
           </div>
           <template v-else>
-            <u-tabs router>
+            <el-tabs :value="routeName" page="main" @tab-click="(pane) => handleTabClick(pane, getTabs(data))">
+              <el-tab-pane
+                v-for="(item, index) in getTabs(data)"
+                :label="item.title"
+                :key="index"
+                :name="item.path"
+                :disabled="item.disabled"
+              />
+            </el-tabs>
+            <!-- <u-tabs router>
               <u-tab
                 v-for="(item, index) in getTabs(data)"
                 :key="index"
@@ -33,7 +45,7 @@
                 :disabled="item.disabled"
                 :to="{ path: item.path }"
               />
-            </u-tabs>
+            </u-tabs> -->
             <router-view :instance="data" />
           </template>
         </template>
@@ -49,6 +61,7 @@ export default {
     data() {
         return {
             service: clusterService.getClusters,
+            clusterDisplayName: '',
         };
     },
     computed: {
@@ -61,8 +74,15 @@ export default {
         isInNetworkRoute() {
             return [ 'platform.cluster.detail.network.create', 'platform.cluster.detail.network.edit' ].includes(this.$route.name);
         },
+        routeName() {
+            return this.$route.path;
+        },
     },
     methods: {
+        handleTabClick(pane, tabs) {
+            const target = tabs.find(item => item.path === pane.name);
+            this.$router.push({ path: target.path });
+        },
         getTabs(instance) {
             const isAbnormal = (instance.status !== 'normal');
             return [
@@ -71,11 +91,12 @@ export default {
                 { title: '存储类别', path: `/platform/cluster/${this.clusterName}/storageclass`, disabled: isAbnormal },
                 { title: '持久存储', path: `/platform/cluster/${this.clusterName}/persistentvolumes`, disabled: isAbnormal },
                 { title: '网络策略', path: `/platform/cluster/${this.clusterName}/network`, disabled: isAbnormal },
-                // { title: '集群日志', path: `/platform/cluster/${this.clusterName}/log` },
                 { title: '监控', path: `/platform/cluster/${this.clusterName}/monitor`, disabled: isAbnormal },
             ];
         },
         resolver(response) {
+            const instance = getFunc(response, 'items.[0]');
+            this.clusterDisplayName = instance.annotations && instance.annotations['cluster.kubecube.io/cn-name'];
             return getFunc(response, 'items.[0]');
         },
     },

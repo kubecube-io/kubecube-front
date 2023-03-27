@@ -4,6 +4,10 @@ import { userInterceptor } from './interceptor';
 const service = Service({
     baseURL: '/api/v1/cube/extend/clusters',
     apis: {
+        getResourceListWithoutNamespace: {
+            method: 'get',
+            template: '/{cluster}/resources/{resource}',
+        },
         getWorkloads: {
             method: 'get',
             template: '/{cluster}/namespaces/{namespace}/{resource}',

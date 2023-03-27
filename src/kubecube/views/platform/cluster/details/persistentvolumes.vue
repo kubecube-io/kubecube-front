@@ -1,69 +1,105 @@
 <template>
   <div>
-    <u-linear-layout
-      style="margin-bottom: 20px;"
-      direction="horizontal"
+    <div
+      style="margin-bottom: 12px;overflow:hidden"
     >
-      <u-linear-layout
-        direction="horizontal"
-        class="kube-clear"
-      >
-        <kube-input-search
-          :align-right="true"
-          placeholder="请输入名称搜索"
-          @search="onSearch"
-        />
-      </u-linear-layout>
-
-      <!-- <search-tag :class="$style.search" :tagTypes="tagTypes" @search="searchNodes" :limit="10"></search-tag> -->
-    </u-linear-layout>
+      <inputSearch placeholder="请输入名称搜索" position="right" @search="onSearch"/>
+    </div>
     <x-request
       ref="request"
       :service="service"
       :params="params"
       :processor="resolver"
     >
-      <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :loading="loading"
-          :columns="columns"
-          :items="data ? data.list : []"
-          :error="error"
-          resizable
-          @sort="onSort"
+      <template slot-scope="{ data, loading }">
+        <el-table
+          v-loading="loading"
+          :data="data ? data.list : []"
+          style="width: 100%"
+          border
+          @sort-change="tableSortChange"
         >
-          <template #[`item.pool`]="{ item }">
-            {{ cephCluster(item) }}
-          </template>
-          <template #[`item.provisioner`]="{ item }">
-            {{ item.provisioner | cephTypeText }}
-          </template>
-          <!-- <template #[`item.reclaimPolicy`]="{ item }">
-            {{ item.reclaimPolicy }}
-          </template> -->
-          <template #[`item.spec.unschedulable`]="{ item }">
-            {{ item.spec.unschedulable ? '不可调度' : '可调度' }}
-          </template>
-          <template #[`item.operation`]="{item}">
-            <u-link-list>
-              <u-link-list-item @click="viewYAML(item)">
-                查看详情
-              </u-link-list-item>
-              <u-link-list-item @click="deleteItem(item)">
-                删除
-              </u-link-list-item>
-            </u-link-list>
-          </template>
-          <template #noData>
-            <template v-if="pagenation.selector">
-              没有搜索到相关内容，可调整关键词重新搜索
+          <el-table-column
+            prop="metadata.name"
+            label="名称"
+            :show-overflow-tooltip="true"
+            sortable
+          />
+          <el-table-column
+            prop="status.phase"
+            label="状态"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="type"
+            label="类型"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{ row.type || '-' }}
             </template>
-            <template v-else>
-              还没有任何 持久存储
+          </el-table-column>
+          <el-table-column
+            prop="provisioner"
+            label="来源"
+            :show-overflow-tooltip="true"
+          >
+            <template slot-scope="{ row }">
+              {{ row.provisioner | cephTypeText }}
             </template>
-          </template>
-        </kube-table>
+          </el-table-column>
+          <el-table-column
+            prop="spec.accessModes"
+            label="访问模式"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="spec.storageClassName"
+            label="存储类别"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="spec.capacity.storage"
+            label="容量"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="spec.claimRef.name"
+            label="声明"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="operation"
+            label="操作"
+            :show-overflow-tooltip="true"
+            width="120"
+          >
+            <template slot-scope="{ row }">
+              <qz-link-group max="3">
+                <el-link
+                  type="primary"
+                  @click="viewYAML(row)"
+                >查看详情</el-link>
+                <el-link
+                  type="primary"
+                  @click="deleteItem(row)"
+                >删除</el-link>
+              </qz-link-group>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          v-if="data && calculatePages(data.total) > 0"
+          style="float:right;margin-top:12px"
+          :current-page="pagenation.pageNum"
+          :page-sizes="[10, 20, 30, 40, 50, 100]"
+          :page-size="pagenation.pageSize"
+          layout="total, sizes, prev, pager, next"
+          :total="data.total"
+          background
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
+        />
       </template>
     </x-request>
     <taint-dialog
@@ -85,15 +121,17 @@ import taintDialog from '../dialogs/taint.vue';
 import {
     CEPH_TYPE_MAP,
 } from 'kubecube/utils/constance';
+import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
 
 export default {
     filters: {
         cephTypeText(val) {
-            return CEPH_TYPE_MAP[val] || val;
+            return CEPH_TYPE_MAP[val] || val || '-';
         },
     },
     components: {
         taintDialog,
+        inputSearch,
     },
     mixins: [ PageMixin ],
 
@@ -132,6 +170,9 @@ export default {
     },
     methods: {
         resolver(response) {
+            if ((response.items || []).length === 0 && response.total > 0 && this.pagenation.pageNum > 1) {
+                this.pagenation.pageNum = this.pagenation.pageNum - 1;
+            }
             return {
                 list: (response.items || []).map(toStoragePlainObject),
                 total: response.total,
@@ -146,7 +187,11 @@ export default {
             this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
         },
         onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+            const temp = content ? `metadata.name~${content}` : undefined;
+            if (this.pagenation.selector === temp) {
+                this.refresh();
+            }
+            this.pagenation.selector = temp;
         },
         cephCluster(item) {
             return get(item, 'metadata.annotations["ceph-cluster-name"]')
@@ -171,9 +216,9 @@ export default {
             });
         },
         deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
                     const reqParam = {
                         pathParams: {

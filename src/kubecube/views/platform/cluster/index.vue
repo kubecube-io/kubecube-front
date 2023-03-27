@@ -139,7 +139,7 @@
           v-if="data && calculatePages(data.total) > 0"
           style="float:right;margin-top:12px"
           :current-page="pagenation.pageNum"
-          :page-sizes="[10, 20, 30, 40, 50, 100]"
+          :page-sizes="[100]"
           :page-size="pagenation.pageSize"
           layout="total, sizes, prev, pager, next"
           :total="data.total"

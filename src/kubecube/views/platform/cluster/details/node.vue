@@ -1,115 +1,181 @@
 <template>
   <div>
-    <u-linear-layout
-      style="margin-bottom: 20px;"
-      direction="horizontal"
-    >
-      <u-linear-layout
-        direction="horizontal"
-        class="kube-clear"
+    <div style="margin-bottom: 12px;">
+      <el-button
+        type="primary"
+        @click="$refs.nodedialog.open()"
+        icon="el-icon-plus"
       >
-        <u-button
-          icon="create"
-          color="primary"
-          @click="$refs.nodedialog.open()"
-        >
-          添加节点
-        </u-button>
-        <!-- <u-button @click="exportNode">
-          导出节点信息
-        </u-button> -->
-        <!-- <u-button
-          v-if="selectRows.length"
-          @click="showNodeTypeModal = true"
-        >
-          设置节点类型
-        </u-button> -->
-        <u-button
-          icon="refresh"
-          square
-          @click="refresh"
-        />
-        <kube-input-search
-          :align-right="true"
-          placeholder="请输入名称搜索"
-          @search="onSearch"
-        />
-      </u-linear-layout>
-
-      <!-- <search-tag :class="$style.search" :tagTypes="tagTypes" @search="searchNodes" :limit="10"></search-tag> -->
-    </u-linear-layout>
+        添加节点
+      </el-button>
+      <el-button @click="refresh" square icon="el-icon-refresh-right"></el-button>
+      <nodeInputSearch
+        :align-right="true"
+        @search="onSearch"
+        :nodeStatusMap="nodeStatusMap"
+      />
+    </div>
     <x-request
       ref="request"
       :service="service"
       :params="params"
       :processor="resolver"
     >
-      <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :loading="loading"
-          :columns="columns"
-          item-key="metadata.name"
-          :items="data ? data.list : []"
-          :error="error"
-          @sort="onSort"
+      <template slot-scope="{ data, loading }">
+        <el-table
+          v-loading="loading"
+          :class="$style.table"
+          :data="data ? data.list : []"
+          style="width: 100%"
+          border
+          @sort-change="tableSortChange"
         >
-          <template #[`item.metadata.name`]="{ item }">
-            <u-tooltip v-if="item.metadata.labels.find(i => i.key === 'node-role.kubernetes.io/master')" content="master 节点" trigger="hover" placement="top">
-              <span :class="$style.master_flag">控</span>
-            </u-tooltip>
-            <u-link :to="`/platform/cluster/${instance.clusterName}/${item.metadata.name}`">
-              {{ item.metadata.name }}
-            </u-link>
-          </template>
-          <template #[`item.status.capacity.cpu`]="{ item }">
-            {{ item.status.capacity.cpu | cpuTextFilter }}
-          </template>
-          <template #[`item.status.memoryUsage`]="{ item }">
-            {{ item.status.capacity.memory | memoTextFilter }}
-          </template>
-          <template #[`item.spec.unschedulable`]="{ item }">
-            {{ item.spec.unschedulable ? '不可调度' : '可调度' }}
-          </template>
-          <template #[`item.operation`]="{item}">
-            <u-link-list>
-              <u-link-list-item
-                @click="openLabelsModal(item)"
-              >
-                编辑标签
-              </u-link-list-item>
-              <u-link-list-item
-                @click="schedule(item)"
-              >
-                {{ !item.spec.unschedulable ? '禁止' : '允许' }}调度
-              </u-link-list-item>
-              <!-- <u-link-list-item
-                :disabled="item.spec.type !== '-'"
-                @click="openTypeModal(item)"
-              >
-                设置节点类型
-              </u-link-list-item> -->
-              <!-- <u-link-list-item @click="toggleMix(item)">
-                {{ item.colocation ? '取消混部' : '设置为混部' }}
-              </u-link-list-item> -->
-              <u-link-list-item @click="setTaints(item)">
-                设置污点
-              </u-link-list-item>
-              <u-link-list-item
-                :disabled="(data.list || []).length < 2"
-                @click="drainItem(item)"
-              >
-                平滑迁移
-              </u-link-list-item>
-              <u-link-list-item
-                :disabled="isDeleteForbidden(item)"
-                @click="deleteItem(item)"
-              >
-                删除
-              </u-link-list-item>
-            </u-link-list>
-          </template>
-        </kube-table>
+          <el-table-column
+            prop="metadata.name"
+            label="名称"
+            :show-overflow-tooltip="true"
+            sortable
+          >
+            <template slot-scope="{ row }">
+              <div>
+                <el-tooltip v-if="row.metadata.labels.find(i => i.key === 'node-role.kubernetes.io/master')" class="item" effect="dark" content="master 节点" placement="bottom">
+                  <span :class="$style.master_flag">控</span>
+                </el-tooltip>
+                <el-link type="primary" :to="{ path: `/platform/cluster/${instance.clusterName}/${row.metadata.name}` }">
+                  {{ row.metadata.name }}
+                </el-link>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status.nodeIP"
+            label="IP"
+            :show-overflow-tooltip="true"
+            width="120"
+            sortable
+          />
+          <el-table-column
+            prop="status.capacity.cpu"
+            label="CPU"
+            :show-overflow-tooltip="true"
+            width="80"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status.capacity.cpu | cpuFilter }} Cores
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status.capacity.memory"
+            label="内存"
+            :show-overflow-tooltip="true"
+            width="80"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status.capacity.memory | memoryFilter }} Gi
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status.capacity['nvidia.com/gpu']"
+            label="GPU"
+            :show-overflow-tooltip="true"
+            width="60"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status.capacity['nvidia.com/gpu'] || '-' }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="metadata.labels"
+            label="标签"
+            :show-overflow-tooltip="true"
+            width="180"
+          >
+            <template slot-scope="{ row }">
+              <tagList :data="row.metadata.labels" :itemFormatter="(i) => `${i.key}:${i.value}`"/>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="spec.type"
+            label="节点类型"
+            :show-overflow-tooltip="true"
+            width="70"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="spec.unschedulable"
+            label="可调度"
+            :show-overflow-tooltip="true"
+            width="60"
+          >
+            <template slot-scope="{ row }">
+              {{ row.spec.unschedulable ? '不可调度' : '可调度' }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status.statusText"
+            label="状态"
+            :show-overflow-tooltip="true"
+            width="60"
+          >
+            <template slot-scope="{ row }">
+              {{ row.status.statusText | nodeStatusFilter }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="operation"
+            label="操作"
+            :show-overflow-tooltip="true"
+            width="200"
+          >
+            <template slot-scope="{ row }">
+              <qz-link-group max="3">
+                <el-link
+                  type="primary"
+                  @click="openLabelsModal(row)"
+                >
+                  编辑标签
+                </el-link>
+                <el-link
+                  type="primary"
+                  @click="schedule(row)"
+                >
+                  {{ !row.spec.unschedulable ? '禁止' : '允许' }}调度
+                </el-link>
+                <el-link
+                  type="primary"
+                  @click="setTaints(row)"
+                >
+                  设置污点
+                </el-link>
+                <el-link
+                  type="primary"
+                  @click="drainItem(row)"
+                >
+                  平滑迁移
+                </el-link>
+                <el-link
+                  type="primary"
+                  :disabled="isDeleteForbidden(row)"
+                  @click="deleteItem(row)"
+                >
+                  删除
+                </el-link>
+              </qz-link-group>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          style="float:right;margin-top:12px"
+          v-if="data && calculatePages(data.total) > 0"
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
+          :current-page="pagenation.pageNum"
+          :page-sizes="[10, 20, 30, 40, 50, 100]"
+          :page-size="pagenation.pageSize"
+          layout="total, sizes, prev, pager, next"
+          :total="data.total"
+          background
+        />
       </template>
     </x-request>
     <taint-dialog
@@ -133,6 +199,7 @@
 <script>
 import { get } from 'lodash';
 import workloadService from 'kubecube/services/k8s-resource';
+import workloadExtendService from 'kubecube/services/k8s-extend-resource';
 import PageMixin from 'kubecube/mixins/pagenation';
 import {
     toPlainObject as toNodePlainObject,
@@ -143,14 +210,31 @@ import {
 import taintDialog from '../dialogs/taint.vue';
 import nodeDialog from '../dialogs/node.vue';
 import labelDialog from '../dialogs/labels.vue';
-
 const formatter = item => `${item.key}: ${item.value}`;
-
+import { unitConvertMemory, unitConvertCPU } from 'kubecube/utils/functional';
+import nodeInputSearch from './component/node-input-serch.vue';
+const nodeStatusMap = {
+    unscheduled: '维护中',
+    normal: '正常',
+    abnormal: '异常',
+};
 export default {
     components: {
         taintDialog,
         nodeDialog,
         labelDialog,
+        nodeInputSearch,
+    },
+    filters: {
+        cpuFilter(cpu) {
+            return unitConvertCPU(`${cpu}`); // m -> plain
+        },
+        memoryFilter(memory) {
+            return Number(`${unitConvertMemory(`${memory}`, 'Gi')}`).toFixed(3); // Mi --> Gi
+        },
+        nodeStatusFilter(val) {
+            return nodeStatusMap[val] || val || '-';
+        },
     },
     mixins: [ PageMixin ],
     props: {
@@ -158,21 +242,22 @@ export default {
     },
     data() {
         return {
-            service: workloadService.getResourceListWithoutNamespace,
+            nodeStatusMap,
+            service: workloadExtendService.getResourceListWithoutNamespace,
             selectRows: [],
-            columns: [
-                // { type: 'selection', width: '60px' },
-                { title: '名称', name: 'metadata.name', sortable: true },
-                { title: 'IP', name: 'status.nodeIP', width: '120px', sortable: true },
-                { title: 'CPU', name: 'status.capacity.cpu', width: '80px' },
-                { title: '内存', name: 'status.capacity.memory', width: '80px' },
-                { title: 'GPU', name: 'status.capacity["nvidia.com/gpu"]', width: '60px' },
-                { title: '标签', name: 'metadata.labels', type: 'tag', width: '180px', cellprops: { hasModal: true, isChip: true, formatter } },
-                { title: '节点类型', name: 'spec.type', width: '60px' },
-                { title: '可调度', name: 'spec.unschedulable', width: '60px' },
-                { title: '状态', name: 'status.statusText', width: '60px' },
-                { title: '操作', name: 'operation', width: '180px' },
-            ],
+            // columns: [
+            //     { type: 'selection', width: '60px' },
+            //     { title: '名称', name: 'metadata.name', sortable: true },
+            //     { title: 'IP', name: 'status.nodeIP', width: '120px', sortable: true },
+            //     { title: 'CPU', name: 'status.capacity.cpu', width: '80px' },
+            //     { title: '内存', name: 'status.capacity.memory', width: '80px' },
+            //     { title: 'GPU', name: 'status.capacity["nvidia.com/gpu"]', width: '60px' },
+            //     { title: '标签', name: 'metadata.labels', type: 'tag', width: '180px', cellprops: { hasModal: true, isChip: true, formatter } },
+            //     { title: '节点类型', name: 'spec.type', width: '70px' },
+            //     { title: '可调度', name: 'spec.unschedulable', width: '60px' },
+            //     { title: '状态', name: 'status.statusText', width: '60px' },
+            //     { title: '操作', name: 'operation', width: '180px' },
+            // ],
         };
     },
     computed: {
@@ -190,23 +275,29 @@ export default {
                 },
             };
         },
+        clusterName() {
+            return this.$route.params.name;
+        },
+        columns() {
+            return [
+                { title: '名称', name: 'metadata.name', sortable: true },
+                { title: 'IP', name: 'status.nodeIP', width: '120px', sortable: true },
+                { title: 'CPU', name: 'status.capacity.cpu', width: '80px' },
+                { title: '内存', name: 'status.capacity.memory', width: '80px' },
+                { title: 'GPU', name: 'status.capacity["nvidia.com/gpu"]', width: '60px' },
+                { title: '标签', name: 'metadata.labels', type: 'tag', width: '180px', cellprops: { hasModal: true, isChip: true, formatter } },
+                { title: '节点类型', name: 'spec.type', width: '70px' },
+                { title: '可调度', name: 'spec.unschedulable', width: '60px' },
+                { title: '状态', name: 'status.statusText', width: '60px' },
+                { title: '操作', name: 'operation', width: '180px' },
+            ];
+        },
     },
     methods: {
-        async exportNode() {
-            // await fetch(`/ncs/proxy/api/v1/ncs/extends/clusters/${this.clusterId}/nodes/export`, {
-            //     method: 'GET',
-            // }).then(response => response.blob())
-            //     .then(blob => {
-            //         const url = window.URL.createObjectURL(blob);
-            //         const a = document.createElement('a');
-            //         a.href = url;
-            //         a.download = 'nodes.csv';
-            //         document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-            //         a.click();
-            //         a.remove(); // afterwards we remove the element again
-            //     });
-        },
         resolver(response) {
+            if ((response.items || []).length === 0 && response.total > 0 && this.pagenation.pageNum > 1) {
+                this.pagenation.pageNum = this.pagenation.pageNum - 1;
+            }
             return {
                 list: response.items.map(toNodePlainObject),
                 total: response.total,
@@ -220,8 +311,16 @@ export default {
             this.pagenation.sortName = `${name}`;
             this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
         },
-        onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+        onSearch({ value, valueType }) {
+            if (valueType === 'name') {
+                this.pagenation.selector = value ? `metadata.name~${value}` : undefined;
+            }
+            if (valueType === 'label') {
+                this.pagenation.selector = value ? `metadata.labels.${value}` : undefined;
+            }
+            if (valueType === 'status') {
+                this.pagenation.selector = value ? `extendInfo.status=${value}` : undefined;
+            }
         },
         onSelectionChange($event) {
             this.selectRows = $event;
@@ -231,8 +330,8 @@ export default {
         },
         schedule(item) {
             if (!item.spec.unschedulable) {
-                this.$confirm({
-                    content: '确定禁止工作负载调度到该节点吗？',
+                this.$eConfirm({
+                    message: '确定禁止工作负载调度到该节点吗？',
                     title: '提示',
                     ok: async () => {
                         await this.modifyNode(item, { spec: { unschedulable: true } });
@@ -253,14 +352,13 @@ export default {
             });
             this.refresh();
         },
-        openTypeModal() {},
-        toggleMix() {},
         setTaints(item) {
             this.$refs.taintdialog.open(item);
         },
         drainItem(item) {
-            this.$confirm({
-                content: `确定迁移节点 ${item.metadata.name} 吗？`,
+            this.$eConfirm({
+                message: `确定迁移节点 ${item.metadata.name} 吗？`,
+                subMessage: '平滑迁移会驱逐节点上的所有Pod，请确保有合适的节点可供调度。',
                 title: '平滑迁移',
                 ok: async () => {
                     const pods = await workloadService.getResourceListWithoutNamespace({
@@ -273,16 +371,22 @@ export default {
                             pageSize: 10000,
                         },
                     });
-                    const pod = pods.items.map(toMetadataPlainObject).filter(i => ![ 'kube-public', 'kube-system' ].includes(i.metadata.namespace)
-                        && i.metadata.ownerReferences !== 'daemonset');
-
+                    const pod = pods.items.map(toMetadataPlainObject).filter(i => ![ 'kube-public', 'kube-system' ].includes(i.namespace) && _.get(i, 'ownerReferences[0].kind') !== 'DaemonSet');
                     await Promise.all(pod.map(p => new Promise(async (r, j) => {
                         try {
                             await workloadService.eviction({
                                 pathParams: {
                                     cluster: this.instance.clusterName,
-                                    namespace: p.metadata.namespace,
-                                    name: p.metadata.name,
+                                    namespace: p.namespace,
+                                    name: p.name,
+                                },
+                                data: {
+                                    apiVersion: 'policy/v1beta1',
+                                    kind: 'Eviction',
+                                    metadata: {
+                                        name: p.name,
+                                        namespace: p.namespace,
+                                    },
                                 },
                             });
                             r();
@@ -303,8 +407,8 @@ export default {
             return isIngressController || isMaster || isSystem;
         },
         deleteItem(item) {
-            this.$confirm({
-                content: `确定删除节点 ${item.metadata.name} 吗？`,
+            this.$eConfirm({
+                message: `确定删除节点 ${item.metadata.name} 吗？`,
                 title: '删除',
                 ok: async () => {
                     await workloadService.deleteResourceWithoutNamespace({
@@ -333,5 +437,9 @@ export default {
     line-height: 18px;
     text-align: center;
     font-size: 12px;
+    margin-right: 4px;
+  }
+  .table :global(.el-table-column--selection .cell) {
+    padding: 0 14px 0 10px !important;
   }
 </style>

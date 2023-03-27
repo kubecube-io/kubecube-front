@@ -1,99 +1,105 @@
 <template>
-  <kube-dynamic-block
-    v-model="model"
-    style="width: 100%;"
-    :data-template="getDataTemplate"
-  >
-    <template slot="column">
-      <th>
-        Key
-      </th>
-      <th>
-        Operator
-      </th>
-      <th>Values</th>
-    </template>
-    <template slot-scope="{ model, index }">
-      <td>
-        <validation-provider
-          v-slot="{ errors }"
-          :name="`${prefixKey}Key-${index}`"
-          :rules="{
-            KeyPattern: true,
-            noRedundance: { list: exsitKeys }
-          }"
+  <div>
+    <dynamicBlock
+      v-model="model"
+      :getDefaultItem="getDataTemplate"
+      :columns="[
+        {
+          title: 'Key',
+          dataIndex: 'key',
+        },
+        {
+          title: 'Operator',
+          dataIndex: 'operator',
+        },
+        {
+          title: 'Values',
+          dataIndex: 'values',
+        }
+      ]"
+    >
+      <template v-slot:key="{record, index}">
+        <el-form-item 
+          label=""
+          :prop="`${prefixProp}.${index}.key`"
+          :rules="[
+            ...(isRequired ? [ validators.required() ] : []),
+            validators.keyPattern(false),
+            validators.noRedundance(exsitKeys, false),
+          ]"
         >
-          <kube-form-item
-            muted="no"
-            style="width: 100%;"
-            field-size="full"
-            layout="none"
-            :message="errors && errors[0]"
-            placement="bottom"
-          >
-            <u-input
-              v-model="model.key"
-              size="huge"
-              :color="errors && errors[0] ? 'error' : ''"
-            />
-          </kube-form-item>
-        </validation-provider>
-      </td>
-      <td>
-        <u-select
-          v-model="model.operator"
-          size="huge"
-          :data="OPERATORS"
-        />
-      </td>
-      <td>
-        <validation-provider
-          v-if="!['Exists', 'DoesNotExist'].includes(model.operator)"
-          v-slot="{ errors }"
-          :name="`${prefixKey}Value-${index}`"
-          :rules="{
-            LabelValuePatten: model.operator === 'label',
-            multipart: ['In', 'NotIn'].includes(model.operator) && {
-              rule: 'LabelValuePatten',
-              spliter: /\s+/,
-            }
-          }"
+          <el-input
+            v-model="record.key"
+          />
+        </el-form-item>
+      </template>
+      <template v-slot:operator="{record}">
+        <el-select
+            v-model="record.operator"
         >
-          <kube-form-item
-            muted="no"
-            style="width: 100%;"
-            field-size="full"
-            layout="none"
-            :message="errors && errors[0]"
-            placement="bottom"
-          >
-            <u-input
-              v-model="model.values"
-              size="huge"
-              :placeholder="getPlaceholder(model.operator)"
-              :color="errors && errors[0] ? 'error' : ''"
-            />
-          </kube-form-item>
-        </validation-provider>
-      </td>
-    </template>
-  </kube-dynamic-block>
+          <el-option
+            v-for="item in OPERATORS"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value"
+            :title="item.text"
+          />
+        </el-select>
+      </template>
+      <template v-slot:values="{record, index}">
+        <el-form-item
+          v-if="!['Exists', 'DoesNotExist'].includes(record.operator)"
+          label=""
+          :prop="`${prefixProp}.${index}.values`"
+          :rules="[
+            ...(isRequired ? [ validators.required() ] : []),
+            ...(record.operator === 'label' ? [ validators.labelValuePatten(false) ] : []),
+            ...(['In', 'NotIn'].includes(record.operator) ? [ validators.multipartLabelValuePatten(/\s+/, false) ] : []),
+          ]"
+        >
+          <el-input
+            v-model="record.values"
+            :placeholder="getPlaceholder(record.operator)"
+          />
+        </el-form-item>
+        <div v-else></div>
+      </template>
+    </dynamicBlock>
+  </div>
 </template>
 
 <script>
 import { makeVModelMixin } from 'kubecube/mixins/functional';
 import { OPERATORS } from 'kubecube/utils/constance';
+import dynamicBlock from 'kubecube/elComponent/dynamic-block/index.vue';
+import * as validators from 'kubecube/utils/validators';
 export default {
     mixins: [ makeVModelMixin ],
+    components: {
+        dynamicBlock,
+    },
     props: {
         prefixKey: {
             type: String,
             default: '',
         },
+        includeLable: {
+            type: Boolean,
+            default: true,
+        },
+        prefixProp: {
+            type: String,
+            default: '',
+        },
+        isRequired: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
-            OPERATORS,
+            OPERATORS: this.includeLable ? OPERATORS : OPERATORS.slice(1),
+            validators,
         };
     },
     computed: {
@@ -105,12 +111,12 @@ export default {
         getDataTemplate() {
             return {
                 key: '',
-                operator: 'label',
+                operator: this.includeLable ? 'label' : 'In',
                 values: '',
             };
         },
         getPlaceholder(operator) {
-            return (OPERATORS.find(item => item.value === operator) || {}).placeholder || '';
+            return (this.OPERATORS.find(item => item.value === operator) || {}).placeholder || '';
         },
     },
 };

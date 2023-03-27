@@ -4,36 +4,22 @@
       <router-view />
     </template>
     <template v-else>
-      <u-linear-layout
-        style="margin-bottom: 20px;"
-        direction="horizontal"
-      >
-        <u-linear-layout
-          direction="horizontal"
-          class="kube-clear"
+      <div style="margin-bottom: 12px;">
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          @click="toCreate"
         >
-          <u-button
-            icon="create"
-            color="primary"
-            @click="toCreate"
-          >
-            创建网络策略
-          </u-button>
+          创建网络策略
+        </el-button>
 
-          <u-button
-            icon="refresh"
-            square
-            @click="refresh"
-          />
-          <kube-input-search
-            :align-right="true"
-            placeholder="请输入名称搜索"
-            @search="onSearch"
-          />
-        </u-linear-layout>
-
-      <!-- <search-tag :class="$style.search" :tagTypes="tagTypes" @search="searchNodes" :limit="10"></search-tag> -->
-      </u-linear-layout>
+        <el-button
+          icon="el-icon-refresh-right"
+          square
+          @click="refresh"
+        />
+        <inputSearch placeholder="请输入名称搜索" position="right" @search="onSearch"/>
+      </div>
       <x-request
         ref="request"
         :service="service"
@@ -41,41 +27,61 @@
         :processor="resolver"
       >
         <template slot-scope="{ data, loading, error }">
-          <kube-table
-            table-width="100%"
-            :loading="loading"
-            :columns="columns"
-            :items="data ? data.list : []"
-            :error="error"
-            @sort="onSort"
+          <el-table
+            v-loading="loading"
+            :data="data ? data.list : []"
+            style="width: 100%"
+            border
+            @sort-change="tableSortChange"
           >
-            <template #[`item.operation`]="{item}">
-              <u-link-list>
-                <u-link-list-item
-                  @click="viewYAML(item)"
-                >
-                  查看详情
-                </u-link-list-item>
-                <u-link-list-item
-                  @click="toEdit(item)"
-                >
-                  设置
-                </u-link-list-item>
-                <u-link-list-item
-                  @click="deleteItem(item)"
-                >
-                  删除
-                </u-link-list-item>
-              </u-link-list>
-            </template>
-            <template #noData>
-              还没有任何 网络策略, 现在就
-              <u-link @click="toCreate">
-                立即创建
-              </u-link>
-              一个吧。
-            </template>
-          </kube-table>
+            <el-table-column
+              prop="metadata.name"
+              label="名称"
+              :show-overflow-tooltip="true"
+              sortable
+            ></el-table-column>
+            <el-table-column
+              prop="metadata.namespace"
+              label="空间"
+              :show-overflow-tooltip="true"
+              width="200"
+            ></el-table-column>
+            <el-table-column
+              prop="t"
+              label="操作"
+              :show-overflow-tooltip="true"
+              width="180"
+            >
+              <template slot-scope="{ row }">
+                <qz-link-group max="3">
+                  <el-link 
+                    type="primary"
+                    @click="viewYAML(row)"
+                  >查看详情</el-link>
+                  <el-link 
+                    type="primary"
+                    @click="toEdit(row)"
+                  >设置</el-link>
+                  <el-link 
+                    type="primary"
+                    @click="deleteItem(row)"
+                  >删除</el-link>
+                </qz-link-group>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination
+            style="float:right;margin-top:12px"
+            v-if="data && calculatePages(data.total) > 0"
+            @size-change="pageSizeChange"
+            @current-change="pageNumChange"
+            :current-page="pagenation.pageNum"
+            :page-sizes="[10, 20, 30, 40, 50, 100]"
+            :page-size="pagenation.pageSize"
+            layout="total, sizes, prev, pager, next"
+            :total="data.total"
+            background
+          />
         </template>
       </x-request>
     </template>
@@ -89,7 +95,11 @@ import {
 } from 'kubecube/k8s-resources/networkPolicy';
 import PageMixin from 'kubecube/mixins/pagenation';
 
+import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
 export default {
+    components: {
+        inputSearch,
+    },
     mixins: [ PageMixin ],
     props: {
         instance: Object,
@@ -132,6 +142,9 @@ export default {
             this.$router.push({ path: `/platform/cluster/${this.instance.clusterName}/network/edit/${item.metadata.namespace}/${item.metadata.name}` });
         },
         resolver(response) {
+            if ((response.items || []).length === 0 && response.total > 0 && this.pagenation.pageNum > 1) {
+                this.pagenation.pageNum = this.pagenation.pageNum - 1;
+            }
             return {
                 list: response.items.map(toNetworPolicyPlainObject),
                 total: response.total,
@@ -146,7 +159,11 @@ export default {
             this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
         },
         onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+            const temp = content ? `metadata.name~${content}` : undefined;
+            if (this.pagenation.selector === temp) {
+                this.refresh();
+            }
+            this.pagenation.selector = temp;
         },
         async viewYAML(item) {
             const reqParam = {
@@ -176,8 +193,8 @@ export default {
                     name: item.metadata.name,
                 },
             };
-            this.$confirm({
-                content: `确定删除网络策略 ${item.metadata.name} 吗？`,
+            this.$eConfirm({
+                message: `确定删除网络策略 ${item.metadata.name} 吗？`,
                 title: '删除',
                 ok: async () => {
                     await workloadService.deleteNetworkingInstance(reqParam);

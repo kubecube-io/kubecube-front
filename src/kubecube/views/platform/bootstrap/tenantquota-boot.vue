@@ -1,12 +1,12 @@
 <template>
-  <validation-observer
-    ref="observer"
-    v-slot="{ invalid }"
-  >
-    <kube-form style="margin-top: 20px">
-      <kube-form-item
+  <div>
+    <el-form ref="form" :model="model" label-position="right" label-width="120px">
+      <el-form-item
         label="租户"
-        required
+        prop="tenant"
+        :rules="[
+          validators.required(),
+        ]"
       >
         <x-request
           ref="requestTenant"
@@ -18,13 +18,18 @@
           }"
           :processor="userResolver"
         >
-          <u-select
+          <el-select
             v-model="model.tenant"
-            size="normal huge"
-            :data="tenants"
-          />
+          >
+            <el-option
+              v-for="optionItem in tenants"
+              :key="optionItem.value"
+              :label="optionItem.text"
+              :value="optionItem.value"
+            />
+          </el-select>
         </x-request>
-      </kube-form-item>
+      </el-form-item>
       <template v-if="tenants.length">
         <x-request
           ref="request"
@@ -33,7 +38,7 @@
           :processor="tenantClusterResolver"
         >
           <template slot-scope="{ data, loading }">
-            <u-loading v-if="loading" />
+            <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
             <template v-else>
               <x-request
                 ref="requestcluster"
@@ -41,24 +46,33 @@
                 :processor="clusterResolver(data)"
               >
                 <template slot-scope="{ loading: quotaLoading }">
-                  <u-loading v-if="quotaLoading" />
+                  <i v-if="quotaLoading" class="el-icon-loading" style="font-size: 24px"/>
                   <template v-else>
-                    <kube-form-item
+                    <el-form-item
                       label="集群"
-                      required
+                      prop="cluster"
+                      :rules="[
+                        validators.required(),
+                      ]"
                     >
-                      <u-select
+                      <el-select
                         v-if="clusters.length"
                         v-model="model.cluster"
-                        size="normal huge"
-                        :data="clusters"
-                      />
-                      <u-select
+                      >
+                        <el-option
+                          v-for="optionItem in clusters"
+                          :key="optionItem.value"
+                          :label="optionItem.text"
+                          :value="optionItem.value"
+                        />
+                      </el-select>
+                      <el-input
                         v-else
+                        v-bind="$attrs"
+                        placeholder="暂无集群"
                         disabled
-                        :data="[{ text: '暂无集群' }]"
                       />
-                    </kube-form-item>
+                    </el-form-item>
                     <template v-if="clusters.length > 0">
                       <x-request
                         ref="requestQuota"
@@ -66,12 +80,14 @@
                         :params="quotaParams"
                         :processor="quotaResolver"
                       >
-                        <hard-quota
-                          v-model="model.model"
-                          style="width: 700px;margin-top:20px"
-                          :item="model.used"
-                          :availables="model.availables"
-                        />
+                        <el-form-item label="共享资源">
+                          <hard-quota
+                            v-model="model.model"
+                            :item="model.used"
+                            :availables="model.availables"
+                            prefixKey="model."
+                          />
+                        </el-form-item>
                       </x-request>
                     </template>
                   </template>
@@ -81,26 +97,23 @@
           </template>
         </x-request>
       </template>
-      <kube-form-item>
-        <u-submit-button
-          :click="submit.bind(this)"
-        >
-          <template slot-scope="scope">
-            <u-linear-layout>
-              <u-button
-                color="primary"
-                :disabled="invalid || scope.submitting"
-                :icon="scope.submitting ? 'loading' : ''"
-                @click="scope.submit"
-              >
-                创建
-              </u-button>
-            </u-linear-layout>
-          </template>
-        </u-submit-button>
-      </kube-form-item>
-    </kube-form>
-  </validation-observer>
+      <el-form-item
+        label="存储资源"
+        prop="model.spec.hard.requestsStorage"
+        :rules="[
+          validators.required(),
+          validators.consistofNumber(),
+          validators.numberBetween(0),
+        ]"
+      >
+        <el-input v-model="model.model.spec.hard['requestsStorage']" style="width: 300px"/>
+        <span style="line-height:32px;margin-left:8px">GiB</span>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submit" :loading="submitLoading">确 定</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 
 <script>
@@ -118,9 +131,10 @@ import {
 import userService from 'kubecube/services/user';
 import clusterService from 'kubecube/services/cluster';
 import scopeService from 'kubecube/services/scope';
-import hardQuota from '../quota/hard-quota-table.vue';
+import hardQuota from '../quota/el-hard-quota-table.vue';
 import { makeVModelMixin } from 'kubecube/mixins/functional.js';
 import BigNumber from 'bignumber.js';
+import * as validators from 'kubecube/utils/validators';
 
 export default {
     components: {
@@ -138,6 +152,8 @@ export default {
             tenants: [],
             clusters: [],
             quotaType: 'edit',
+            validators,
+            submitLoading: false,
         };
     },
     computed: {
@@ -212,40 +228,70 @@ export default {
             this.quotaType = cubeQuotaResponse ? 'edit' : 'create';
             this.model.model = toCubeResourceQoutaPlainObject(cubeQuotaResponse);
             this.model.used = {
-              usedCpu: this.model.model.status.used.cpu,
-              usedMemory: this.model.model.status.used.memory,
-              usedGpu: this.model.model.status.used.gpu,
+                usedCpu: this.model.model.status.used.cpu,
+                usedMemory: this.model.model.status.used.memory,
+                usedGpu: this.model.model.status.used.gpu,
+                usedLimitsCpu: this.model.model.status.used.limitsCpu,
+                usedLimitsMemory: this.model.model.status.used.limitsMemory,
             };
             this.model.availables = {
                 cpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityCpu)).minus(unitConvertCPU(clusterQuota.assignedCpu)).plus(this.model.model.status.hard.cpu),
                 memory: +new BigNumber(unitConvertMemory(clusterQuota.capacityMem)).minus(unitConvertMemory(clusterQuota.assignedMem)).plus(this.model.model.status.hard.memory),
                 gpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityGpu)).minus(unitConvertCPU(clusterQuota.assignedGpu)).plus(this.model.model.status.hard.gpu),
-                // storage: item.totalStorage - item.usedStorage,
+                storage: Infinity,
             };
+
+
+
+            // this.quotaType = cubeQuotaResponse ? 'edit' : 'create';
+            // this.model.model = toCubeResourceQoutaPlainObject(cubeQuotaResponse);
+            // this.model.used = {
+            //   usedCpu: this.model.model.status.used.cpu,
+            //   usedMemory: this.model.model.status.used.memory,
+            //   usedGpu: this.model.model.status.used.gpu,
+            // };
+            // this.model.availables = {
+            //     cpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityCpu)).minus(unitConvertCPU(clusterQuota.assignedCpu)).plus(this.model.model.status.hard.cpu),
+            //     memory: +new BigNumber(unitConvertMemory(clusterQuota.capacityMem)).minus(unitConvertMemory(clusterQuota.assignedMem)).plus(this.model.model.status.hard.memory),
+            //     gpu: +new BigNumber(unitConvertCPU(clusterQuota.capacityGpu)).minus(unitConvertCPU(clusterQuota.assignedGpu)).plus(this.model.model.status.hard.gpu),
+            //     // storage: item.totalStorage - item.usedStorage,
+            // };
         },
 
         async submit() {
-            const {
-                model,
-                tenant,
-                cluster,
-            } = this.model;
-            if (this.quotaType === 'edit') {
-                const data = patchCubeResourceQoutaK8SObject(model, tenant, cluster);
-                await scopeService.patchKubeDefineResource({
-                    pathParams: {
-                        name: model.metadata.name,
-                    },
-                    data,
-                });
-            } else {
-                const data = toCubeResourceQoutaK8SObject(model, tenant, cluster);
-                await scopeService.createCubeQuotaResource({
-                    data,
-                });
+            // 触发校验
+            try {
+                await this.$refs.form.validate();
+            } catch (error) {
+                return;
             }
-            this.$toast.success('创建成功');
-            this.$emit('next');
+            this.submitLoading = true;
+            try {
+                const {
+                    model,
+                    tenant,
+                    cluster,
+                } = this.model;
+                if (this.quotaType === 'edit') {
+                    const data = patchCubeResourceQoutaK8SObject(model, tenant, cluster);
+                    await scopeService.patchKubeDefineResource({
+                        pathParams: {
+                            name: model.metadata.name,
+                        },
+                        data,
+                    });
+                } else {
+                    const data = toCubeResourceQoutaK8SObject(model, tenant, cluster);
+                    await scopeService.createCubeQuotaResource({
+                        data,
+                    });
+                }
+                this.$toast.success('创建成功');
+                this.$emit('next');
+            } catch (error) {
+                console.log(error);
+            }
+            this.submitLoading = false;
         },
     },
 };

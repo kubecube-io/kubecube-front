@@ -1,108 +1,80 @@
 <template>
-  <kube-dynamic-block
-    v-model="model"
-    :layout-comp="blockLayout"
-    :row-comp="blockRowLayout"
-    :column-comp="null"
-    :data-template="getTemplate"
+  <div>
+    <dynamicCard
+      v-model="model"
+      :getDefaultItem="getTemplate"
 
-    button-name="添加规则"
-  >
-    <template slot-scope="{ model, index }">
-      <kube-form label-size="small">
-        <kube-form-item
+    >
+      <template slot-scope="{ item: dataModel, index: dataIndex }">
+        <el-form-item
           label="IP 段"
-          :layout="model.ipBlock.enable ? 'block': 'normal'"
+          style="margin-bottom: 24px;"
         >
-          <span slot="label">
-            <u-note>ip规则同空间、副本选择规则不可同时设置。</u-note>
-          </span>
-          <u-radios
-            v-model="model.ipBlock.enable"
-            @change="onChangeIp($event, model)"
-          >
-            <u-radio :label="false">
-              不设置 IP 段
-            </u-radio>
-            <u-radio :label="true">
-              指定 IP 段
-            </u-radio>
-          </u-radios>
-          <template v-if="model.ipBlock.enable">
-            <validation-provider
-              v-slot="{ errors }"
-              :name="`${prefixKey}-ip-${index}-cidr`"
-              rules="cidr"
-            >
-              <kube-form-item
-                label="CIDR"
-                layout="list"
-                :message="errors && errors[0]"
-              >
-                <u-input
-                  v-model="model.ipBlock.cidr"
-                  :color="errors && errors[0] ? 'error' : ''"
-                  size="large"
-                />
-              </kube-form-item>
-            </validation-provider>
-            <kube-form-item
-              label="例外 CIDR"
-              layout="list"
-            >
-              <cidr-input
-                v-model="model.ipBlock.except"
-                :prefix-key="`${prefixKey}-ip-${index}-except`"
-              />
-            </kube-form-item>
+          <template slot="label">
+            IP 段
+            <el-tooltip effect="dark" placement="right" popper-class="ncs-el-tooltip-popper">
+              <div slot="content">
+                ip规则同空间、副本选择规则不可同时设置。
+              </div>
+              <i class="el-icon-question" style="position: absolute;right:4px;top:11px"/>
+            </el-tooltip>
           </template>
-        </kube-form-item>
-
-        <kube-form-item
+          <el-radio-group v-model="dataModel.ipBlock.enable" @change="onChangeIp($event, dataModel)">
+            <el-radio :label="false">不设置 IP 段</el-radio>
+            <el-radio :label="true">指定 IP 段</el-radio>
+          </el-radio-group>
+          <div v-if="dataModel.ipBlock.enable">
+            <div style="padding-left:8px;color:#909399;">
+              CIDR
+            </div>
+            <el-form-item
+              :prop="`${prefixProp}.${dataIndex}.ipBlock.cidr`"
+              :rules="[
+                validators.required(),
+                validators.cidr(false),
+              ]"
+            >
+              <el-input
+                v-model="dataModel.ipBlock.cidr"
+              />
+            </el-form-item>
+            <cidr-input
+              v-model="dataModel.ipBlock.except"
+              :prefixProp="`${prefixProp}.${dataIndex}.ipBlock.except`"
+            />
+          </div>
+        </el-form-item>
+        <el-form-item
           label="空间规则"
-          :layout="model.namespaceSelector.enable ? 'block': 'normal'"
+          style="margin-bottom: 24px;"
         >
-          <u-radios
-            v-model="model.namespaceSelector.enable"
-            :disabled="model.namespaceSelector.disabled"
-          >
-            <u-radio :label="false">
-              所有空间
-            </u-radio>
-            <u-radio :label="true">
-              符合规则的空间
-            </u-radio>
-          </u-radios>
+          <el-radio-group v-model="dataModel.namespaceSelector.enable" :disabled="dataModel.namespaceSelector.disabled">
+            <el-radio :label="false">所有空间</el-radio>
+            <el-radio :label="true">符合规则的空间</el-radio>
+          </el-radio-group>
           <regular-input
-            v-if="model.namespaceSelector.enable"
-            v-model="model.namespaceSelector.matchExpressions"
-            :prefix-key="`${prefixKey}-ip-${index}-namespace`"
+            v-if="dataModel.namespaceSelector.enable"
+            v-model="dataModel.namespaceSelector.matchExpressions"
+            :prefixProp="`${prefixProp}.${dataIndex}.namespaceSelector.matchExpressions`"
           />
-        </kube-form-item>
-        <kube-form-item
+        </el-form-item>
+        <el-form-item
           label="副本规则"
-          :layout="model.podSelector.enable ? 'block': 'normal'"
+          style="margin-bottom: 24px;"
         >
-          <u-radios
-            v-model="model.podSelector.enable"
-            :disabled="model.podSelector.disabled"
-          >
-            <u-radio :label="false">
-              所有副本
-            </u-radio>
-            <u-radio :label="true">
-              符合规则的副本
-            </u-radio>
-          </u-radios>
+          <el-radio-group v-model="dataModel.podSelector.enable" :disabled="dataModel.podSelector.disabled">
+            <el-radio :label="false">所有副本</el-radio>
+            <el-radio :label="true">符合规则的副本</el-radio>
+          </el-radio-group>
           <regular-input
-            v-if="model.podSelector.enable"
-            v-model="model.podSelector.matchExpressions"
-            :prefix-key="`${prefixKey}-ip-${index}-pod`"
+            v-if="dataModel.podSelector.enable"
+            v-model="dataModel.podSelector.matchExpressions"
+            :prefixProp="`${prefixProp}.${dataIndex}.podSelector.matchExpressions`"
           />
-        </kube-form-item>
-      </kube-form>
-    </template>
-  </kube-dynamic-block>
+        </el-form-item>
+      </template>
+    </dynamicCard>
+  </div>
 </template>
 
 <script>
@@ -111,14 +83,21 @@ import blockLayout from 'kubecube/component/common/kube-dynamic-block-layout/ind
 import blockRowLayout from 'kubecube/component/common/kube-dynamic-block-layout/row.vue';
 import cidrInput from './cidr-inputs.vue';
 import regularInput from './regular-input.vue';
+import dynamicCard from 'kubecube/elComponent/dynamic-card/index.vue';
+import * as validators from 'kubecube/utils/validators';
 export default {
     components: {
         cidrInput,
         regularInput,
+        dynamicCard,
     },
     mixins: [ makeVModelMixin ],
     props: {
         prefixKey: {
+            type: String,
+            default: '',
+        },
+        prefixProp: {
             type: String,
             default: '',
         },
@@ -127,6 +106,7 @@ export default {
         return {
             blockLayout,
             blockRowLayout,
+            validators,
         };
     },
     methods: {
@@ -150,7 +130,7 @@ export default {
             };
         },
         onChangeIp($event, model) {
-            if ($event.value) {
+            if ($event) {
                 model.namespaceSelector.enable = false;
                 model.podSelector.enable = false;
                 model.namespaceSelector.disabled = true;

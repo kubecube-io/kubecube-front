@@ -12,8 +12,8 @@
         <div :class="$style.message">
           {{ message }}
         </div>
-        <div :class="$style.sunMessage">
-          {{ sunMessage }}
+        <div :class="$style.subMessage">
+          {{ subMessage }}
         </div>
       </div>
     </div>
@@ -42,7 +42,7 @@ export default {
             type: 'warning',
             title: '',
             message: '',
-            sunMessage: '',
+            subMessage: '',
             commitLoading: false,
             cancleLoading: false,
             width: '460px',
@@ -85,7 +85,15 @@ export default {
         },
         open(obj) {
             this.dialogVisible = true;
-            Object.assign(this, _.pick(obj, [ 'type', 'title', 'message', 'ok', 'cancel', 'width' ]));
+            Object.assign(this, {
+                type: _.get(obj, 'type', 'warning'),
+                title: _.get(obj, 'title', ''),
+                message: _.get(obj, 'message', ''),
+                ok: _.get(obj, 'ok', () => {}),
+                cancel: _.get(obj, 'cancel', () => {}),
+                width: _.get(obj, 'width', '460px'),
+                subMessage: _.get(obj, 'subMessage', ''),
+            });
         },
     },
 
@@ -110,7 +118,7 @@ export default {
   color: #303133;
   line-height: 1.3;
 }
-.sunMessage {
+.subMessage {
   font-size: 14px;
   color: #666;
   line-height: 1.3;

@@ -1,16 +1,24 @@
 <template>
-  <u-select
-    v-if="list.length > 0"
-    v-model="model"
-    :data="list"
-    v-bind="$attrs"
-  />
-  <u-select
-    v-else
-    v-bind="$attrs"
-    value="暂无集群"
-    disabled
-  />
+    <el-select
+        v-if="list.length > 0"
+        filterable
+        placeholder="请选择"
+        v-bind="$attrs"
+        v-model="model"
+    >
+        <el-option
+            v-for="item in list"
+            :key="item.value"
+            :label="item.text"
+            :value="item.value"
+            :title="item.text"
+        />
+    </el-select>
+    <el-input
+        v-else
+        placeholder="暂无空间"
+        disabled
+    />
 </template>
 
 <script>

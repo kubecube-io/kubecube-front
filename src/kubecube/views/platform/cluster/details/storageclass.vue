@@ -1,35 +1,19 @@
 <template>
   <div>
-    <u-linear-layout
-      style="margin-bottom: 20px;"
-      direction="horizontal"
-    >
-      <u-linear-layout
-        direction="horizontal"
-        class="kube-clear"
+    <div style="margin-bottom: 12px;">
+      <el-button
+        type="primary"
+        @click="createYAML"
       >
-        <u-button
-          icon="create"
-          color="primary"
-          @click="createYAML"
-        >
-          创建存储类别
-        </u-button>
-
-        <u-button
-          icon="refresh"
-          square
-          @click="refresh"
-        />
-        <kube-input-search
-          :align-right="true"
-          placeholder="请输入名称搜索"
-          @search="onSearch"
-        />
-      </u-linear-layout>
-
-      <!-- <search-tag :class="$style.search" :tagTypes="tagTypes" @search="searchNodes" :limit="10"></search-tag> -->
-    </u-linear-layout>
+        YAML方式创建
+      </el-button>
+      <el-button
+        icon="el-icon-refresh-right"
+        square
+        @click="refresh"
+      />
+      <inputSearch placeholder="请输入名称搜索" position="right" @search="onSearch"/>
+    </div>
     <x-request
       ref="request"
       :service="service"
@@ -37,51 +21,64 @@
       :processor="resolver"
     >
       <template slot-scope="{ data, loading, error }">
-        <kube-table
-          table-width="100%"
-          :loading="loading"
-          :columns="columns"
-          :items="data ? data.list : []"
-          :error="error"
-          @sort="onSort"
+        <el-table
+          v-loading="loading"
+          :data="data ? data.list : []"
+          style="width: 100%"
+          border
+          @sort-change="tableSortChange"
         >
-          <template #[`item.pool`]="{ item }">
-            {{ cephCluster(item) }}
-          </template>
-          <template #[`item.provisioner`]="{ item }">
-            {{ item.provisioner | cephTypeText }}
-          </template>
-          <template #[`item.reclaimPolicy`]="{ item }">
-            {{ item.reclaimPolicy }}
-          </template>
-          <template #[`item.spec.unschedulable`]="{ item }">
-            {{ item.spec.unschedulable ? '不可调度' : '可调度' }}
-          </template>
-          <template #[`item.operation`]="{item}">
-            <u-link-list>
-              <u-link-list-item
-                @click="deleteItem(item)"
-              >
-                删除
-              </u-link-list-item>
-            </u-link-list>
-          </template>
-          <template #noData>
-            <template v-if="pagenation.selector">
-              没有搜索到相关内容，可调整关键词重新搜索
+          <el-table-column
+            prop="metadata.name"
+            label="名称"
+            :show-overflow-tooltip="true"
+            sortable
+          />
+          <el-table-column
+            prop="pool"
+            label="存储集群"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="provisioner"
+            label="类型"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="reclaimPolicy"
+            label="释放策略"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="operation"
+            label="操作"
+            :show-overflow-tooltip="true"
+            width="100"
+          >
+            <template slot-scope="{ row }">
+              <qz-link-group max="3">
+                <el-link
+                  type="primary"
+                  @click="deleteItem(row)"
+                >删除</el-link>
+              </qz-link-group>
             </template>
-            <template v-else>
-              还没有任何 存储类别
-            </template>
-          </template>
-        </kube-table>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          v-if="data && calculatePages(data.total) > 0"
+          style="float:right;margin-top:12px"
+          :current-page="pagenation.pageNum"
+          :page-sizes="[10, 20, 30, 40, 50, 100]"
+          :page-size="pagenation.pageSize"
+          layout="total, sizes, prev, pager, next"
+          :total="data.total"
+          background
+          @size-change="pageSizeChange"
+          @current-change="pageNumChange"
+        />
       </template>
     </x-request>
-    <taint-dialog
-      ref="taintdialog"
-      :instance="instance"
-      @refresh="refresh"
-    />
   </div>
 </template>
 
@@ -94,7 +91,6 @@ import {
     getDefaultModel as getStorageDefaultModel,
     toK8SObject as toStorageK8SObject,
 } from 'kubecube/k8s-resources/storageclass';
-import taintDialog from '../dialogs/taint.vue';
 import {
     CEPH_TYPE_MAP,
 } from 'kubecube/utils/constance';
@@ -106,7 +102,7 @@ export default {
         },
     },
     components: {
-        taintDialog,
+        // createStorageclassModal,
     },
     mixins: [ PageMixin ],
 
@@ -117,16 +113,19 @@ export default {
         return {
             service: workloadService.getStorage,
             selectRows: [],
-            columns: [
-                { title: '名称', name: 'metadata.name', sortable: true },
-                { title: '存储集群', name: 'pool' },
-                { title: '类型', name: 'provisioner' },
-                { title: '释放策略', name: 'reclaimPolicy' },
-                { title: '操作', name: 'operation', width: '180px' },
-            ],
+            // columns: [
+            //     { title: '名称', name: 'metadata.name', sortable: true },
+            //     { title: '存储集群', name: 'pool' },
+            //     { title: '类型', name: 'provisioner' },
+            //     { title: '释放策略', name: 'reclaimPolicy' },
+            //     { title: '操作', name: 'operation', width: '180px' },
+            // ],
         };
     },
     computed: {
+        clusterName() {
+            return this.instance && this.instance.clusterName;
+        },
         isControlCluster() {
             return !this.instance.isMemberCluster;
         },
@@ -141,9 +140,21 @@ export default {
                 },
             };
         },
+        columns() {
+            return [
+                { title: '名称', name: 'metadata.name', sortable: true },
+                { title: '存储集群', name: 'pool' },
+                { title: '类型', name: 'provisioner' },
+                { title: '释放策略', name: 'reclaimPolicy' },
+                { title: '操作', name: 'operation', width: '180px' },
+            ];
+        },
     },
     methods: {
         resolver(response) {
+            if ((response.items || []).length === 0 && response.total > 0 && this.pagenation.pageNum > 1) {
+                this.pagenation.pageNum = this.pagenation.pageNum - 1;
+            }
             return {
                 list: (response.items || []).map(toStoragePlainObject),
                 total: response.total,
@@ -158,7 +169,11 @@ export default {
             this.pagenation.sortFunc = name === 'creationTimestamp' ? 'time' : 'string';
         },
         onSearch(content) {
-            this.pagenation.selector = content ? `metadata.name~${content}` : undefined;
+            const temp = content ? `metadata.name~${content}` : undefined;
+            if (this.pagenation.selector === temp) {
+                this.refresh();
+            }
+            this.pagenation.selector = temp;
         },
         cephCluster(item) {
             return get(item, 'metadata.annotations["ceph-cluster-name"]')
@@ -185,9 +200,9 @@ export default {
             });
         },
         deleteItem(item) {
-            this.$confirm({
+            this.$eConfirm({
                 title: '删除',
-                content: `确认要删除 ${item.metadata.name} 吗？`,
+                message: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
                     const reqParam = {
                         pathParams: {
