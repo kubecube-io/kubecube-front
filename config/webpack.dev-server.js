@@ -46,7 +46,7 @@ module.exports = function() {
                 target: 'http://10.219.192.79:30008',
                 pathRewrite: { '^/api/v1/audit': '/api/v1/cube/audit' },
             },
-            // 10.219.192.164:30010/api/v1/pivot-cluster/pod/es/es-0/shell/wb-test-nginx
+            // 10.219.192.79:30010/api/v1/pivot-cluster/pod/es/es-0/shell/wb-test-nginx
         },
     };
 };

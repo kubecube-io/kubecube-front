@@ -164,9 +164,6 @@ export default {
                 } else {
                     const data = toCubeResourceQoutaK8SObject(this.model, this.item.tenant, this.item.clusterName);
                     await scopeService.createCubeQuotaResource({
-                        pathParams: {
-                            cluster: this.controlClusterList[0].clusterName,
-                        },
                         data,
                     });
                     this.show = false;

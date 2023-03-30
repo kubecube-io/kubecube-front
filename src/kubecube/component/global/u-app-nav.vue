@@ -123,8 +123,7 @@
             运维中心
           </div>
         </div>
-
-        <u-sidebar-group class="m-sidebar-group">
+        <u-sidebar-group v-if="logseerFeatures" class="m-sidebar-group">
           <span slot="title"><u-icons name="config" />日志</span>
           <u-sidebar-item
             :to="{ path: '/control/logconfigs' }"
@@ -175,6 +174,7 @@ export default {
     computed: {
         namespace: sync('scope/namespace'),
         cluster: sync('scope/cluster'),
+        logseerFeatures: get('feature/features@logseer'),
         query: get('query'),
         // dashbo{ title: 'specialTerms.Dashboard', to: this.makeRoute("/dashboard"), icon: 'mdi-view-dashboard' },
         workloads() {
