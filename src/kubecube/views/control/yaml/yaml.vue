@@ -58,7 +58,7 @@
       </template>
       <div slot="footer">
         <el-button @click="close">取消</el-button>
-        <el-button :disabled="!!readOnly" @click="submit" :loading="commitLoading">预检测</el-button>
+        <el-button :disabled="!!readOnly" @click="submit(true)" :loading="commitLoading">预检测</el-button>
         <el-button type="primary" :disabled="!!readOnly" @click="submit" :loading="commitLoading">确定</el-button>
       </div>
     </el-dialog>
