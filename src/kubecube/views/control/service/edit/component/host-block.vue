@@ -118,6 +118,9 @@ export default {
                     namespace: this.namespace,
                     resource: 'services',
                 },
+                params: {
+                    pageSize: 10000,
+                },
             };
         },
     },

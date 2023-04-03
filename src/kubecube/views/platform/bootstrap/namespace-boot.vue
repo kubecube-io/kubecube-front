@@ -221,7 +221,10 @@ export default {
                     },
                 });
                 this.$toast.success('创建成功');
-                this.$refs.request.request();
+                // this.$refs.request.request();
+                this.$router.push({
+                    path: '/platform/nsquota',
+                });
             } catch (error) {
                 console.log(error);
             }
