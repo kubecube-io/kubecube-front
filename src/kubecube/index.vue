@@ -14,7 +14,7 @@
     <kube-yaml-dialog ref="kubeyaml" />
     <global-error-modal ref="globalErrorModal" />
     <eConfirmModal ref="eConfirm" />
-    <termModal ref="termModal" style="z-index: 10000; position: relative"/>
+    <termModal ref="termModal" style="z-index: 2000; position: relative"/>
     <yaml-dialog ref="yamlDialog" />
   </div>
 </template>

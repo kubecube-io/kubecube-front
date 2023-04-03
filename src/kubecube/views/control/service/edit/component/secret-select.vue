@@ -120,6 +120,9 @@ export default {
                     namespace: this.namespace,
                     resource: 'secrets',
                 },
+                params: {
+                    pageSize: 10000,
+                },
             };
         },
     },
