@@ -80,8 +80,8 @@ export default {
             // if (!this.isInNSBoard) {
             //     this.$router.push({ path: '/namespace' });
             // }
-            this.cluster = this.items.find(i => i.value === val.value);
-            this.model = val.value;
+            this.cluster = this.items.find(i => i.value === val);
+            this.model = val;
             const pathArr = this.$route.path.split('/');
             if (pathArr.length > 4 || this.$route.path.endsWith('create')) {
                 this.$router.push({
