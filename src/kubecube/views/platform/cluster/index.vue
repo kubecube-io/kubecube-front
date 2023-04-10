@@ -157,6 +157,30 @@
       ref="domainSuffixDialog"
       @refresh="refresh"
     />
+    <el-dialog
+      title="删除集群"
+      :visible.sync="showDelete"
+      width="700px"
+      :close-on-click-modal="false"
+    >
+      <div
+        :class="$style.noticeWrap"
+      >
+        <span :class="$style.textspan">
+          请参照
+        </span>
+        <el-link
+          type="primary"
+          target="_blank"
+          href="https://www.kubecube.io/docs/installation-guide/install-on-k8s/install-member-by-helm/#卸载计算集群中的-warden"
+        >
+          文档链接
+        </el-link>
+        <span :class="$style.textspan">
+          来移除已纳管的计算集群。
+        </span>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -217,6 +241,7 @@ export default {
                 // { name: 'metadata.creationTimestamp', title: '创建时间' },
                 { name: 'operation', title: '操作', width: '160px' },
             ],
+            showDelete: false,
         };
     },
     computed: {
@@ -242,23 +267,8 @@ export default {
         refresh() {
             this.$refs.request.request();
         },
-        removeItem(item) {
-            this.$eConfirm({
-                title: '删除',
-                message: `确认要删除 ${item.clusterName} 吗？`,
-                ok: async () => {
-                    await workloadService.deleteClusterCRResource({
-                        pathParams: {
-                            cluster: this.controlClusterList[0].clusterName,
-                            group: 'cluster.kubecube.io',
-                            version: 'v1',
-                            plural: 'clusters',
-                            name: item.clusterName,
-                        },
-                    });
-                    this.refresh();
-                },
-            });
+        removeItem() {
+            this.showDelete = true;
         },
         editDomainSuffix(item) {
             this.$refs.domainSuffixDialog.open(item);
@@ -276,6 +286,12 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.noticeWrap {
+  display: flex;
+  align-items: center;
+}
+.noticeWrap .textspan {
+  flex-shrink: 0;
+}
 </style>

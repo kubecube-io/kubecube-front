@@ -7,7 +7,7 @@
       :close-on-click-modal="false"
     >
       <el-form
-        v-if="show"
+        v-if="show && isEdit"
         ref="form"
         :model="model"
         label-position="right"
@@ -114,7 +114,21 @@
           </div>
         </el-form-item>
       </el-form>
-      <div slot="footer">
+      <div
+        v-else-if="show"
+        :class="$style.noticeWrap"
+      >
+        <span :class="$style.textspan">
+          请参照
+        </span>
+        <el-link type="primary" target="_blank" href="https://www.kubecube.io/docs/installation-guide/install-on-k8s/install-member-by-helm/#通过-helm-在计算集群上安装-warden">
+          文档链接
+        </el-link>
+        <span :class="$style.textspan">
+          来纳管计算集群。
+        </span>
+      </div>
+      <div v-if="isEdit" slot="footer">
         <el-button @click="close">
           取 消
         </el-button>
@@ -127,120 +141,6 @@
         </el-button>
       </div>
     </el-dialog>
-    <!-- <u-modal
-      :title=" isEdit ? '修改集群': '添加集群' "
-      ok-button=""
-      cancel-button=""
-      :visible.sync="show"
-      size="large"
-      @close="close"
-    >
-      <validation-observer
-        ref="observer"
-        v-slot="{ invalid }"
-      >
-        <kube-form>
-          <kube-name-input
-            v-model="model.clusterName"
-            :disabled="isEdit"
-          />
-          <kube-form-item
-            label="描述"
-          >
-            <u-input
-              v-model="model.description"
-              size="large"
-              maxlength="128"
-              maxlength-message="128字符以内"
-              placeholder="128字符以内"
-            />
-          </kube-form-item>
-
-          <validation-provider
-            v-slot="{ errors }"
-            name="storage"
-            rules="required"
-          >
-            <kube-form-item
-              :message="uploadErrorMsg || (errors && errors[0])"
-              label="KubeConfig"
-              required
-            >
-              <div style="display:flex;align-items: center;">
-                <u-input
-                  v-model="model.kubeConfig"
-                  :color="(uploadErrorMsg || (errors && errors[0])) ? 'error' : ''"
-                  size="large"
-                  style="width: 350px;margin-right:10px"
-                  readonly
-                />
-                <u-uploader
-                  style="width: 80px"
-                  max-size="1MB"
-                  @before-send="onUpload($event)"
-                  @error="uploadError($event)"
-                >
-                  <u-link>选择文件</u-link>
-                </u-uploader>
-              </div>
-            </kube-form-item>
-          </validation-provider>
-
-          <validation-provider
-            v-slot="{ errors }"
-            name="storage"
-            rules="required"
-          >
-            <kube-form-item
-              :message="uploadErrorMsg || (errors && errors[0])"
-              label="网络类型"
-              required
-            >
-              <u-linear-layout
-                type="flex"
-                alignment="center"
-              >
-                <u-input
-                  v-if="otherNetworkType"
-                  v-model="model.networkType"
-                  size="large"
-                />
-                <u-select
-                  v-else
-                  v-model="model.networkType"
-                  :data="networkTypes"
-                  size="large"
-                />
-                <u-checkbox
-                  v-model="otherNetworkType"
-                  style="width: 80px"
-                >其他</u-checkbox>
-              </u-linear-layout>
-            </kube-form-item>
-          </validation-provider>
-          <u-submit-button
-            :click="submit.bind(this)"
-            place="right"
-          >
-            <template slot-scope="scope">
-              <u-linear-layout>
-                <u-button
-                  color="primary"
-                  :disabled="invalid || scope.submitting"
-                  :icon="scope.submitting ? 'loading' : ''"
-                  @click="scope.submit"
-                >
-                  确定
-                </u-button>
-                <u-button @click="close">
-                  取消
-                </u-button>
-              </u-linear-layout>
-            </template>
-          </u-submit-button>
-        </kube-form>
-      </validation-observer>
-    </u-modal> -->
   </div>
 </template>
 
@@ -358,6 +258,12 @@ export default {
 };
 </script>
 
-<style>
-
+<style module>
+.noticeWrap {
+  display: flex;
+  align-items: center;
+}
+.noticeWrap .textspan {
+  flex-shrink: 0;
+}
 </style>

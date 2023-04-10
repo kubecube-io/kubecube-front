@@ -145,6 +145,7 @@ export default {
         dynamicBlock,
     },
     mixins: [ makeVModelMixin ],
+    inject: [ 'elForm' ],
     props: {
         availables: Object,
         prefixProp: {
@@ -202,6 +203,15 @@ export default {
                 this.model.spec.hard['limitsMemory'] = val && /^[1-9][0-9]*$/.test(`${val}`) ? val * num : val
             },
         },
+    },
+    mounted() {
+        this.$watch('model.spec.hard', () => {
+            this.$nextTick(() => {
+                this.elForm && this.elForm.validate();
+            });
+        }, {
+            deep: true,
+        });
     },
     methods: {
         normalizeCore(d) {
