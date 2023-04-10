@@ -129,6 +129,9 @@ export default {
                     namespace: this.namespace,
                     resource: 'storageclasses',
                 },
+                params: {
+                    pageSize: 10000,
+                },
             };
         },
     },

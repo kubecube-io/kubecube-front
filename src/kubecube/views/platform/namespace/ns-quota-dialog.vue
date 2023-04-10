@@ -73,32 +73,36 @@
             :params="params"
             :processor="resolver"
           >
-            <el-form-item
-              label="计算资源"
-            >
-              <template v-if="model.pipe.cluster && model.pipe.tenant">
-                  <hardQuota
-                    v-model="model.resource"
-                    prefixProp="resource"
-                    :availables="availables"
-                  />
-              </template>
-            </el-form-item>
-            <el-form-item
-              label="存储资源"
-              prop="resource.spec.hard.storage"
-              :rules="[
-                validators.required(),
-                validators.consistofNumber(),
-                validators.numberBetween(0, availables.storage),
-              ]"
-            >
-              <el-input
-                v-model="model.resource.spec.hard.storage"
-                style="width: 200px"
-              />
-              <span style="line-height:32px;margin-left:8px">GiB</span>
-            </el-form-item>
+            <template slot-scope="{ loading }">
+                <el-form-item
+                label="计算资源"
+                >
+                <template v-if="model.pipe.cluster && model.pipe.tenant">
+                    <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
+                    <hardQuota
+                        v-else
+                        v-model="model.resource"
+                        prefixProp="resource"
+                        :availables="availables"
+                    />
+                </template>
+                </el-form-item>
+                <el-form-item
+                label="存储资源"
+                prop="resource.spec.hard.storage"
+                :rules="[
+                    validators.required(),
+                    validators.consistofNumber(),
+                    validators.numberBetween(0, availables.storage),
+                ]"
+                >
+                <el-input
+                    v-model="model.resource.spec.hard.storage"
+                    style="width: 200px"
+                />
+                <span style="line-height:32px;margin-left:8px">GiB</span>
+                </el-form-item>
+            </template>
           </x-request>
       </el-form>
     </kube-pipe>

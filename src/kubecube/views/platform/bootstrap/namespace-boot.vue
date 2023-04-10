@@ -62,30 +62,34 @@
         :params="params"
         :processor="resolver"
       >
-        <el-form-item
-          label="计算资源"
-        >
-          <hardQuota
-            v-model="model.resource"
-            prefixProp="resource"
-            :availables="model.availables"
-          />
-        </el-form-item>
-        <el-form-item
-          label="存储资源"
-          prop="resource.spec.hard.storage"
-          :rules="[
-            validators.required(),
-            validators.consistofNumber(),
-            validators.numberBetween(0, model.availables.storage),
-          ]"
-        >
-          <el-input
-            v-model="model.resource.spec.hard.storage"
-            style="width: 200px"
-          />
-          <span style="line-height:32px;margin-left:8px">GiB</span>
-        </el-form-item>
+        <template slot-scope="{ loading }">
+          <el-form-item
+            label="计算资源"
+          >
+            <i v-if="loading" class="el-icon-loading" style="font-size: 24px"/>
+            <hardQuota
+              v-else
+              v-model="model.resource"
+              prefixProp="resource"
+              :availables="model.availables"
+            />
+          </el-form-item>
+          <el-form-item
+            label="存储资源"
+            prop="resource.spec.hard.storage"
+            :rules="[
+              validators.required(),
+              validators.consistofNumber(),
+              validators.numberBetween(0, model.availables.storage),
+            ]"
+          >
+            <el-input
+              v-model="model.resource.spec.hard.storage"
+              style="width: 200px"
+            />
+            <span style="line-height:32px;margin-left:8px">GiB</span>
+          </el-form-item>
+        </template>
       </x-request>
       <el-form-item>
         <el-button type="primary" @click="submit" :loading="submitting">创 建</el-button>
