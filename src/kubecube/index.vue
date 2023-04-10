@@ -1,5 +1,5 @@
 <template>
-  <div :class="$style.container">
+  <div v-if="!roleLoading" :class="$style.container">
     <u-app-header :role-loading="roleLoading" />
     <div
       v-if="roleLoading"
@@ -17,6 +17,10 @@
     <termModal ref="termModal" style="z-index: 2000; position: relative"/>
     <yaml-dialog ref="yamlDialog" />
   </div>
+  <u-loading
+    v-else
+    size="huge"
+  />
 </template>
 
 <script>
