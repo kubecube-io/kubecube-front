@@ -66,18 +66,24 @@
           />
         </kube-form-item>
       </validation-provider>
-
-      <kube-form-item
-        label="项目描述"
+      <validation-provider
+        v-slot="{ errors }"
+        name="Description"
+        rules="required"
       >
-        <u-input
-          v-model="model.model.spec.description"
-          size="normal huge"
-          maxlength="32"
-          maxlength-message="不得超过 32 个字符"
-        />
-      </kube-form-item>
-
+        <kube-form-item
+          label="项目描述"
+          required
+          :message="errors && errors[0]"
+        >
+          <u-input
+            v-model="model.model.spec.description"
+            size="normal huge"
+            maxlength="32"
+            maxlength-message="不得超过 32 个字符"
+          />
+        </kube-form-item>
+      </validation-provider>
       <kube-form-item
         label="项目管理员"
         required
