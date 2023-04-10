@@ -1,3 +1,12 @@
+# V1.3.0
+## Bug fix
+- limiting cluster operations
+- alertmanagerConfig operating button cannot click issue
+- add logseer switch check
+- cluster params missing when control page refresh
+## Features
+- replace UI components
+- adapt to a new logging module
 # V1.2.0
 ## Bug fix
 ### Platform management
