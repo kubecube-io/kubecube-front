@@ -1,3 +1,15 @@
+# V1.3.0
+## Bug fix
+- limiting cluster operations
+- alertmanagerConfig operating button cannot click issue
+- add logseer switch check
+- cluster params missing when control page refresh
+## Features
+- replace UI components
+- adapt to a new logging module
+### Dependencies
+- [KubeCube v1.8.2](https://github.com/kubecube-io/KubeCube/tree/v1.8.2)
+- [WebConsole v1.3.0](https://github.com/kubecube-io/kubecube-webconsole/tree/v1.3.0)
 # V1.2.0
 ## Bug fix
 ### Platform management
