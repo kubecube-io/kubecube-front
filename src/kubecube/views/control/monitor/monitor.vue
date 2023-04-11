@@ -43,7 +43,7 @@
                 <template v-if="sources[v.name].length > 0">
                   <div>
                     <span :class="$style.occupation">{{ findLongest(sources[v.name]) }}</span>
-                    <el-select 
+                    <el-select
                         v-model="variableSelected[v.name]" 
                         placeholder="请选择"
                         style="width: 100%"
@@ -71,7 +71,7 @@
         </kube-pipe>
       </template>
     </div>
-    <template v-if="!pipeLoading">
+    <template v-if="!pipeLoading && startTime && endTime">
       <template v-for="row in rows">
         <div
             v-if="selectshowable ? row.panels.find(panel => panel.showPanel) : true"
@@ -161,7 +161,6 @@ export default {
         instance: Object,
     },
     data() {
-        const now = Date.now();
         return {
             // podService: workloadService.getAPIV1,
             queryService: monitorService.queryRange,
@@ -171,8 +170,8 @@ export default {
                 { name: '近1天', value: 1440 * 60 * 1000 },
                 // { name: '近7天', value: 10080 * 60 * 1000 },
             ],
-            startTime: (now - 30 * 60 * 1000),
-            endTime: now,
+            startTime: 0,
+            endTime: 0,
             timeType: 'quick',
             quickValue: 30 * 60 * 1000,
             title: '',

@@ -1,15 +1,21 @@
 <template>
-  <div v-if="!roleLoading" :class="$style.container">
-    <u-app-header :role-loading="roleLoading" />
+  <div>
     <div
-      v-if="roleLoading"
-      :class="$style.full"
+      :class="$style.container"
     >
-      <u-loading
-        size="huge"
-      />
+      <div
+        v-if="roleLoading"
+        :class="$style.full"
+      >
+        <u-loading
+          size="huge"
+        />
+      </div>
+      <template v-else>
+        <u-app-header :role-loading="roleLoading" />
+        <router-view />
+      </template>
     </div>
-    <router-view v-else />
     <u-confirm ref="confirm" />
     <kube-yaml-dialog ref="kubeyaml" />
     <global-error-modal ref="globalErrorModal" />
@@ -17,10 +23,6 @@
     <termModal ref="termModal" style="z-index: 2000; position: relative"/>
     <yaml-dialog ref="yamlDialog" />
   </div>
-  <u-loading
-    v-else
-    size="huge"
-  />
 </template>
 
 <script>
