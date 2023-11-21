@@ -51,7 +51,7 @@
           />
           <u-uploader
             :class="$style.uploader"
-            extensions="crt"
+            :extensions="[ 'pem', 'der', 'pfx', 'jks', 'kdb', 'cer', 'key', 'csr', 'crt', 'crl', 'ocsp', 'scep' ]"
             max-size="1MB"
             @before-send="onUpload($event, 'tls.crt')"
             @error="uploadError($event, 'tls.crt')"
@@ -71,7 +71,7 @@
           />
           <u-uploader
             :class="$style.uploader"
-            extensions="crt"
+            :extensions="[ 'pem', 'der', 'pfx', 'jks', 'kdb', 'cer', 'key', 'csr', 'crt', 'crl', 'ocsp', 'scep' ]"
             max-size="1MB"
             @before-send="onUpload($event, 'tls.key')"
             @error="uploadError($event, 'tls.key')"
@@ -155,7 +155,7 @@ export default {
         uploadError(e, key) {
             const ref = this.$refs[key];
             ref.color = 'error';
-            if (e.name === 'ExtensionError') { ref.innerText = `只能上传 ${e.extensions.join(', ')} 类型的文件！`; } else { ref.innerText = e.message; }
+            if (e.name === 'ExtensionError') { ref.innerText = `只能上传 ${e.extensions.join('、')} 文件！`; } else { ref.innerText = e.message; }
             this.model.dataSource[key] = '';
         },
         async submit() {
