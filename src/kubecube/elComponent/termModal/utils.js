@@ -46,7 +46,7 @@ class heartCheck {
 // }
 
 
-export function initSocket(getTerm, afterSocketOpen, processSocketMessage, doReconnect, enableHeartCheck, heartCheckInterval, sendHeartCheckSign, reconnectLimit = 4) {
+export function initSocket(getTerm, afterSocketOpen, processSocketMessage, doReconnect, enableHeartCheck, heartCheckInterval, sendHeartCheckSign, reconnectLimit = 4, forceClose) {
     let errorCount = 1;
     function connect(href) {
         const socket = new SockJS(href);
@@ -75,7 +75,11 @@ export function initSocket(getTerm, afterSocketOpen, processSocketMessage, doRec
                 }
             );
         };
-        socket.onclose = socket.onerror = function() {
+        socket.onclose = socket.onerror = function(event) {
+            if (event.type === 'close' && event.code === 1) {
+                forceClose();
+                return;
+            }
             if (hc) {
                 hc.reset();
             }

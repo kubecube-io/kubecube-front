@@ -146,10 +146,6 @@ export default {
                 console.log(msg);
                 switch (msg.Op) {
                     case 'stdout':
-                        if (msg.Data === '\r\n\u001b[?2004l\rexit\r\n') {
-                            this.forceClose();
-                            return;
-                        }
                         term.write(msg.Data);
                         break;
                     default:
@@ -185,7 +181,9 @@ export default {
                     () => this.doReconnect(),
                     enableHeartCheck,
                     heartCheckInterval,
-                    socket => this.sendHeartCheckSign(socket)
+                    socket => this.sendHeartCheckSign(socket),
+                    4,
+                    () => this.forceClose()
                 );
                 this.socketMeta = connect(href);
             } else {
