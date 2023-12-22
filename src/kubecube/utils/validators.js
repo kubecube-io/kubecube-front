@@ -331,11 +331,11 @@ export const consistoLetterNumbersUnderscores = required => {
     };
 };
 
-export const keyPattern = required => {
+export const keyPattern = isRequired => {
     return {
         trigger: [ 'blur', 'change' ],
         validator(rule, value, callback) {
-            if (!required && !value) {
+            if (!isRequired && !value) {
                 return callback();
             }
             const message = 'key 不合法';

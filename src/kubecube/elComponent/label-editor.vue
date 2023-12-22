@@ -34,7 +34,6 @@
           label=""
           :prop="`${prefixProp}.${index}.key`"
           :rules="[
-            validators.lengthBetween(1, 63, false),
             validators.keyPattern(false),
             validators.noRedundance(exsitKeys, false),
             ...(!noSystemKeyRule && !record.disabled ? [ validators.noSystemKey(false) ] : []),
