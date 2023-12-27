@@ -10,7 +10,7 @@ export function podService({
 }) {
     if (workload === 'deployments') {
         return async () => {
-            const response = await workloadService.getWorkloads({
+            const response = await workloadExtendService.getWorkloads({
                 pathParams: {
                     cluster,
                     namespace,
