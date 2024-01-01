@@ -1,8 +1,19 @@
 <template>
   <div>
     <el-form-item label="挂载数据卷">
-      <div style="color: #999;">RWO类型存储声明，不支持多副本挂载，请设置副本数为1</div>
+      <div v-if="tabs[activeIndex].tab === 'pvc'" style="color: #999;line-height:24px">
+        <div style="display:flex;align-items:center">
+          <span>
+            根据存储提供者不同，选择PVC支持的访问模式不同，具体规则参照
+          </span>
+          <el-link type="primary" style="margin-left:4px" href="https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/#access-modes" target="_blank">链接</el-link>
+        </div>
+        <div>
+          注:Kubernetes不对挂载选项执行合法性检查。如果挂载选项是非法的，挂载就会失败。
+        </div>
+      </div>
       <dynamicTab
+        :activeIndex.sync="activeIndex"
         :value="tabs"
         :showAddBtn="false"
         :showDeleteBtn="false"
@@ -131,6 +142,7 @@ export default {
     data() {
         return {
             validateStatus: {},
+            activeIndex: 0,
         };
     },
     watch: {

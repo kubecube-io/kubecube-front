@@ -28,7 +28,12 @@
             <el-tooltip class="item" effect="dark" content="pending中" placement="left" popper-class="ncs-el-tooltip-popper">
               <i class="el-icon-warning-outline" v-if="item.status.phase === 'Pending'" style="color: #FFA136"/>
             </el-tooltip>
-            {{item.text}}
+            <span style="display:inline-block;padding-right:4px">
+              {{item.text}}
+            </span>
+            <el-tag style="float: right;margin-top:5px" size="small">
+              {{getFunc(item, 'spec.accessModes[0]') | accessModeFilter}}
+            </el-tag>
           </el-option>
         </el-select>
       </template>
@@ -84,11 +89,22 @@
 import { makeVModelMixin } from 'kubecube/mixins/functional';
 import volumnMixin from './volumn-mixin';
 import * as validators from 'kubecube/utils/validators';
+import { get as getFunc } from 'lodash';
+import {
+    PVC_MODE_TEXT_MAP,
+} from 'kubecube/utils/constance';
+
 export default {
+    filters: {
+        accessModeFilter(val) {
+            return PVC_MODE_TEXT_MAP[val] || '-';
+        },
+    },
     mixins: [ makeVModelMixin, volumnMixin ],
     data: () => ({
         validators,
         resource: 'persistentvolumeclaims',
+        getFunc,
     }),
     methods: {
         getDataTemplate() {
