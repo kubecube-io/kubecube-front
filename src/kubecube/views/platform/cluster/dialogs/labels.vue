@@ -50,7 +50,7 @@ export default {
             const labels = get(item, 'metadata.labels', []);
             this.model.labels = labels.map(i => ({
                 ...i,
-                disabled: ignoredKeys.some(k => i.key.startsWith(k)),
+                disabled: ignoredKeys.some(k => k.test(i.key)),
             }));
 
             this.raw = cloneDeep(item);

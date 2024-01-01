@@ -113,7 +113,7 @@ export const CEPH_TYPE_MAP = {
     'ceph.com/rbd': 'CephRbd',
 };
 
-export const ignoredKeys = [ 'system', 'kubernetes.io', 'beta.kubernetes.io', 'cicd.skiff.netease.com' ];
+export const ignoredKeys = [ /^system/, /^kubernetes\.io/, /^beta\.kubernetes\.io/, /^cicd\.skiff\.netease\.com/, /\.kubecube\.io/, /^kubecube\.io/ ];
 
 export const PORTS = [
     { text: 80, value: 80 },

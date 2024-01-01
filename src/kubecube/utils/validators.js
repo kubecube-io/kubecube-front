@@ -367,7 +367,7 @@ export const noSystemKey = required => {
                 return callback();
             }
             const message = '不能使用系统标签';
-            if (ignoredKeys.some(item => value.startsWith(item))) {
+            if (ignoredKeys.some(item => item.test(value))) {
                 callback(new Error(message));
             } else {
                 callback();

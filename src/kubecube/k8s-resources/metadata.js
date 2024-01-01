@@ -20,7 +20,7 @@ export const toPlainObject = (model, mode = 'normal') => {
         annotations: toObjectArray(g('metadata.annotations', {}), 'key', 'value'), // 注释
         labels: toObjectArray(g('metadata.labels', {}), 'key', 'value').map(i => ({ // 标签
             ...i,
-            disabled: ignoredKeys.some(k => i.key.startsWith(k)),
+            disabled: ignoredKeys.some(k => k.test(i.key)),
         })).sort((a, b) => (a.disabled ? -1 : 1)),
         pureLabels: g('metadata.labels', {}), // 原始标签
         resourceVersion: g('metadata.resourceVersion'), // 资源版本

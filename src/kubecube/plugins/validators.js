@@ -159,7 +159,7 @@ export const rules = {
     },
 
     noSystemKey: {
-        validate: v => !ignoredKeys.some(item => v.startsWith(item)),
+        validate: v => !ignoredKeys.some(item => item.test(v)),
         message: '不能使用系统标签',
     },
 
