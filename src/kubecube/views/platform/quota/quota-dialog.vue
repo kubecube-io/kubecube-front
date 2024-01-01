@@ -33,6 +33,7 @@
               validators.required(),
               validators.consistofNumber(),
               validators.numberBetween(0),
+              validators.lengthBetween(1, 12),
             ]"
           >
             <el-input v-model="model.spec.hard['requestsStorage']" style="width: 300px"/>

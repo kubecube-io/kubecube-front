@@ -106,7 +106,7 @@
             validators.consistofNumber(),
             validators.greateThenEqual(model.spec.hard['requestsCpu'], '上限资源应大于等于请求资源'),
             validators.numberBetween(0),
-            validators.lengthBetween(1, 20)
+            validators.lengthBetween(1, 15)
           ]"
         >
           <div :class="$style.unitInputWrap">
@@ -122,7 +122,7 @@
             validators.consistofNumber(),
             validators.greateThenEqual(requestsMemory, '上限资源应大于等于请求资源'),
             validators.numberBetween(0),
-            validators.lengthBetween(1, memoryUnit === 'Gi' ? 17 : 20)
+            validators.lengthBetween(1, memoryUnit === 'Gi' ? 12 : 15)
           ]"
         >
           <div :class="$style.unitInputWrap">

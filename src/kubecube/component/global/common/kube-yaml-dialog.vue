@@ -8,7 +8,7 @@
       :close-on-click-modal="false"
     >
       <div
-        v-if="!fullScreen"
+        v-if="!fullScreen && show"
         :class="$style.editor"
       >
         <div :class="$style.header">

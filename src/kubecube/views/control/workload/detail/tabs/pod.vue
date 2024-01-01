@@ -30,13 +30,13 @@
           prop="status.podIP"
           label="IP"
           :show-overflow-tooltip="true"
-          width="100"
+          width="120"
         />
         <el-table-column
           prop="status.hostIP"
           label="所在节点IP"
           :show-overflow-tooltip="true"
-          width="100"
+          width="120"
         >
           <template slot-scope="{ row }">
             <el-link
