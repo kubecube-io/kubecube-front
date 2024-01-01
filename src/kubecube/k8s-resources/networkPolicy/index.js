@@ -116,9 +116,9 @@ function resolve2SelectionArray(target) {
     return 'all';
 }
 
-function resolve3Selection(target, dir) {
+function resolve3Selection(target, dir, ports) {
     if (!target) return 'none';
-    if ((dir || []).length > 0) {
+    if ((dir || []).length > 0 || (ports || []).length > 0) {
         return 'regular';
     }
     return 'all';
@@ -129,20 +129,20 @@ function resolveSpec(model) {
     return {
         ingress: {
             from: resolveNetworkPeer(g('spec.ingress[0].from') || []),
-            ports: (g('spec.ingress.ports') || []).map(p => ({ ...p, port: +p.port })),
+            ports: (g('spec.ingress[0].ports') || []).map(p => ({ ...p, port: +p.port })),
         },
         egress: {
             to: resolveNetworkPeer(g('spec.egress[0].to') || []),
-            ports: (g('spec.egress.ports') || []).map(p => ({ ...p, port: +p.port })),
+            ports: (g('spec.egress[0].ports') || []).map(p => ({ ...p, port: +p.port })),
         },
         podSelector: resolveLabelSelector(g('spec.podSelector') || {}),
 
         selections: {
             target: resolve2Selection(g('spec.podSelector')),
-            insource: resolve3Selection(g('spec.ingress[0]'), g('spec.ingress[0].from')),
-            inport: resolve2SelectionArray(g('spec.ingress.ports')),
-            outsource: resolve3Selection(g('spec.egress[0]'), g('spec.egress[0].to')),
-            outport: resolve2SelectionArray(g('spec.ingress.ports')),
+            insource: resolve3Selection(g('spec.ingress[0]'), g('spec.ingress[0].from'), g('spec.ingress[0].ports')),
+            inport: resolve2SelectionArray(g('spec.ingress[0].ports')),
+            outsource: resolve3Selection(g('spec.egress[0]'), g('spec.egress[0].to'), g('spec.egress[0].ports')),
+            outport: resolve2SelectionArray(g('spec.egress[0].ports')),
         },
     };
 }
