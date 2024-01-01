@@ -62,7 +62,12 @@
             :placeholder="getPlaceholder(record.operator)"
           />
         </el-form-item>
-        <div v-else></div>
+        <div v-else>
+          <el-input
+            disabled
+            placeholder="不需要填Values"
+          />
+        </div>
       </template>
     </dynamicBlock>
   </div>

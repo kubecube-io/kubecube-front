@@ -3,7 +3,8 @@
     <dynamicCard
       v-model="model"
       :getDefaultItem="getTemplate"
-
+      :miniFormatter="miniFormatter"
+      :validateFile="prefixProp"
     >
       <template slot-scope="{ item: dataModel, index: dataIndex }">
         <el-form-item
@@ -54,6 +55,7 @@
           </el-radio-group>
           <regular-input
             v-if="dataModel.namespaceSelector.enable"
+            isRequired
             v-model="dataModel.namespaceSelector.matchExpressions"
             :prefixProp="`${prefixProp}.${dataIndex}.namespaceSelector.matchExpressions`"
           />
@@ -68,6 +70,7 @@
           </el-radio-group>
           <regular-input
             v-if="dataModel.podSelector.enable"
+            isRequired
             v-model="dataModel.podSelector.matchExpressions"
             :prefixProp="`${prefixProp}.${dataIndex}.podSelector.matchExpressions`"
           />
@@ -110,6 +113,9 @@ export default {
         };
     },
     methods: {
+        miniFormatter(item) {
+            return `CIDR:${item.ipBlock.enable && item.ipBlock.cidr || ' - '} 空间规则:${item.namespaceSelector.enable ? item.namespaceSelector.matchExpressions.length : 0} 副本规则:${item.podSelector.enable ? item.podSelector.matchExpressions.length : 0}`;
+        },
         getTemplate() {
             return {
                 ipBlock: {

@@ -51,9 +51,9 @@
           />
           <el-table-column
             prop="status.cpuUsage"
-            label="CPU 使用量"
+            label="CPU 请求使用量"
             :show-overflow-tooltip="true"
-            width="100"
+            width="110"
           >
             <template slot-scope="{ row }">
               {{ row.status.cpuUsage && row.status.cpuUsage.toFixed(2) }} Cores
@@ -61,9 +61,9 @@
           </el-table-column>
           <el-table-column
             prop="status.memoryUsage"
-            label="内存使用量"
+            label="内存请求使用量"
             :show-overflow-tooltip="true"
-            width="100"
+            width="110"
           >
             <template slot-scope="{ row }">
               {{ row.status.memoryUsage && row.status.memoryUsage.toFixed(2)  }} Mi

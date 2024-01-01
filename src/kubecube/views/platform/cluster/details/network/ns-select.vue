@@ -51,6 +51,9 @@ export default {
                 pathParams: {
                     cluster: this.cluster,
                 },
+                params: {
+                    pageSize: 1000,
+                },
             });
             this.list = (getFunc(response, 'items') || []).map(i => {
                 const name = getFunc(i, 'metadata.name');

@@ -38,8 +38,8 @@ export function toPlainObject(model) {
             return {
                 ...status,
                 restartCount: (g('status.containerStatuses') || []).reduce((a, i) => a + i.restartCount, 0),
-                cpuUsage,
-                memoryUsage,
+                cpuUsage: Number(cpuUsage),
+                memoryUsage: Number(memoryUsage),
                 // cpuUsage: containers.reduce((a, i) => a + get(i, 'resources.cpu', 0), 0),
                 // memoryUsage: containers.reduce((a, i) => a + get(i, 'resources.memory', 0), 0),
             };
