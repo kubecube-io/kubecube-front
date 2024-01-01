@@ -41,9 +41,10 @@
                   validators.startsWithLetter(false),
                   validators.keyPattern(false),
                   validators.noRedundance(blockModel.rules.map(r => r.key), false),
+                  ...(type === 'nodeAffinity' && !ruleModel.disabled ? [ validators.noAffinityNodeSystemKey() ] : [])
                 ]"
               >
-                <el-input v-model="ruleModel.key"/>
+                <el-input v-model="ruleModel.key" :disabled="ruleModel.disabled"/>
               </el-form-item>
             </template>
             <template v-slot:operator="{record: ruleModel}">
@@ -51,6 +52,7 @@
                 v-model="ruleModel.operator"
                 :data="operators"
                 placeholder="请选择"
+                :disabled="ruleModel.disabled"
               >
                 <el-option
                   v-for="item in operators"
@@ -78,6 +80,7 @@
                 <el-input
                   v-else
                   v-model="ruleModel.value"
+                  :disabled="ruleModel.disabled"
                 />
               </el-form-item>
             </template>

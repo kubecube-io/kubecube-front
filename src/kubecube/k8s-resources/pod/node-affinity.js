@@ -9,9 +9,8 @@ import {
 export const toPlainObject = model => {
     const g = getFromModel(model);
     const list = g('requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms', []);
-
     return list.map(t => ({
-        rules: resolveLableSelector(t.matchExpressions || []),
+        rules: resolveLableSelector(t.matchExpressions || [], true).sort(a => (a.disabled ? -1 : 1)),
     }));
 };
 

@@ -1,4 +1,4 @@
-import { ignoredKeys } from 'kubecube/utils/constance';
+import { ignoredKeys, affinityNodeKeys } from 'kubecube/utils/constance';
 import cronValidate from 'node-cron/src/pattern-validation';
 import YAML from 'yaml';
 export const k8sResourceNameValidator = () => {
@@ -861,3 +861,19 @@ export const requiredLetterNumbers = required => {
     };
 };
 
+export const noAffinityNodeSystemKey = required => {
+    return {
+        trigger: [ 'blur', 'change' ],
+        validator(rule, value, callback) {
+            if (!required && !value) {
+                return callback();
+            }
+            const message = '不能使用系统标签';
+            if (affinityNodeKeys.some(item => item.test(value))) {
+                callback(new Error(message));
+            } else {
+                callback();
+            }
+        },
+    };
+};

@@ -1,4 +1,5 @@
 export const operators = [ 'In', 'NotIn', 'Exists', 'DoesNotExist', 'Gt', 'Lt' ];
+import { affinityNodeKeys } from 'kubecube/utils/constance';
 
 export const getDefaultAffinity = (type, namespace) => {
     if (type === 'nodeAffinity') {
@@ -19,10 +20,13 @@ export const getDefaultAffinityRule = () => ({
     value: '',
 });
 
-export const resolveLableSelector = labelSelector => labelSelector.map(r => ({
-    ...r,
-    value: (r.values || []).join(' '),
-}));
+export const resolveLableSelector = (labelSelector, isNode) => labelSelector.map(r => {
+    return {
+        ...r,
+        value: (r.values || []).join(' '),
+        disabled: isNode ? affinityNodeKeys.some(item => item.test(r.key)) : false,
+    }
+});
 
 export const refactLableSelector = labelSelector => {
     const r = [];

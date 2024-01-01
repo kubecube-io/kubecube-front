@@ -115,6 +115,12 @@ export const CEPH_TYPE_MAP = {
 
 export const ignoredKeys = [ /^system/, /^kubernetes\.io/, /^beta\.kubernetes\.io/, /^cicd\.skiff\.netease\.com/, /\.kubecube\.io/, /^kubecube\.io/ ];
 
+export const affinityNodeKeys = [
+    /^node\.kubecube\.io\/ns$/,
+    /^node\.kubecube\.io\/tenant$/,
+    /^system\/tenant$/,
+];
+
 export const PORTS = [
     { text: 80, value: 80 },
     { text: 443, value: 443 },
