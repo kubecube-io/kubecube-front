@@ -15,7 +15,7 @@
           show-icon
           :closable="false"
         />
-        <div style="margin-bottom: 20px">
+        <div style="margin-bottom: 12px">
           <div style="display: flex; justify-content: flex-end">
             <u-uploader
               :class="$style.uploader"
@@ -254,7 +254,13 @@ export default {
                     console.log(err);
                     // 二次校验
                     try {
-                        YAML.parse(value);
+                        if (value.includes('\n---')) {
+                            value.split('\n---').forEach(item => {
+                                return YAML.parse(item);
+                            });
+                        } else {
+                            YAML.parse(value);
+                        }
                     } catch (e) {
                         const { parsedLine, snippet } = err;
                         this.yamlErrorTip = `第${parsedLine}行解析错误："${snippet}"`;
@@ -366,10 +372,14 @@ export default {
                 this.yamlErrorTip = '';
                 // let content = this.editor.getModel().getValue();
                 let content = this.yamlContent;
-
-                // content = yamljs.parse(content);
-                content = YAML.parse(content);
-
+                let objects = [];
+                if (content.includes('\n---')) {
+                    objects = content.split('\n---').map(item => {
+                        return YAML.parse(item);
+                    }).filter(item => item);
+                } else {
+                    objects = [ YAML.parse(content) ];
+                }
                 await workloadExtendService.deploy({
                     pathParams: {
                         cluster: this.cluster,
@@ -377,7 +387,9 @@ export default {
                     params: {
                         ...(dryRun === true ? { dryRun: true } : {}),
                     },
-                    data: content,
+                    data: {
+                        objects,
+                    },
                     noAlert: true,
                 });
                 if (dryRun === true) {
