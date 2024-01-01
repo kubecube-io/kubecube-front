@@ -89,7 +89,7 @@
             <template slot-scope="{ row }">
               <template v-if="row.resourceQuato">
                 <div>{{ row.resourceQuato.used['requests.cpu'] | clusterCpu }} / {{row.resourceQuato.hard['requests.cpu'] | clusterCpu }} Cores</div>
-                <div>{{ row.resourceQuato.used['requests.memory'] | clusterMemory }} / {{ row.resourceQuato.hard['requests.memory'] | clusterMemory }} Gi</div>
+                <div>{{ row.resourceQuato.used['requests.memory'] | clusterMemory }} / {{ row.resourceQuato.hard['requests.memory'] | clusterMemory }} GiB</div>
                 <div>{{ row.resourceQuato.used['requests.nvidia.com/gpu'] }} / {{ row.resourceQuato.hard['requests.nvidia.com/gpu'] }} Cores</div>
               </template>
               <div v-else>
@@ -106,7 +106,7 @@
             <template slot-scope="{ row }">
               <template v-if="row.resourceQuato">
                 <div>{{ row.resourceQuato.used['limits.cpu'] | clusterCpu }} / {{row.resourceQuato.hard['limits.cpu'] | clusterCpu }} Cores</div>
-                <div>{{ row.resourceQuato.used['limits.memory'] | clusterMemory }} / {{ row.resourceQuato.hard['limits.memory'] | clusterMemory }} Gi</div>
+                <div>{{ row.resourceQuato.used['limits.memory'] | clusterMemory }} / {{ row.resourceQuato.hard['limits.memory'] | clusterMemory }} GiB</div>
                 <div>-</div>
               </template>
               <div v-else>
@@ -200,10 +200,10 @@ export default {
     },
     filters: {
         clusterCpu(cpu) {
-            return unitConvertCPU(`${cpu}`); // m -> plain
+            return Number(unitConvertCPU(`${cpu}`)).toFixed(2); // m -> plain
         },
         clusterMemory(memory) {
-            return Number(`${unitConvertMemory(memory, 'Gi')}`).toFixed(3); // Mi --> Gi
+            return Number(`${unitConvertMemory(memory, 'Gi')}`).toFixed(2); // Mi --> Gi
         },
     },
     data() {

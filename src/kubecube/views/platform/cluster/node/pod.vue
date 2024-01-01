@@ -63,7 +63,7 @@
             width="110"
           >
             <template slot-scope="{ row }">
-              {{ row.status.memoryUsage && row.status.memoryUsage.toFixed(2)  }} Mi
+              {{ row.status.memoryUsage && row.status.memoryUsage.toFixed(2)  }} MiB
             </template>
           </el-table-column>
           <el-table-column

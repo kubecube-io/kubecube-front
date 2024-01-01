@@ -62,8 +62,8 @@
                v-model="memoryUnit"
               :class="$style.unitSelect"
             >
-              <el-option label="Mi" value="Mi"/>
-              <el-option label="Gi" value="Gi"/>
+              <el-option label="MiB" value="MiB"/>
+              <el-option label="GiB" value="GiB"/>
             </el-select>
           </div>
           <div :class="$style.availableText">可分配 {{ memoryTransform(availableMemory) }} / {{ memoryTransform(availables.memory) }} {{memoryUnit}}</div>
@@ -120,8 +120,8 @@
                v-model="memoryUnit"
               :class="$style.unitSelect"
             >
-              <el-option label="Mi" value="Mi"/>
-              <el-option label="Gi" value="Gi"/>
+              <el-option label="MiB" value="MiB"/>
+              <el-option label="GiB" value="GiB"/>
             </el-select>
           </div>
           <div :class="$style.availableText">可分配 {{ memoryTransform(availableLimitsMemory) }} / {{ memoryTransform(availables.limitsMemory) }} {{memoryUnit}}</div>
@@ -155,7 +155,7 @@ export default {
     },
     data() {
         return {
-            memoryUnit: 'Gi',
+            memoryUnit: 'GiB',
             validators,
         };
     },
@@ -181,25 +181,25 @@ export default {
         // },
         requestsMemory: {
             get() {
-                const num = this.memoryUnit === 'Gi' ? 1024 : 1;
+                const num = this.memoryUnit === 'GiB' ? 1024 : 1;
                 const val = this.model.spec.hard['memory'];
                 this.model.requestsMemory = val && /^[1-9][0-9]*$/.test(`${val}`) ? val / num : val;
                 return this.model.requestsMemory;
             },
             set(val) {
-                const num = this.memoryUnit === 'Gi' ? 1024 : 1;
+                const num = this.memoryUnit === 'GiB' ? 1024 : 1;
                 this.model.spec.hard['memory'] = val && /^[1-9][0-9]*$/.test(`${val}`) ? val * num : val
             },
         },
         limitsMemory: {
             get() {
-                const num = this.memoryUnit === 'Gi' ? 1024 : 1;
+                const num = this.memoryUnit === 'GiB' ? 1024 : 1;
                 const val = this.model.spec.hard['limitsMemory'];
                 this.model.limitsMemory = val && /^[1-9][0-9]*$/.test(`${val}`) ? val / num : val;
                 return this.model.limitsMemory;
             },
             set(val) {
-                const num = this.memoryUnit === 'Gi' ? 1024 : 1;
+                const num = this.memoryUnit === 'GiB' ? 1024 : 1;
                 this.model.spec.hard['limitsMemory'] = val && /^[1-9][0-9]*$/.test(`${val}`) ? val * num : val
             },
         },
@@ -218,7 +218,7 @@ export default {
             return d / 1000;
         },
         memoryTransform(val) {
-            if (this.memoryUnit === 'Gi') {
+            if (this.memoryUnit === 'GiB') {
                 return (val / 1024).toFixed(2);
             }
             return val;
@@ -335,7 +335,7 @@ tr.thead > th {
   display: none;
 }
 .unitSelect :global(.el-input__inner){
-  padding: 0 4px;
+  padding: 0 4px !important;
   border-left: none;
 }
 </style>

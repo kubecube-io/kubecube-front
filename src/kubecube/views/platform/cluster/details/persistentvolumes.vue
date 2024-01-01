@@ -62,7 +62,11 @@
             prop="spec.capacity.storage"
             label="容量"
             :show-overflow-tooltip="true"
-          />
+          >
+            <template slot-scope="{ row }">
+              {{ row.spec.capacity.storage | memoryFilter }} GiB
+            </template>
+          </el-table-column>
           <el-table-column
             prop="spec.claimRef.name"
             label="声明"
@@ -122,12 +126,17 @@ import {
     CEPH_TYPE_MAP,
 } from 'kubecube/utils/constance';
 import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
+import { unitConvertMemory } from 'kubecube/utils/functional';
 
 export default {
     filters: {
         cephTypeText(val) {
             return CEPH_TYPE_MAP[val] || val || '-';
         },
+        memoryFilter(memory) {
+            return Number(`${unitConvertMemory(`${memory}`, 'Gi')}`).toFixed(2); // Mi --> Gi
+        },
+
     },
     components: {
         taintDialog,

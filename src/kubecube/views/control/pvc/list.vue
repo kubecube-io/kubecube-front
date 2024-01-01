@@ -80,7 +80,7 @@
               width="100"
             >
               <template slot-scope="{ row }">
-                {{ getFun(row, 'spec.resources.requests.storage', '-') }}
+                {{ getFun(row, 'spec.resources.requests.storage', '-') | memoryFilter }}
               </template>
             </el-table-column>
             <el-table-column
@@ -90,7 +90,7 @@
               width="100"
             >
               <template slot-scope="{ row }">
-                {{ getFun(row, 'status.capacity.storage', '-') }}
+                {{ getFun(row, 'status.capacity.storage', '-') | memoryFilter }}
               </template>
             </el-table-column>
             <el-table-column
@@ -184,6 +184,7 @@ import {
 } from 'kubecube/utils/constance';
 import createPvcDialog from './create-pvc-dialog.vue';
 import inputSearch from 'kubecube/elComponent/inputSearch/index.vue';
+import { unitConvertMemory } from 'kubecube/utils/functional';
 
 export default {
     metaInfo: {
@@ -193,6 +194,12 @@ export default {
     filters: {
         accessModeFilter(val) {
             return val[0] ? PVC_MODE_TEXT_MAP[val[0]] : '-';
+        },
+        memoryFilter(memory) {
+            if (memory === '-') {
+                return '-';
+            }
+            return Number(`${unitConvertMemory(`${memory}`, 'Gi')}`).toFixed(2) + ' GiB'; // Mi --> Gi
         },
     },
     components: {

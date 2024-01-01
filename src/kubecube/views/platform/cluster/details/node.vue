@@ -71,7 +71,7 @@
             width="80"
           >
             <template slot-scope="{ row }">
-              {{ row.status.capacity.memory | memoryFilter }} Gi
+              {{ row.status.capacity.memory | memoryFilter }} GiB
             </template>
           </el-table-column>
           <el-table-column
@@ -227,10 +227,10 @@ export default {
     },
     filters: {
         cpuFilter(cpu) {
-            return unitConvertCPU(`${cpu}`); // m -> plain
+            return Number(unitConvertCPU(`${cpu}`)).toFixed(2); // m -> plain
         },
         memoryFilter(memory) {
-            return Number(`${unitConvertMemory(`${memory}`, 'Gi')}`).toFixed(3); // Mi --> Gi
+            return Number(`${unitConvertMemory(`${memory}`, 'Gi')}`).toFixed(2); // Mi --> Gi
         },
         nodeStatusFilter(val) {
             return nodeStatusMap[val] || val || '-';

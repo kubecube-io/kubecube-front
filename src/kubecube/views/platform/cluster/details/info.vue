@@ -54,10 +54,10 @@ export default {
             return CLUSTER_STATUS_MAP[status] || '-';
         },
         clusterCpu(cpu) {
-            return unitConvertCPU(`${cpu}m`); // m -> plain
+            return Number(unitConvertCPU(`${cpu}m`)).toFixed(2); // m -> plain
         },
         clusterMemory(memory) {
-            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(3); // Mi --> Gi
+            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(2); // Mi --> Gi
         },
     },
     props: {

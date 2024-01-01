@@ -82,7 +82,7 @@
             width="120"
           >
             <template slot-scope="{ row }">
-              {{ row.usedMem | clusterMemory }} / {{ row.totalMem | clusterMemory }} Gi
+              {{ row.usedMem | clusterMemory }} / {{ row.totalMem | clusterMemory }} GiB
             </template>
           </el-table-column>
           <el-table-column
@@ -202,10 +202,10 @@ export default {
     },
     filters: {
         clusterCpu(cpu) {
-            return unitConvertCPU(`${cpu}m`); // m -> plain
+            return Number(unitConvertCPU(`${cpu}m`)).toFixed(2); // m -> plain
         },
         clusterMemory(memory) {
-            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(3); // Mi --> Gi
+            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(2); // Mi --> Gi
         },
         statusFilter(val) {
             switch (val) {

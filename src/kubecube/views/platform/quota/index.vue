@@ -67,7 +67,7 @@
             <template slot-scope="{ row }">
               <template v-if="row.cuberesourcequota">
                 <div>{{ row.cuberesourcequota.status.used.cpu }} / {{row.cuberesourcequota.status.hard.cpu }} Cores</div>
-                <div>{{ row.cuberesourcequota.status.used.memory | clusterMemory }} / {{ row.cuberesourcequota.status.hard.memory | clusterMemory }} Gi</div>
+                <div>{{ row.cuberesourcequota.status.used.memory | clusterMemory }} / {{ row.cuberesourcequota.status.hard.memory | clusterMemory }} GiB</div>
                 <div>{{ row.cuberesourcequota.status.used.gpu }} / {{ row.cuberesourcequota.status.hard.gpu }} Cores</div>
               </template>
               <div v-else>
@@ -84,7 +84,7 @@
             <template slot-scope="{ row }">
               <template v-if="row.cuberesourcequota">
                 <div>{{ row.cuberesourcequota.status.used.limitsCpu }} / {{ row.cuberesourcequota.status.hard.limitsCpu }} Cores</div>
-                <div>{{ row.cuberesourcequota.status.used.limitsMemory | clusterMemory }} / {{ row.cuberesourcequota.status.hard.limitsMemory | clusterMemory }} Gi</div>
+                <div>{{ row.cuberesourcequota.status.used.limitsMemory | clusterMemory }} / {{ row.cuberesourcequota.status.hard.limitsMemory | clusterMemory }} GiB</div>
                 <div>-</div>
               </template>
               <div v-else>
@@ -146,7 +146,7 @@ export default {
             return unitConvertCPU(`${cpu}m`); // m -> plain
         },
         clusterMemory(memory) {
-            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(3); // Mi --> Gi
+            return Number(`${unitConvertMemory(`${memory}Mi`, 'Gi')}`).toFixed(2); // Mi --> Gi
         },
     },
     data() {

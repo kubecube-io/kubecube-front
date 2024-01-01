@@ -3,7 +3,7 @@ export default {
         return {
             pagenation: {
                 pageNum: 1,
-                pageSize: 10,
+                pageSize: 20,
                 sortOrder: '',
                 sortName: undefined,
                 selector: '',
