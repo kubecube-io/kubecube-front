@@ -102,9 +102,6 @@ import roleBindingService from 'kubecube/services/role-binding';
 import PageMixin from 'kubecube/mixins/pagenation';
 import memberDialog from './member-dialog.vue';
 // import UserUploadDialog from './user-upload-dialog.vue';
-import {
-    toPlainObject,
-} from 'kubecube/k8s-resources/rolebinding/rolebinding';
 import kubeTenantSelect from 'kubecube/component/global/common/kube-tenant-select.vue';
 import kubeProjectSelect from 'kubecube/component/global/common/kube-project-select.vue';
 import kubeRoleSelect from 'kubecube/component/global/common/kube-role-select.vue';
@@ -126,9 +123,9 @@ export default {
             project: null,
             role: null,
             pipeLoading: true,
-            service: roleBindingService.getRoleBindings,
+            service: userService.getMembers,
             columns: [
-                { name: 'user', title: '账号' },
+                { name: 'metadata.name', title: '账号' },
                 { name: 'role', title: '角色' },
                 { name: 'tenant', title: '所属租户' },
                 { name: 'project', title: '所属项目' },
@@ -147,19 +144,17 @@ export default {
         },
         params() {
             const params = {
-                selector: `roleRef.name=${this.role.value}`,
+              role: this.role.value,
             };
-            const namespace = getFunc(this.project, 'spec.namespace') || getFunc(this.tenant, 'spec.namespace');
             if (getFunc(this.tenant, 'value')) {
-                params.selector += `,metadata.labels.kubecube.io/tenant=${this.tenant.value}`;
+              params.scopetype = 'tenant';
+              params.scopename = this.tenant.value;
             }
             if (getFunc(this.project, 'value')) {
-                params.selector += `,metadata.labels.kubecube.io/project=${this.project.value}`;
+              params.scopetype = 'project';
+              params.scopename = this.project.value;
             }
             return {
-                pathParams: {
-                    namespace,
-                },
                 params,
             };
         },
@@ -170,9 +165,16 @@ export default {
         },
     },
     methods: {
+        toUserPlainObject(item) {
+          return {
+            metadata: item.metadata,
+            role: this.role.value,
+            ...getFunc(item, 'status.belongProjectInfos[0]', {})
+          };
+        },
         resolver(result) {
             const r = {
-                list: (getFunc(result, 'items') || []).map(i => toPlainObject(i)),
+                list: (getFunc(result, 'items') || []).map(i => this.toUserPlainObject(i)),
                 total: getFunc(result, 'total', 0),
             };
             this.list = r.list;
@@ -202,11 +204,19 @@ export default {
                 title: '删除',
                 content: `确认要删除 ${item.metadata.name} 吗？`,
                 ok: async () => {
-                    await userService.deleteRoleBinding({
-                        params: {
-                            namespace: item.metadata.namespace,
-                            name: item.metadata.name,
-                        },
+                    const params = {
+                        user: item.metadata.name,
+                    };
+                    if (getFunc(this.tenant, 'value')) {
+                        params.scopetype = 'tenant';
+                        params.scopename = this.tenant.value;
+                    }
+                    if (getFunc(this.project, 'value')) {
+                        params.scopetype = 'project';
+                        params.scopename = this.project.value;
+                    }
+                    await userService.deleteMember({
+                        params
                     });
                     this.refresh();
                 },

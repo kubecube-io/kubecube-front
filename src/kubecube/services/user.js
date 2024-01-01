@@ -110,6 +110,14 @@ const userService = Service({
             method: 'post',
             url: '/authorization/resources',
         },
+        getMembers: {
+            method: 'get',
+            url: '/authorization/members',
+        },
+        deleteMember: {
+            method: 'delete',
+            url: '/authorization/members',
+        }
     },
 });
 
