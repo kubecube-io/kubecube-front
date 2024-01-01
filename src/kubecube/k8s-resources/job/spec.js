@@ -20,7 +20,7 @@ export const toPlainObject = (model, containers, podTemplate) => {
         completions: g('spec.completions', 1), // 预期成功执行数
         parallelism: g('spec.parallelism', 1), // 并行数
         activeDeadlineSeconds: g('spec.activeDeadlineSeconds'), // 超时时间
-        backoffLimit: g('spec.backoffLimit', 6), // 重试次数
+        backoffLimit: g('spec.backoffLimit', 1), // 重试次数
         matchLabels: toObjectArray(g('spec.selector.matchLabels', {}), 'key', 'value'),
     };
 };

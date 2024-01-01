@@ -21,8 +21,17 @@
           <tenant-select v-model="model.spec.level.tenant" :disabled="isEdit"/>
         </el-form-item>
       </template>
-      <el-form-item label="副本数" v-if="!['cronjobs', 'jobs', 'daemonsets'].includes(workload)">
-        <el-input-number v-model="model.spec.replicas" controls-position="right" :min="0" style="width: 300px;"/>
+      <el-form-item 
+        label="副本数" 
+        v-if="!['cronjobs', 'jobs', 'daemonsets'].includes(workload)"
+        prop="spec.replicas"
+        :rules="[
+            validators.required(),
+            validators.lessThenEqual(100),
+        ]"
+
+      >
+        <el-input-number v-model="model.spec.replicas" controls-position="right" :min="0" step-strictly :step="1" style="width: 300px;"/>
         <span style="margin-left:8px">个</span>
       </el-form-item>
       <template v-if="workload === 'statefulsets'">
@@ -71,6 +80,7 @@ export default {
     data() {
         return {
             advanced: getFunc(this.value, 'spec.strategy.enable'),
+            validators,
             rules: {
                 'metadata.name': [
                     { required: true, message: '名称不能为空', trigger: 'blur' },

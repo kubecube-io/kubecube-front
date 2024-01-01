@@ -57,7 +57,7 @@ export const consistofNumber = (required, message) => {
             if (!required && !value) {
                 return callback();
             }
-            message = message || '应为整数';
+            message = message || '应为非负整数';
             if (!/^[0-9]*$/.test(value)) {
                 callback(new Error(message));
             } else {

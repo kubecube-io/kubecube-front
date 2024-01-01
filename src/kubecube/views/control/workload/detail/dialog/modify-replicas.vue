@@ -7,15 +7,21 @@
     :close-on-click-modal="false"
     @close="close"
   >
-    <el-form>
+    <el-form ref="form" :model="model">
       <el-form-item
         label="副本数"
         label-position="right"
         label-width="120px"
+        prop="replicas"
+        :rules="[
+            validators.required(),
+            validators.lessThenEqual(100),
+        ]"
+
       >
         <el-input-number
           ref="replicas"
-          v-model="replicas"
+          v-model="model.replicas"
           :min="0"
           controls-position="right"
           step-strictly
@@ -35,6 +41,7 @@ import { get as getFunc, set } from 'lodash';
 import { get } from 'vuex-pathify';
 import { Modal } from '@micro-app/common/mixins';
 import workloadService from 'kubecube/services/k8s-resource';
+import * as validators from 'kubecube/utils/validators';
 
 export default {
     mixins: [ Modal ],
@@ -43,7 +50,10 @@ export default {
     },
     data() {
         return {
-            replicas: 0,
+            validators,
+            model: {
+                replicas: 0,
+            },
             data: null,
             available: Infinity,
             ips: [],
@@ -58,10 +68,10 @@ export default {
             return this.$route.params.workload;
         },
         minify() {
-            return this.replicas < this.workload.replicas;
+            return this.model.replicas < getFunc(this.data, 'spec.replicas', 0);
         },
         canSubmit() {
-            return getFunc(this.data, 'spec.replicas', 0) !== this.replicas;
+            return getFunc(this.data, 'spec.replicas', 0) !== this.model.replicas;
         },
     },
     // watch: {
@@ -73,12 +83,12 @@ export default {
         open(instance) {
             this.data = instance || this.instance;
             console.log(this.instance);
-            this.replicas = getFunc(this.data, 'spec.replicas', 0);
+            this.model.replicas = getFunc(this.data, 'spec.replicas', 0);
             this.show = true;
         },
         async submit() {
             const data = {};
-            set(data, 'spec.replicas', this.replicas);
+            set(data, 'spec.replicas', this.model.replicas);
             this.submitLoading = true;
             const name = this.data.metadata.name;
             try {
