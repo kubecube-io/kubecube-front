@@ -58,6 +58,7 @@ export const unitConvertMemory = (value, target = 'Mi') => {
 // byte to ...
 const units = [ 'bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ];
 export const BPSunits = [ 'Bps', 'KBps', 'MBps', 'GBps', 'TBps', 'PBps', 'EBps', 'ZBps', 'YBps' ];
+export const memoryUnits = [ 'bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB' ];
 export function niceBytes(x, us = units) {
     let l = 0,
         n = parseInt(x, 10) || 0;

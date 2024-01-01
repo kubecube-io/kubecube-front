@@ -1,6 +1,6 @@
 import { get, map, uniq } from 'lodash';
 import monitorService from 'kubecube/services/monitor';
-import { niceBytes, BPSunits, niceTiming } from 'kubecube/utils/functional';
+import { niceBytes, BPSunits, niceTiming, memoryUnits } from 'kubecube/utils/functional';
 const NumberFormatter = new Intl.NumberFormat('en-GB', {
     notation: 'compact',
     compactDisplay: 'short',
@@ -96,7 +96,7 @@ export function resolveFormatter(unit) {
     }
 
     if (unit === 'bytes') {
-        formatter = d => niceBytes(d);
+        formatter = d => niceBytes(d, memoryUnits);
     }
 
     if (unit === 'cores') {
